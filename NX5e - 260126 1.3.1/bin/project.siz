@@ -1,0 +1,9 @@
+.\bin\project.out  .intvect             500
+.\bin\project.out  EIINTTBL            1432
+.\bin\project.out  .rodata              584
+.\bin\project.out  .text              75490
+.\bin\project.out  .secinfo             204
+.\bin\project.out  .syscall               6
+.\bin\project.out  .romdata            1081
+.\bin\project.out  .R_FDL_Text         6820
+.\bin\project.out  .R_FDL_Const          19

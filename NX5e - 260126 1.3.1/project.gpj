@@ -1,0 +1,14 @@
+#!gbuild
+[Program]
+	-e _RESET
+	{optgroup=GhsCommonOptions} -o ./bin/project.out
+	:postexec='gsrec -e 0 -hex386 ./bin/project.out -o ./bin/project.hex¡®
+	:postexec='gsrec project -o project.src¡®
+	:postexec='gmemfile project -o project.bin¡®
+	:postexec='gsize -ram -rom ./bin/project.out'
+	-init_ram_at_startup
+	-gsize
+sc_file.gpj
+device\deviceheader.gpj
+lowsrc\lowinit.gpj
+FDL\fdl.gpj

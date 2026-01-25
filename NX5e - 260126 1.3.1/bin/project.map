@@ -1,0 +1,1116 @@
+Host OS:	Windows
+ELXR: Copyright (C) 1983-2022 Green Hills Software.  All Rights Reserved.
+Release: Compiler v2022.1.4
+Build Directory: [Directory] messi:/space1/build_2022_1_bto/2022-03-06.1900-2022_1_bto/win64-cross-linux86-comp
+Revision: [VCInfo] http://toolsvc/branches/release-branch-2022-1-comp/src@714644 (built by build)
+Revision Date: Mon Mar 07 12:38:15 2022
+
+Release Date: Mon Mar 07 17:07:23 2022
+
+
+
+
+Load Map Fri Jan 23 18:35:14 2026
+Image Summary
+
+  Section              Base      Size(hex)    Size(dec)  SecOffs
+  .intvect             00000000  000001f4          500   0000220
+  .intvect_end         000001ff  00000000            0   0000000
+  EIINTTBL             00000200  00000598         1432   0000414
+  EIINTTBL_end         00000798  00000000            0   0000000
+  .rozdata             00000798  00000000            0   0000000
+  .robase              00000798  00000000            0   0000000
+  .rosdata             00000798  00000000            0   0000000
+  .rodata              00000798  00000248          584   00009ac
+  .text                000009e0  000126e2        75490   0000c00
+  .fixaddr             000130c4  00000000            0   0000000
+  .fixtype             000130c4  00000000            0   0000000
+  .secinfo             000130c4  000000cc          204   00132e4
+  .syscall             00013190  00000006            6   00133b0
+  .romdata             00013198  00000439         1081   00133b8
+  .ROM.tls.cond.data   000135d1  00000000            0   0000000
+  .romzdata            000135d4  00000000            0   0000000
+  .romsdata            000135d4  00000000            0   0000000
+  .romtdata            000135d4  00000000            0   0000000
+  .R_FDL_Text          000135d4  00001aa4         6820   00137f4
+  .R_FDL_Const         00015078  00000013           19   0015298
+  .bcode               01000000  00000000            0   0000000
+  .bconst              01000000  00000000            0   0000000
+  .data                febf0000  00000439         1081   00133b8
+  .tls.cond.data       febf0439  00000000            0   0000000
+  .sldata              febf043c  00000000            0   0000000
+  .slbss               febf043c  00000000            0   0000000
+  .bss                 febf043c  0000045c         1116   0000000
+  .tls.cond.bss        febf0898  00000000            0   0000000
+  .sda_start           febf0898  00000000            0   0000000
+  .sdata               febf0898  00000000            0   0000000
+  .sbss                febf0898  00000000            0   0000000
+  .sda_end             febf0898  00000000            0   0000000
+  .zdata               febf0898  00000000            0   0000000
+  .zbss                febf0898  00000000            0   0000000
+  .tdata               febf0898  00000000            0   0000000
+  .stack               febf0898  00000800         2048   0000000
+  .R_FDL_Data          febf1098  00000068          104   0000000
+  .R_FDL_CodeRam       febf1100  00000100          256   0000000
+  .heapbase            febf1200  00000000            0   0000000
+  .heap                febf1200  00000040           64   0000000
+  .rdata               febf8000  00000000            0   0000000
+  .rbss                febf8000  00000000            0   0000000
+  .ghrettbl            00000000  000008a8         2216   00152ac
+  .ghcalltbl           00000000  00000c98         3224   0015b54
+  .ghtailcalltbl       00000000  00000080          128   00167ec
+  .note.renesas        00000000  00000050           80   001686c
+  .linfix              00000000  00000000            0   0000000
+  .gstackfix           00000000  00000000            0   0000000
+  .rominfo             00000000  0000002d           45   00168bc
+
+Load Map Fri Jan 23 18:35:14 2026
+Module Summary
+
+  Origin+Size    Section          Module
+000009e0+000134  .text            crt0.o
+00000000+000008  .ghrettbl        crt0.o
+00000000+000010  .ghcalltbl       crt0.o
+00000000+000050  .note.renesas    <RENESAS ABI INFO>
+00000b14+000214  .text            Config_ADCA0.o
+00000010+000004  .ghcalltbl       Config_ADCA0.o
+00000008+000020  .ghrettbl        Config_ADCA0.o
+00000d28+00008a  .text            Config_ADCA0_user.o
+00000028+00000c  .ghrettbl        Config_ADCA0_user.o
+00000db2+000434  .text            Config_CSIH0.o
+febf043c+00000e  .bss             Config_CSIH0.o
+00000014+000004  .ghcalltbl       Config_CSIH0.o
+00000034+000010  .ghrettbl        Config_CSIH0.o
+000011e6+0001e8  .text            Config_CSIH0_user.o
+00000044+000018  .ghrettbl        Config_CSIH0_user.o
+00000018+000010  .ghcalltbl       Config_CSIH0_user.o
+000013ce+0000e8  .text            Config_INTC.o
+00000028+000004  .ghcalltbl       Config_INTC.o
+0000005c+00000c  .ghrettbl        Config_INTC.o
+000014b6+000046  .text            Config_INTC_user.o
+00000068+000008  .ghrettbl        Config_INTC_user.o
+000014fc+000482  .text            Config_PORT.o
+0000002c+000004  .ghcalltbl       Config_PORT.o
+00000070+000010  .ghrettbl        Config_PORT.o
+00000798+000140  .rodata          Config_PORT.o
+0000197e+000002  .text            Config_PORT_user.o
+00000080+000004  .ghrettbl        Config_PORT_user.o
+00001980+0000d4  .text            Config_STBC.o
+00000030+000014  .ghcalltbl       Config_STBC.o
+00000084+00000c  .ghrettbl        Config_STBC.o
+00001a54+000008  .text            Config_STBC_user.o
+00000090+000010  .ghrettbl        Config_STBC_user.o
+00001a5c+0001dc  .text            Config_TAUD0_13.o
+00000044+000004  .ghcalltbl       Config_TAUD0_13.o
+000000a0+00000c  .ghrettbl        Config_TAUD0_13.o
+00001c38+000086  .text            Config_TAUD0_13_user.o
+000000ac+000008  .ghrettbl        Config_TAUD0_13_user.o
+00001cbe+0001e8  .text            Config_TAUD0_3.o
+00000048+000004  .ghcalltbl       Config_TAUD0_3.o
+000000b4+00000c  .ghrettbl        Config_TAUD0_3.o
+00001ea6+0003b6  .text            Config_TAUD0_3_user.o
+000000c0+000008  .ghrettbl        Config_TAUD0_3_user.o
+0000225c+00005a  .text            Config_WDT0.o
+0000004c+000004  .ghcalltbl       Config_WDT0.o
+000000c8+000008  .ghrettbl        Config_WDT0.o
+000022b6+000046  .text            Config_WDT0_user.o
+000000d0+000008  .ghrettbl        Config_WDT0_user.o
+000022fc+000820  .text            r_cg_cgc.o
+febf044c+000004  .bss             r_cg_cgc.o
+00000050+000008  .ghcalltbl       r_cg_cgc.o
+000000d8+000008  .ghrettbl        r_cg_cgc.o
+00002b1c+000002  .text            r_cg_cgc_user.o
+000000e0+000004  .ghrettbl        r_cg_cgc_user.o
+00000200+000598  EIINTTBL         r_cg_intvector.o
+00002b1e+005308  .text            r_cg_main.o
+febf0000+000432  .data            r_cg_main.o
+febf0450+000018  .bss             r_cg_main.o
+00000058+000360  .ghcalltbl       r_cg_main.o
+000000e4+0000c8  .ghrettbl        r_cg_main.o
+00007e26+00002e  .text            r_cg_systeminit.o
+000003b8+000020  .ghcalltbl       r_cg_systeminit.o
+000001ac+000004  .ghrettbl        r_cg_systeminit.o
+00007e54+000002  .text            r_smc_interrupt.o
+000001b0+000004  .ghrettbl        r_smc_interrupt.o
+00007e56+00a24c  .text            r_smc_intprg.o
+000001b4+00059c  .ghrettbl        r_smc_intprg.o
+000003d8+00059c  .ghcalltbl       r_smc_intprg.o
+000120a2+000372  .text            Pin.o
+00000750+000004  .ghrettbl        Pin.o
+00012414+00006c  .text            dr7f701695_startup.o
+00000000+0001f4  .intvect         dr7f701695_startup.o
+00000974+000004  .ghcalltbl       dr7f701695_startup.o
+00000000+000080  .ghtailcalltbl   dr7f701695_startup.o
+00012480+0000c0  .text            exception.o
+febf0468+000008  .bss             exception.o
+00000754+000008  .ghrettbl        exception.o
+00012540+000034  .text            lowinit.o
+0000075c+000008  .ghrettbl        lowinit.o
+00000978+000004  .ghcalltbl       lowinit.o
+00012574+00019e  .text            fdl_function.o
+0000097c+000024  .ghcalltbl       fdl_function.o
+00000764+000010  .ghrettbl        fdl_function.o
+000008d8+000008  .rodata          fdl_descriptor.o
+00012712+00003e  .text            fdl_user.o
+febf0470+000004  .bss             fdl_user.o
+00000774+000010  .ghrettbl        fdl_user.o
+00012750+000182  .text            fdlapp_control.o
+000008e0+000100  .rodata          fdlapp_control.o
+000009a0+00002c  .ghcalltbl       fdlapp_control.o
+00000784+000004  .ghrettbl        fdlapp_control.o
+000135d4+000c9a  .R_FDL_Text      r_fdl_hw_access.o
+00000788+000084  .ghrettbl        r_fdl_hw_access.o
+000009cc+00013c  .ghcalltbl       r_fdl_hw_access.o
+0001426e+000de0  .R_FDL_Text      r_fdl_user_if.o
+00000b08+000118  .ghcalltbl       r_fdl_user_if.o
+0000080c+00004c  .ghrettbl        r_fdl_user_if.o
+febf1098+000068  .R_FDL_Data      r_fdl_user_if.o
+00015078+000013  .R_FDL_Const     r_fdl_user_if.o
+febf1100+000100  .R_FDL_CodeRam   r_fdl_user_if.o
+0001504e+00002a  .R_FDL_Text      r_fdl_user_if_init.o
+00000c20+000004  .ghcalltbl       r_fdl_user_if_init.o
+00000858+000004  .ghrettbl        r_fdl_user_if_init.o
+000128d2+000006  .text            libmulti.a
+febf0434+000004  .data            libmulti.a
+febf0474+000418  .bss             libmulti.a
+0000085c+000004  .ghrettbl        libmulti.a
+000128d8+000066  .text            libansi.a(ccexit.o)
+00000c24+00000c  .ghcalltbl       libansi.a(ccexit.o)
+00000860+000004  .ghrettbl        libansi.a(ccexit.o)
+0001293e+0000be  .text            libstartup.a(ind_initmem.o)
+00000864+000004  .ghrettbl        libstartup.a(ind_initmem.o)
+000129fc+000368  .text            libstartup.a(ind_crt0.o)
+00000c30+000018  .ghcalltbl       libstartup.a(ind_crt0.o)
+00000868+000004  .ghrettbl        libstartup.a(ind_crt0.o)
+00012d70+000074  .text            libstartup.a(ind_mset.o)
+0000086c+000008  .ghrettbl        libstartup.a(ind_mset.o)
+00012de4+0000fc  .text            libstartup.a(ind_mcpy.o)
+00000874+000010  .ghrettbl        libstartup.a(ind_mcpy.o)
+00000c48+000004  .ghcalltbl       libstartup.a(ind_mcpy.o)
+00012ee0+0000a8  .text            libsys.a(ind_exit.o)
+febf088c+000004  .bss             libsys.a(ind_exit.o)
+00000c4c+00001c  .ghcalltbl       libsys.a(ind_exit.o)
+00000884+000004  .ghrettbl        libsys.a(ind_exit.o)
+00013190+000006  .syscall         libsys.a(ind_dots.o)
+00000888+000004  .ghrettbl        libsys.a(ind_dots.o)
+00012f88+000022  .text            libsys.a(ind_call.o)
+0000088c+000004  .ghrettbl        libsys.a(ind_call.o)
+00000c68+000008  .ghcalltbl       libsys.a(ind_call.o)
+00012faa+0000f6  .text            libsys.a(ind_crt1.o)
+febf0890+000004  .bss             libsys.a(ind_crt1.o)
+00000c70+000028  .ghcalltbl       libsys.a(ind_crt1.o)
+000130a0+000006  .text            libsys.a(ind_lock.o)
+febf0438+000001  .data            libsys.a(ind_lock.o)
+00000890+00000c  .ghrettbl        libsys.a(ind_lock.o)
+000130a6+00001c  .text            libsys.a(ind_errn.o)
+febf0894+000004  .bss             libsys.a(ind_errn.o)
+0000089c+00000c  .ghrettbl        libsys.a(ind_errn.o)
+000130c4+0000cc  .secinfo         <section info>
+00000000+00002d  .rominfo         <ROM info>
+
+Load Map Fri Jan 23 18:35:14 2026
+Global Symbols (sorted alphabetically)
+
+ .intvect         00000000+000000 .intvect..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20PROTO.5CNX5e_SW1.2E3.5Cobjs.5Cdr7f701695_startup.
+ .data            febf0074+000004 _AAF1_TargetPosition..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0190+000004 _AAF1_TargetPosition_select..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0078+000004 _AAF2_TargetPosition..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0194+000004 _AAF2_TargetPosition_select..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf007c+000004 _AAF3_TargetPosition..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0198+000004 _AAF3_TargetPosition_select..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0044+000004 _AAF_LINOut..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf019c+000004 _AAF_LIN_ChkSum_CHK..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf01a0+000004 _AAF_LIN_ChkSum_CHK_value..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf020c+000004 _AAF_Maximum_Torque_Test_Mode..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf006c+000004 _AAF_OverCurrent..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0080+000004 _AAF_ProtectionMode_Rx..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0084+000004 _AAF_ProtectionMode_Tx..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0088+000004 _AAF_Tx_Position..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf008c+000004 _AAF_Tx_Position_LIN..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf00dc+000004 _AAF_location_type..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0058+000004 _AAFx_Circuit_Open..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf005c+000004 _AAFx_Circuit_Short..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf01e0+000004 _AAFx_ErrorStatus..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0050+000004 _AAFx_Index..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf004c+000004 _AAFx_InitStatus..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0168+000004 _AAFx_InitStatus_memory_read..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0164+000004 _AAFx_InitStatus_memory_write..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0064+000004 _AAFx_Low_Volt..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf01cc+000004 _AAFx_Mode..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0060+000004 _AAFx_Motor_Fault..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0068+000004 _AAFx_Over_Volt..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf01dc+000004 _AAFx_Position_Status..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf01e8+000004 _AAFx_SNSR1_Position..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf01ec+000004 _AAFx_SNSR2_Position..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf01f0+000004 _AAFx_SNSR3_Position..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf01f4+000004 _AAFx_SNSR4_Position..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf01d8+000004 _AAFx_SNSR_OC..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf01d4+000004 _AAFx_SNSR_SCB..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf01d0+000004 _AAFx_SNSR_SCG..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0048+000004 _AAFx_Type..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .text            00006e52+000672 _Antipinch_move..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .text            00006172+000070 _CHK_external_factors..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .text            00002e38+00001a _Clear_DataBuffer..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .text            000034c0+000052 _DRV8899_Init..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .text            00003544+000052 _DRV8899_Sleep..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .text            00003512+000032 _DRV8899_Wakeup..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .text            000035a8+000026 _DRV_Off..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .text            00003596+000012 _DRV_On..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0431+000001 _DTC_Status
+ .data            febf0174+000004 _DTC_memory_read..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0170+000004 _DTC_memory_write..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0218+000004 _Diag_Mode..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf021c+000004 _Diag_Mode_chk..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .text            00003fd4+000534 _ERROR_chk..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf01bc+000004 _EngRunSta..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .text            0000795c+00016a _Error_FaultClear..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .text            0001274e+000002 _FDL_Close
+ .text            00012744+00000a _FDL_Open
+ .text            00012712+00001e _FDL_User_CriticalSetionBegin
+ .text            00012730+000014 _FDL_User_CriticalSetionEnd
+ .text            000061e2+0006a8 _Fail_safety_mode..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0220+000004 _First_Powerchk..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0228+000004 _First_Powerchk_memory_read..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0224+000004 _First_Powerchk_memory_write..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .text            0000475c+000136 _Flash_memory_read..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .text            0000454e+00020e _Flash_memory_write..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .bss             febf0460+000001 _GetIDbuffer..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .text            00002f0c+000030 _Get_reponse_RxData..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf01c0+000004 _HevRdy..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0308+00000b _ID_chk_rxdata..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .text            000075a6+000072 _IGN_On_Memory_read..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .text            00012480+000060 _INTOSTM0
+ .text            000124e0+000060 _INTOSTM1
+ EIINTTBL         00000200+000598 _INT_Vectors
+ .text            0000385c+0005d0 _Init_move..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf014c+000004 _Initial_memory_read..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0148+000004 _Initial_memory_write..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .text            00007618+0001a4 _LIMP_HOME..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0200+000004 _LIMP_HOME_Count..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0204+000004 _LIMP_HOME_step..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .text            00007d58+0000ce _LIN_Diag_Action..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .text            00007ca2+0000b6 _LIN_Diag_Rx..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0250+000004 _LIN_Short_Ok..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0400+000004 _LIN_Short_Sleep
+ .text            000035f2+000012 _Lin_Transceiver_Off..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .text            000035e0+000012 _Lin_Transceiver_On..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .text            0000688a+0000a8 _Lin_bus_chk..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .text            000053e8+000586 _Lin_rx_data_chk..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .text            00006b2e+000324 _Lin_sleep..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .text            0000596e+00027a _Lin_tx_data_chk..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .text            00005be8+000096 _MCU_sleep..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .text            00003698+0001c4 _Motor_Action..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .text            00003650+000048 _Motor_Close..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .text            00003604+00004c _Motor_Open..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .text            00007ac6+0001dc _Motor_SPI_Init..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .bss             febf0468+000004 _OSTM0Tick1ms
+ .bss             febf046c+000004 _OSTM1Tick100us
+ .data            febf0240+000004 _Open_Detected..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0248+000004 _Open_fault_check..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .text            00004906+000ae2 _Operating_mode..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0238+000004 _Over_Voltage_Deceted..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .bss             febf0470+000004 _PSWSafe
+ .rodata          00000798+000140 _PortList..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C3.2E.20SX3k.5C4.2E.20.C4.DA.B5.E5.5CSX3k.20.BA.CF.B9.CC.C7.E2.20.B0.B3.B9.DF.5Cobjs.5CConfig_PORT.
+ .text            00006932+0001b6 _Protection_Mode..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .text            00012414+000000 _RESET
+ .text            0000304a+000054 _RLIN30_interrupt
+ .text            000030fc+0002ce _RLIN30_receive_complete_interrupt
+ .text            000033ca+0000f6 _RLIN30_status_interrupt
+ .text            0000309e+00005e _RLIN30_transmit_interrupt
+ .text            00002f3c+000104 _RLIN3_slave_init..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .text            00003040+00000a _RLIN_Slave_NoResponse..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .text            00002e52+000056 _RLIN_Slave_Receive..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .text            00002ea8+000064 _RLIN_Slave_Transmit..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .text            000022fc+000474 _R_CGC_Create
+ .text            00002b1c+000002 _R_CGC_Create_UserInit
+ .text            00002770+0003ac _R_CGC_Create_sleepmode
+ .text            00000b14+000120 _R_Config_ADCA0_Create
+ .text            00000d28+000002 _R_Config_ADCA0_Create_UserInit
+ .text            00000c34+000030 _R_Config_ADCA0_Halt
+ .text            00000cb4+000074 _R_Config_ADCA0_ScanGroup1_GetResult
+ .text            00000caa+00000a _R_Config_ADCA0_ScanGroup1_OperationOff
+ .text            00000ca0+00000a _R_Config_ADCA0_ScanGroup1_OperationOn
+ .text            00000c8a+000016 _R_Config_ADCA0_ScanGroup1_Start
+ .text            00000c76+000014 _R_Config_ADCA0_SelfDiagnostic_VoltageCircuitOff
+ .text            00000c64+000012 _R_Config_ADCA0_SelfDiagnostic_VoltageCircuitOn
+ .text            00000db2+0002f0 _R_Config_CSIH0_Create
+ .text            000011e6+000002 _R_Config_CSIH0_Create_UserInit
+ .text            00001132+0000b4 _R_Config_CSIH0_Send_Receive
+ .text            000010a2+000034 _R_Config_CSIH0_Start
+ .text            000010d6+00005c _R_Config_CSIH0_Stop
+ .text            000013ce+0000c4 _R_Config_INTC_Create
+ .text            000014b6+000002 _R_Config_INTC_Create_UserInit
+ .text            00001492+00000a _R_Config_INTC_INTP5_Start
+ .text            0000149c+00001a _R_Config_INTC_INTP5_Stop
+ .text            000014fc+0001a2 _R_Config_PORT_Create
+ .text            0000197e+000002 _R_Config_PORT_Create_UserInit
+ .text            00001a52+000002 _R_Config_STBC_Deep_Stop_Loop
+ .text            00001980+00006e _R_Config_STBC_Prepare_Deep_Stop_Mode
+ .text            00001a58+000002 _R_Config_STBC_Prepare_Deep_Stop_Mode_Set_Clock_Mask
+ .text            00001a5a+000002 _R_Config_STBC_Prepare_Deep_Stop_Mode_Set_Clock_Source
+ .text            00001a56+000002 _R_Config_STBC_Prepare_Deep_Stop_Mode_Set_Interrupt
+ .text            00001a54+000002 _R_Config_STBC_Prepare_Deep_Stop_Mode_Set_Peripheral
+ .text            000019ee+000064 _R_Config_STBC_Start_Deep_Stop_Mode
+ .text            00001a5c+000196 _R_Config_TAUD0_13_Create
+ .text            00001c38+000002 _R_Config_TAUD0_13_Create_UserInit
+ .text            00001bf2+00001a _R_Config_TAUD0_13_Start
+ .text            00001c0c+00002c _R_Config_TAUD0_13_Stop
+ .text            00001cbe+0001a2 _R_Config_TAUD0_3_Create
+ .text            00001ea6+000002 _R_Config_TAUD0_3_Create_UserInit
+ .text            00001e60+00001a _R_Config_TAUD0_3_Start
+ .text            00001e7a+00002c _R_Config_TAUD0_3_Stop
+ .text            0000225c+00004e _R_Config_WDT0_Create
+ .text            000022b6+000002 _R_Config_WDT0_Create_UserInit
+ .text            000022aa+00000c _R_Config_WDT0_Restart
+ .R_FDL_Text      00014d2a+000094 _R_FDL_CancelRequest
+ .R_FDL_Text      0001433c+00011e _R_FDL_Execute
+ .R_FDL_Text      000140e8+000042 _R_FDL_FCUFct_CheckFatalError
+ .R_FDL_Text      000140b8+000030 _R_FDL_FCUFct_ChkReady_TS
+ .R_FDL_Text      0001372e+000024 _R_FDL_FCUFct_ChkReg_Asm
+ .R_FDL_Text      00013fd4+000050 _R_FDL_FCUFct_ChkStartable
+ .R_FDL_Text      00014024+000030 _R_FDL_FCUFct_ChkSuspendable_TS
+ .R_FDL_Text      000137b4+000070 _R_FDL_FCUFct_ClearStatus
+ .R_FDL_Text      00013752+000062 _R_FDL_FCUFct_ForcedStop
+ .R_FDL_Text      00013898+00005a _R_FDL_FCUFct_GetDFSize
+ .R_FDL_Text      00013c42+0000b8 _R_FDL_FCUFct_GetStat
+ .R_FDL_Text      00013b24+000006 _R_FDL_FCUFct_InitRAM
+ .R_FDL_Text      00013ec0+000114 _R_FDL_FCUFct_ReadOperation
+ .R_FDL_Text      0001406e+000030 _R_FDL_FCUFct_ResumeChkNeed_TS
+ .R_FDL_Text      0001409e+00001a _R_FDL_FCUFct_Resume_TS
+ .R_FDL_Text      000138f2+00022c _R_FDL_FCUFct_SetFrequency
+ .R_FDL_Text      0001412a+0000b6 _R_FDL_FCUFct_StandBy_Processing
+ .R_FDL_Text      00013e18+0000a8 _R_FDL_FCUFct_StartBCEraseOperation
+ .R_FDL_Text      00013cfa+00011e _R_FDL_FCUFct_StartWriteOperation
+ .R_FDL_Text      00014054+00001a _R_FDL_FCUFct_Suspend_TS
+ .R_FDL_Text      00013bf4+00004e _R_FDL_FCUFct_SwitchMode_Check_TS
+ .R_FDL_Text      00013b2a+0000ca _R_FDL_FCUFct_SwitchMode_Start
+ .R_FDL_Text      00013824+00003a _R_FDL_FCUFct_Switch_FAEINT
+ .R_FDL_Text      00013b1e+000006 _R_FDL_FCUFct_VerifyChecksum
+ .R_FDL_Text      000141e0+00008e _R_FDL_FCUFct_WakeUp_Processing
+ .R_FDL_Text      00014c0a+000008 _R_FDL_GetVersionString
+ .R_FDL_Text      00014b16+0000f4 _R_FDL_Handler
+ .R_FDL_Text      0001451a+00004c _R_FDL_Handler_BusyAndSuspendPossible..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20PROTO.5CNX5e_SW1.2E3.5Cobjs.5Cr_fdl_user_if.
+ .R_FDL_Text      0001445a+0000c0 _R_FDL_Handler_CancelReq..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20PROTO.5CNX5e_SW1.2E3.5Cobjs.5Cr_fdl_user_if.
+ .R_FDL_Text      00014566+00011a _R_FDL_Handler_ChkResume..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20PROTO.5CNX5e_SW1.2E3.5Cobjs.5Cr_fdl_user_if.
+ .R_FDL_Text      000147c4+000136 _R_FDL_Handler_MultiOperation..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20PROTO.5CNX5e_SW1.2E3.5Cobjs.5Cr_fdl_user_if.
+ .R_FDL_Text      000148fa+00021c _R_FDL_Handler_OperationStates..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20PROTO.5CNX5e_SW1.2E3.5Cobjs.5Cr_fdl_user_if.
+ .R_FDL_Text      00014680+000074 _R_FDL_Handler_ReactOnFatalErrors..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20PROTO.5CNX5e_SW1.2E3.5Cobjs.5Cr_fdl_user_if.
+ .R_FDL_Text      000146f4+0000d0 _R_FDL_Handler_StatusCheckAndSuspendOnReady..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20PROTO.5CNX5e_SW1.2E3.5Cobjs.5Cr_fdl_user_if.
+ .R_FDL_Text      00013602+000020 _R_FDL_IFct_CalcFOpUnitCnt_BC
+ .R_FDL_Text      00013622+00009c _R_FDL_IFct_ChkAccessBoundaries
+ .R_FDL_Text      000136be+000070 _R_FDL_IFct_ChkAccessRight..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20PROTO.5CNX5e_SW1.2E3.5Cobjs.5Cr_fdl_hw_access.
+ .R_FDL_Text      0001385e+00003a _R_FDL_IFct_GetFWParam..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20PROTO.5CNX5e_SW1.2E3.5Cobjs.5Cr_fdl_hw_access.
+ .R_FDL_Text      000135da+000006 _R_FDL_IFct_ReadMemoryU08_TS..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20PROTO.5CNX5e_SW1.2E3.5Cobjs.5Cr_fdl_hw_access.
+ .R_FDL_Text      000135e0+000006 _R_FDL_IFct_ReadMemoryU16_TS..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20PROTO.5CNX5e_SW1.2E3.5Cobjs.5Cr_fdl_hw_access.
+ .R_FDL_Text      000135d4+000006 _R_FDL_IFct_ReadMemoryU32_TS..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20PROTO.5CNX5e_SW1.2E3.5Cobjs.5Cr_fdl_hw_access.
+ .R_FDL_Text      000135e6+00000a _R_FDL_IFct_WriteMemoryU08_TS
+ .R_FDL_Text      000135f0+00000a _R_FDL_IFct_WriteMemoryU16_TS..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20PROTO.5CNX5e_SW1.2E3.5Cobjs.5Cr_fdl_hw_access.
+ .R_FDL_Text      000135fa+000008 _R_FDL_IFct_WriteMemoryU32_TS..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20PROTO.5CNX5e_SW1.2E3.5Cobjs.5Cr_fdl_hw_access.
+ .R_FDL_Text      0001504e+00002a _R_FDL_Init
+ .R_FDL_Text      0001426e+0000ce _R_FDL_InitVariables
+ .R_FDL_Text      00014c70+000054 _R_FDL_ResumeRequest
+ .R_FDL_Text      00014cc4+000048 _R_FDL_StandBy
+ .R_FDL_Text      00014c12+00005e _R_FDL_SuspendRequest
+ .R_FDL_Text      00014fd8+000036 _R_FDL_UFct_EndCurrentOperation..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20PROTO.5CNX5e_SW1.2E3.5Cobjs.5Cr_fdl_user_if.
+ .R_FDL_Text      00014dbe+00021a _R_FDL_UFct_FlashOpStart..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20PROTO.5CNX5e_SW1.2E3.5Cobjs.5Cr_fdl_user_if.
+ .R_FDL_Text      0001500e+000040 _R_FDL_UFct_StateOperational..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20PROTO.5CNX5e_SW1.2E3.5Cobjs.5Cr_fdl_user_if.
+ .R_FDL_Text      00014d0c+00001e _R_FDL_WakeUp
+ .text            00007e54+000002 _R_Interrupt_Create
+ .text            00001954+00002a _R_PORT_GetLevel
+ .text            000018f8+00005c _R_PORT_ResetAltFunc
+ .text            0000169e+00025a _R_PORT_SetAltFunc
+ .text            000120a2+000372 _R_Pins_Create
+ .text            00012540+000018 _R_SYSTEM_ClearRetentionRAM
+ .text            00007e26+00002e _R_Systeminit
+ .text            00004892+000074 _Re_Init..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf01b0+000004 _ReqAAF1DiagMode..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf01b4+000004 _ReqAAF2DiagMode..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf01b8+000004 _ReqAAF3DiagMode..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf01ac+000004 _ReqRespAAFID..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf01c8+000004 _Req_Alive_Rx..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf01fc+000004 _Req_Alive_Tx..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf01c4+000004 _Req_ChkSum_Rx..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf01f8+000004 _Req_ChkSum_Tx..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .text            00005c7e+0002de _SPI_chk..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .text            000035ce+000012 _SPI_select_pin_Off..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+                  00000000+000000 _STBC_WUF0
+ .data            febf024c+000004 _SW_Chk..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .text            00012750+000182 _SampleApp_FDL_Control
+ .data            febf023c+000004 _Short_Detected..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf03ec+000004 _Short_chk
+ .data            febf0244+000004 _Short_fault_check..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .bss             febf0450+000008 _Slave_RxData1..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .bss             febf0458+000008 _Slave_RxSwData1..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0008+000008 _Slave_SwData..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0000+000008 _Slave_TxData..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .text            00005f5c+000216 _Stall_chk..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .text            000074c4+0000e2 _Torque_Test_Mode..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0054+000004 _TotalNumOfAAF..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf01e4+000004 _TotalNumOfAAFSensor..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .text            00004508+000046 _Tx_position_complete_chk..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0234+000004 _Under_Voltage_Deceted..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .text            00003e2c+0001a8 _VDC_adc..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .text            00006ae8+000046 _Voltage_chk_current_limit_init..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .text            00012ee0+000066 __Exit
+                  00000000+000000 ___atexit_cleanup_func
+                  00000000+000000 ___cpp_exception_cleanup
+                  00000000+000000 ___cpp_exception_init
+ .syscall         00013190+000006 ___dotsyscall
+ .text            000130b0+000008 ___gh_errno_ptr
+ .text            000130b8+00000a ___gh_get_errno
+                  00000000+000000 ___gh_iob_init
+ .text            000130a4+000002 ___gh_lock_init
+ .text            000130a6+00000a ___gh_set_errno
+ .text            000130a0+000002 ___ghsLock
+ .text            000130a2+000002 ___ghsUnlock
+                  00000000+000000 ___ghs_GetCurrentThreadID
+                  00000000+000000 ___ghs_GetCurrentThreadName
+                  00000000+000000 ___ghs_InterruptLock
+                  00000000+000000 ___ghs_InterruptUnlock
+                  00000000+000000 ___ghs_RunTimeErrorDetected
+ .text            00012f46+000042 ___ghs_at_exit
+                  00000000+000000 ___ghs_board_cache_sync
+                  00000000+000000 ___ghs_board_devices_init
+ .text            0001293e+0000be ___ghs_board_memory_init
+ .text            0001293e+0000be ___ghs_board_memory_init..trg.2Frh850.2Fobjs.2Flibs.2Flibstartup.2Find_initmem.
+                  00000000+000000 ___ghs_call_table
+                  00000000+000000 ___ghs_checksum
+                  00000000+000000 ___ghs_coverage_init
+                  00000000+000000 ___ghs_cpp_exception_cleanup
+                  00000000+000000 ___ghs_cpp_exception_init
+                  00000001+000000 ___ghs_cxx_do_thread_safe_local_static_inits
+                  00000000+000000 ___ghs_decompress
+                  62257e27+000000 ___ghs_elxr_revision
+                  000315e6+000000 ___ghs_elxr_version
+ .text            000129fc+000368 ___ghs_ind_crt0
+ .text            00012faa+0000f6 ___ghs_ind_crt1
+ .syscall         00013190+000006 ___ghs_initial_dotsyscall
+                  00000000+000000 ___ghs_lock_create
+                  00000000+000000 ___ghs_lock_destroy
+                  00000000+000000 ___ghs_lock_lock
+                  00000000+000000 ___ghs_lock_unlock
+                  00000000+000000 ___ghs_malloc_init
+                  00000000+000000 ___ghs_manprf_init
+ .text            00000b08+00000c ___ghs_multicore_init_done
+ .text            00000af8+000010 ___ghs_multicore_wait_for_init
+                  00000000+000000 ___ghs_multicore_wait_for_init_weak
+                  00000000+000000 ___ghs_rambootcodeend
+                  00000000+000000 ___ghs_rambootcodestart
+                  febf8000+000000 ___ghs_ramend
+                  febf0000+000000 ___ghs_ramstart
+                  00000000+000000 ___ghs_rombootcodeend
+                  00000000+000000 ___ghs_rombootcodestart
+                  00080000+000000 ___ghs_romend
+                  00000000+000000 ___ghs_romstart
+                  fec00000+000000 ___ghs_rramend
+                  febf8000+000000 ___ghs_rramstart
+                  00000000+000000 ___ghs_set_stack_chk_guard
+ .data            febf0438+000001 ___ghs_single_threaded
+ .text            00012f88+000022 ___ghs_syscall
+                  00000000+000000 ___ghs_undefined_func
+ .fixaddr         000130c4+000000 ___ghsbegin_fixaddr
+ .fixtype         000130c4+000000 ___ghsbegin_fixtype
+                  00000000+000000 ___ghsbegin_picbase
+                  00000000+000000 ___ghsbegin_pidbase
+ .robase          00000798+000000 ___ghsbegin_robase
+ .sda_end         febf0898+000000 ___ghsbegin_sda_end
+ .sda_start       febf0898+000000 ___ghsbegin_sda_start
+                  00000000+000000 ___ghsbegin_sdabase
+ .secinfo         000130c4+000000 ___ghsbegin_secinfo
+ .stack           febf0898+000000 ___ghsbegin_stack
+ .secinfo         000130f4+000000 ___ghsbinfo_aclear
+ .secinfo         00013130+000000 ___ghsbinfo_acopy
+ .secinfo         00013190+000000 ___ghsbinfo_bcopy
+ .secinfo         000130c4+000030 ___ghsbinfo_clear
+ .secinfo         00013130+000000 ___ghsbinfo_comacopy
+ .secinfo         00013130+000000 ___ghsbinfo_comcopy
+ .secinfo         00013130+000000 ___ghsbinfo_comtcopy
+ .secinfo         000130f4+00003c ___ghsbinfo_copy
+ .secinfo         00013130+000060 ___ghsbinfo_init
+ .secinfo         00013150+000000 ___ghsbinfo_rinit
+ .secinfo         00013130+000000 ___ghsbinfo_tcopy
+ .secinfo         00013190+000000 ___ghseinfo_bcopy
+ .secinfo         000130f4+000000 ___ghseinfo_clear
+ .secinfo         00013130+000000 ___ghseinfo_comcopy
+ .secinfo         00013130+000000 ___ghseinfo_copy
+ .secinfo         00013190+000000 ___ghseinfo_init
+ .fixaddr         000130c4+000000 ___ghsend_fixaddr
+ .fixtype         000130c4+000000 ___ghsend_fixtype
+ .stack           febf1098+000000 ___ghsend_stack
+ .text            00012558+00001c ___lowinit
+ .text            00012ebc+000024 ___mcopy
+                  00000000+000000 __cleanup
+ .tdata           febf0898+000000 __ep
+ .text            00012ee0+000066 __exit
+                  00000000+000000 __ghs_rh850_misalign
+                  00000000+000000 __ghs_v800_r20_initializer
+                  00000000+000000 __ghs_v800_r21_initializer
+                  00000000+000000 __ghs_v800_r22_initializer
+                  00000000+000000 __ghs_v800_r23_initializer
+                  00000000+000000 __ghs_v800_r24_initializer
+                  00000001+000000 __ghs_v800_sda_model
+ .sda_start       febf0898+000000 __gp
+ .bss             febf085c+000030 __multiArgs
+ .data            febf0434+000004 __multibufSize
+ .bss             febf0474+0003e8 __multibuffer
+ .text            000128d2+000004 __multiend
+ .text            000009e0+0000f6 __start
+ .rosdata         00008798+000000 __tp
+ .text            0001247e+000000 __unused_isr
+ .data            febf0034+000004 _aaf_action..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf00a4+000004 _aaf_action_complete_chk..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf003c+000004 _aaf_init_step..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0030+000004 _aaf_step..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf009c+000004 _adc_avr..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0278+000028 _adc_chk..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf00e4+000004 _adc_chk_ok_flag..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf018c+000004 _adc_chk_ready..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0098+000004 _adc_sum..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0114+000004 _antipinch_action_on..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0110+000004 _antipinch_previous_action..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf010c+000004 _antipinch_step..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0254+000002 _bat_adc..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf012c+000004 _close_memory_read..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0128+000004 _close_memory_write..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0104+000004 _diag_mode_auto_action..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0100+000004 _diag_mode_auto_dir..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0020+000004 _dir_state..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .text            00007e6a+000074 _eiint0
+ .text            00007ede+000074 _eiint1
+ .text            000082f2+000074 _eiint10
+ .text            0000abba+000074 _eiint100
+ .text            0000ac2e+000074 _eiint101
+ .text            0000aca2+000074 _eiint102
+ .text            0000ad16+000074 _eiint103
+ .text            0000ad8a+000074 _eiint104
+ .text            0000adfe+000074 _eiint105
+ .text            0000ae72+000074 _eiint106
+ .text            0000aee6+000074 _eiint107
+ .text            0000af5a+000074 _eiint108
+ .text            0000afce+000074 _eiint109
+ .text            00008366+000074 _eiint11
+ .text            0000b042+000074 _eiint110
+ .text            0000b0b6+000074 _eiint111
+ .text            0000b12a+000074 _eiint112
+ .text            0000b19e+000074 _eiint113
+ .text            0000b212+000074 _eiint114
+ .text            0000b286+000074 _eiint115
+ .text            0000b2fa+000074 _eiint116
+ .text            0000b36e+000074 _eiint117
+ .text            0000b3e2+000074 _eiint118
+ .text            0000b456+000074 _eiint119
+ .text            000083da+000074 _eiint12
+ .text            0000b4ca+000074 _eiint120
+ .text            0000b53e+000074 _eiint121
+ .text            0000b5b2+000074 _eiint122
+ .text            0000b626+000074 _eiint123
+ .text            0000b69a+000074 _eiint124
+ .text            0000b70e+000074 _eiint125
+ .text            0000b782+000074 _eiint126
+ .text            0000b7f6+000074 _eiint127
+ .text            0000b86a+000074 _eiint128
+ .text            0000b8de+000074 _eiint129
+ .text            0000844e+000074 _eiint13
+ .text            0000b952+000074 _eiint130
+ .text            0000b9c6+000074 _eiint131
+ .text            0000ba3a+000074 _eiint132
+ .text            0000baae+000074 _eiint133
+ .text            0000bb22+000074 _eiint134
+ .text            0000bb96+000074 _eiint135
+ .text            0000bc0a+000074 _eiint136
+ .text            0000bc7e+000074 _eiint137
+ .text            0000bcf2+000074 _eiint138
+ .text            0000bd66+000074 _eiint139
+ .text            000084c2+000074 _eiint14
+ .text            0000bdda+000074 _eiint140
+ .text            0000be4e+000074 _eiint141
+ .text            0000bec2+000074 _eiint142
+ .text            0000bf36+000074 _eiint143
+ .text            0000bfaa+000074 _eiint144
+ .text            0000c01e+000074 _eiint145
+ .text            0000c092+000074 _eiint146
+ .text            0000c106+000074 _eiint147
+ .text            0000c17a+000074 _eiint148
+ .text            0000c1ee+000074 _eiint149
+ .text            00008536+000074 _eiint15
+ .text            0000c262+000074 _eiint150
+ .text            0000c2d6+000074 _eiint151
+ .text            0000c34a+000074 _eiint152
+ .text            0000c3be+000074 _eiint153
+ .text            0000c432+000074 _eiint154
+ .text            0000c4a6+000074 _eiint155
+ .text            0000c51a+000074 _eiint156
+ .text            0000c58e+000074 _eiint157
+ .text            0000c602+000074 _eiint158
+ .text            0000c676+000074 _eiint159
+ .text            000085aa+000074 _eiint16
+ .text            0000c6ea+000074 _eiint160
+ .text            0000c75e+000074 _eiint161
+ .text            0000c7d2+000074 _eiint162
+ .text            0000c846+000074 _eiint163
+ .text            0000c8ba+000074 _eiint164
+ .text            0000c92e+000074 _eiint165
+ .text            0000c9a2+000074 _eiint166
+ .text            0000ca16+000074 _eiint167
+ .text            0000ca8a+000074 _eiint168
+ .text            0000cafe+000074 _eiint169
+ .text            0000861e+000074 _eiint17
+ .text            0000cb72+000074 _eiint170
+ .text            0000cbe6+000074 _eiint171
+ .text            0000cc5a+000074 _eiint172
+ .text            0000ccce+000074 _eiint173
+ .text            0000cd42+000074 _eiint174
+ .text            0000cdb6+000074 _eiint175
+ .text            0000ce2a+000074 _eiint176
+ .text            0000ce9e+000074 _eiint177
+ .text            0000cf12+000074 _eiint178
+ .text            0000cf86+000074 _eiint179
+ .text            00008692+000074 _eiint18
+ .text            0000cffa+000074 _eiint180
+ .text            0000d06e+000074 _eiint181
+ .text            0000d0e2+000074 _eiint182
+ .text            0000d156+000074 _eiint183
+ .text            0000d1ca+000074 _eiint184
+ .text            0000d23e+000074 _eiint185
+ .text            0000d2b2+000074 _eiint186
+ .text            0000d326+000074 _eiint187
+ .text            0000d39a+000074 _eiint188
+ .text            0000d40e+000074 _eiint189
+ .text            00008706+000074 _eiint19
+ .text            0000d482+000074 _eiint190
+ .text            0000d4f6+000074 _eiint191
+ .text            0000d56a+000074 _eiint192
+ .text            0000d5de+000074 _eiint193
+ .text            0000d652+000074 _eiint194
+ .text            0000d6c6+000074 _eiint195
+ .text            0000d73a+000074 _eiint196
+ .text            0000d7ae+000074 _eiint197
+ .text            0000d822+000074 _eiint198
+ .text            0000d896+000074 _eiint199
+ .text            00007f52+000074 _eiint2
+ .text            0000877a+000074 _eiint20
+ .text            0000d90a+000074 _eiint200
+ .text            0000d97e+000074 _eiint201
+ .text            0000d9f2+000074 _eiint202
+ .text            0000da66+000074 _eiint203
+ .text            0000dada+000074 _eiint204
+ .text            0000db4e+000074 _eiint205
+ .text            0000dbc2+000074 _eiint206
+ .text            0000dc36+000074 _eiint207
+ .text            0000dcaa+000074 _eiint208
+ .text            0000dd1e+000074 _eiint209
+ .text            000087ee+000074 _eiint21
+ .text            0000dd92+000074 _eiint210
+ .text            0000de06+000074 _eiint211
+ .text            0000de7a+000074 _eiint212
+ .text            0000deee+000074 _eiint213
+ .text            0000df62+000074 _eiint214
+ .text            0000dfd6+000074 _eiint215
+ .text            0000e04a+000074 _eiint216
+ .text            0000e0be+000074 _eiint217
+ .text            0000e132+000074 _eiint218
+ .text            0000e1a6+000074 _eiint219
+ .text            00008862+000074 _eiint22
+ .text            0000e21a+000074 _eiint220
+ .text            0000e28e+000074 _eiint221
+ .text            0000e302+000074 _eiint222
+ .text            0000e376+000074 _eiint223
+ .text            0000e3ea+000074 _eiint224
+ .text            0000e45e+000074 _eiint225
+ .text            0000e4d2+000074 _eiint226
+ .text            0000e546+000074 _eiint227
+ .text            0000e5ba+000074 _eiint228
+ .text            0000e62e+000074 _eiint229
+ .text            000088d6+000074 _eiint23
+ .text            0000e6a2+000074 _eiint230
+ .text            0000e716+000074 _eiint231
+ .text            0000e78a+000074 _eiint232
+ .text            0000e7fe+000074 _eiint233
+ .text            0000e872+000074 _eiint234
+ .text            0000e8e6+000074 _eiint235
+ .text            0000e95a+000074 _eiint236
+ .text            0000e9ce+000074 _eiint237
+ .text            0000ea42+000074 _eiint238
+ .text            0000eab6+000074 _eiint239
+ .text            0000894a+000074 _eiint24
+ .text            0000eb2a+000074 _eiint240
+ .text            0000eb9e+000074 _eiint241
+ .text            0000ec12+000074 _eiint242
+ .text            0000ec86+000074 _eiint243
+ .text            0000ecfa+000074 _eiint244
+ .text            0000ed6e+000074 _eiint245
+ .text            0000ede2+000074 _eiint246
+ .text            0000ee56+000074 _eiint247
+ .text            0000eeca+000074 _eiint248
+ .text            0000ef3e+000074 _eiint249
+ .text            000089be+000074 _eiint25
+ .text            0000efb2+000074 _eiint250
+ .text            0000f026+000074 _eiint251
+ .text            0000f09a+000074 _eiint252
+ .text            0000f10e+000074 _eiint253
+ .text            0000f182+000074 _eiint254
+ .text            0000f1f6+000074 _eiint255
+ .text            0000f26a+000074 _eiint256
+ .text            0000f2de+000074 _eiint257
+ .text            0000f352+000074 _eiint258
+ .text            0000f3c6+000074 _eiint259
+ .text            00008a32+000074 _eiint26
+ .text            0000f43a+000074 _eiint260
+ .text            0000f4ae+000074 _eiint261
+ .text            0000f522+000074 _eiint262
+ .text            0000f596+000074 _eiint263
+ .text            0000f60a+000074 _eiint264
+ .text            0000f67e+000074 _eiint265
+ .text            0000f6f2+000074 _eiint266
+ .text            0000f766+000074 _eiint267
+ .text            0000f7da+000074 _eiint268
+ .text            0000f84e+000074 _eiint269
+ .text            00008aa6+000074 _eiint27
+ .text            0000f8c2+000074 _eiint270
+ .text            0000f936+000074 _eiint271
+ .text            0000f9aa+000074 _eiint272
+ .text            0000fa1e+000074 _eiint273
+ .text            0000fa92+000074 _eiint274
+ .text            0000fb06+000074 _eiint275
+ .text            0000fb7a+000074 _eiint276
+ .text            0000fbee+000074 _eiint277
+ .text            0000fc62+000074 _eiint278
+ .text            0000fcd6+000074 _eiint279
+ .text            00008b1a+000074 _eiint28
+ .text            0000fd4a+000074 _eiint280
+ .text            0000fdbe+000074 _eiint281
+ .text            0000fe32+000074 _eiint282
+ .text            0000fea6+000074 _eiint283
+ .text            0000ff1a+000074 _eiint284
+ .text            0000ff8e+000074 _eiint285
+ .text            00010002+000074 _eiint286
+ .text            00010076+000074 _eiint287
+ .text            000100ea+000074 _eiint288
+ .text            0001015e+000074 _eiint289
+ .text            00008b8e+000074 _eiint29
+ .text            000101d2+000074 _eiint290
+ .text            00010246+000074 _eiint291
+ .text            000102ba+000074 _eiint292
+ .text            0001032e+000074 _eiint293
+ .text            000103a2+000074 _eiint294
+ .text            00010416+000074 _eiint295
+ .text            0001048a+000074 _eiint296
+ .text            000104fe+000074 _eiint297
+ .text            00010572+000074 _eiint298
+ .text            000105e6+000074 _eiint299
+ .text            00007fc6+000074 _eiint3
+ .text            00008c02+000074 _eiint30
+ .text            0001065a+000074 _eiint300
+ .text            000106ce+000074 _eiint301
+ .text            00010742+000074 _eiint302
+ .text            000107b6+000074 _eiint303
+ .text            0001082a+000074 _eiint304
+ .text            0001089e+000074 _eiint305
+ .text            00010912+000074 _eiint306
+ .text            00010986+000074 _eiint307
+ .text            000109fa+000074 _eiint308
+ .text            00010a6e+000074 _eiint309
+ .text            00008c76+000074 _eiint31
+ .text            00010ae2+000074 _eiint310
+ .text            00010b56+000074 _eiint311
+ .text            00010bca+000074 _eiint312
+ .text            00010c3e+000074 _eiint313
+ .text            00010cb2+000074 _eiint314
+ .text            00010d26+000074 _eiint315
+ .text            00010d9a+000074 _eiint316
+ .text            00010e0e+000074 _eiint317
+ .text            00010e82+000074 _eiint318
+ .text            00010ef6+000074 _eiint319
+ .text            00008cea+000074 _eiint32
+ .text            00010f6a+000074 _eiint320
+ .text            00010fde+000074 _eiint321
+ .text            00011052+000074 _eiint322
+ .text            000110c6+000074 _eiint323
+ .text            0001113a+000074 _eiint324
+ .text            000111ae+000074 _eiint325
+ .text            00011222+000074 _eiint326
+ .text            00011296+000074 _eiint327
+ .text            0001130a+000074 _eiint328
+ .text            0001137e+000074 _eiint329
+ .text            00008d5e+000074 _eiint33
+ .text            000113f2+000074 _eiint330
+ .text            00011466+000074 _eiint331
+ .text            000114da+000074 _eiint332
+ .text            0001154e+000074 _eiint333
+ .text            000115c2+000074 _eiint334
+ .text            00011636+000074 _eiint335
+ .text            000116aa+000074 _eiint336
+ .text            0001171e+000074 _eiint337
+ .text            00011792+000074 _eiint338
+ .text            00011806+000074 _eiint339
+ .text            00008dd2+000074 _eiint34
+ .text            0001187a+000074 _eiint340
+ .text            000118ee+000074 _eiint341
+ .text            00011962+000074 _eiint342
+ .text            000119d6+000074 _eiint343
+ .text            00011a4a+000074 _eiint344
+ .text            00011abe+000074 _eiint345
+ .text            00011b32+000074 _eiint346
+ .text            00011ba6+000074 _eiint347
+ .text            00011c1a+000074 _eiint348
+ .text            00011c8e+000074 _eiint349
+ .text            00008e46+000074 _eiint35
+ .text            00011d02+000074 _eiint350
+ .text            00011d76+000074 _eiint351
+ .text            00011dea+000074 _eiint352
+ .text            00011e5e+000074 _eiint353
+ .text            00011ed2+000074 _eiint354
+ .text            00011f46+000074 _eiint355
+ .text            00011fba+000074 _eiint356
+ .text            0001202e+000074 _eiint357
+ .text            00008eba+000074 _eiint36
+ .text            00008f2e+000074 _eiint37
+ .text            00008fa2+000074 _eiint38
+ .text            00009016+000074 _eiint39
+ .text            0000803a+000074 _eiint4
+ .text            0000908a+000074 _eiint40
+ .text            000090fe+000074 _eiint41
+ .text            00009172+000074 _eiint42
+ .text            000091e6+000074 _eiint43
+ .text            0000925a+000074 _eiint44
+ .text            000092ce+000074 _eiint45
+ .text            00009342+000074 _eiint46
+ .text            000093b6+000074 _eiint47
+ .text            0000942a+000074 _eiint48
+ .text            0000949e+000074 _eiint49
+ .text            000080ae+000074 _eiint5
+ .text            00009512+000074 _eiint50
+ .text            00009586+000074 _eiint51
+ .text            000095fa+000074 _eiint52
+ .text            0000966e+000074 _eiint53
+ .text            000096e2+000074 _eiint54
+ .text            00009756+000074 _eiint55
+ .text            000097ca+000074 _eiint56
+ .text            0000983e+000074 _eiint57
+ .text            000098b2+000074 _eiint58
+ .text            00009926+000074 _eiint59
+ .text            00008122+000074 _eiint6
+ .text            0000999a+000074 _eiint60
+ .text            00009a0e+000074 _eiint61
+ .text            00009a82+000074 _eiint62
+ .text            00009af6+000074 _eiint63
+ .text            00009b6a+000074 _eiint64
+ .text            00009bde+000074 _eiint65
+ .text            00009c52+000074 _eiint66
+ .text            00009cc6+000074 _eiint67
+ .text            00009d3a+000074 _eiint68
+ .text            00009dae+000074 _eiint69
+ .text            00008196+000074 _eiint7
+ .text            00009e22+000074 _eiint70
+ .text            00009e96+000074 _eiint71
+ .text            00009f0a+000074 _eiint72
+ .text            00009f7e+000074 _eiint73
+ .text            00009ff2+000074 _eiint74
+ .text            0000a066+000074 _eiint75
+ .text            0000a0da+000074 _eiint76
+ .text            0000a14e+000074 _eiint77
+ .text            0000a1c2+000074 _eiint78
+ .text            0000a236+000074 _eiint79
+ .text            0000820a+000074 _eiint8
+ .text            0000a2aa+000074 _eiint80
+ .text            0000a31e+000074 _eiint81
+ .text            0000a392+000074 _eiint82
+ .text            0000a406+000074 _eiint83
+ .text            0000a47a+000074 _eiint84
+ .text            0000a4ee+000074 _eiint85
+ .text            0000a562+000074 _eiint86
+ .text            0000a5d6+000074 _eiint87
+ .text            0000a64a+000074 _eiint88
+ .text            0000a6be+000074 _eiint89
+ .text            0000827e+000074 _eiint9
+ .text            0000a732+000074 _eiint90
+ .text            0000a7a6+000074 _eiint91
+ .text            0000a81a+000074 _eiint92
+ .text            0000a88e+000074 _eiint93
+ .text            0000a902+000074 _eiint94
+ .text            0000a976+000074 _eiint95
+ .text            0000a9ea+000074 _eiint96
+ .text            0000aa5e+000074 _eiint97
+ .text            0000aad2+000074 _eiint98
+ .text            0000ab46+000074 _eiint99
+ .bss             febf0890+000004 _environ
+ .bss             febf0894+000004 _errno
+ .data            febf0256+000001 _error_status..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf00ec+000004 _evrdy_on_flag..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .text            000128d8+000066 _exit
+ .data            febf00b8+000004 _fail_safety_1_cycle_flag..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf00b4+000004 _fail_safety_flag..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf00bc+000004 _fail_safety_step..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf042c+000002 _fault_clear
+ .data            febf0188+000004 _fdl_fail..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0180+000004 _flap_move..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .text            000125d8+00005e _function_FDL_erease
+ .text            00012574+000064 _function_FDL_init
+ .text            000126a4+00006e _function_FDL_read
+ .text            00012636+00006e _function_FDL_write
+ .bss             febf044c+000004 _g_cg_sync_read
+ .bss             febf0446+000002 _g_csih0_rx_num
+ .bss             febf0448+000002 _g_csih0_total_num
+ .bss             febf0444+000002 _g_csih0_tx_num
+ .R_FDL_CodeRam   febf1100+000100 _g_fdl_ramCodeBuf_au16
+ .R_FDL_Data      febf1098+000068 _g_fdl_str
+ .bss             febf0440+000004 _gp_csih0_rx_address
+ .bss             febf043c+000004 _gp_csih0_tx_address
+ .data            febf0028+000004 _init_move_step..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0158+000004 _limit_memory_read..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0154+000004 _limit_memory_write..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf00c8+000004 _limit_step_position..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0038+000004 _lin_aaf_command..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf00a8+000004 _lin_bus_inactive_flag..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0070+000004 _lin_rx_chk_flag..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0040+000004 _lin_rx_pass_flag..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0120+000004 _lin_sleep_step..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .text            00002b1e+000300 _main
+ .text            00012de4+0000d8 _memcpy
+ .text            00012de4+0000d8 _memcpy..trg.2Frh850.2Fobjs.2Flibs.2Flibstartup.2Find_mcpy.
+ .text            00012de4+000000 _memcpy_mcopy
+ .text            00012d70+000074 _memset
+ .data            febf0230+000004 _motor_Open_chk_count..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf022c+000004 _motor_Short_chk_count..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf00fc+000004 _motor_ccw_stall_value..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf00f8+000004 _motor_cw_stall_value..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0210+000004 _motor_fault_chk..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf002c+000004 _motor_open_load..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf00b0+000004 _motor_stall_flag..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf00ac+000004 _motor_stall_value..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0018+000004 _motor_start..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0118+000004 _motor_step_value..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf001c+000004 _motor_wait_chk..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .text            000128d6+000002 _multiBreak
+ .text            000128d2+000000 _multiCall
+ .data            febf013c+000004 _now_step_memory_read..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0138+000004 _now_step_memory_write..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf00cc+000004 _open_1st_step_position..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf00d0+000004 _open_2nd_step_position..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0134+000004 _open_memory_read..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0130+000004 _open_memory_write..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0150+000004 _position_Initial_combined_read..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf016c+000004 _position_Initstatus_combined_read..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0144+000004 _position_memory_read..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0140+000004 _position_memory_write..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0160+000004 _position_status_memory_read..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf015c+000004 _position_status_memory_write..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0214+000004 _power_chk..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf017c+000004 _power_chk_memory_read..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0178+000004 _power_chk_memory_write..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf00d8+000004 _protection_Mode_step..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf00d4+000004 _protection_function..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .text            00000d2a+000044 _r_Config_ADCA0_error_interrupt
+ .text            00000d6e+000044 _r_Config_ADCA0_scan_group1_end_interrupt
+ .text            000013be+000010 _r_Config_CSIH0_callback_error..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C3.2E.20SX3k.5C4.2E.20.C4.DA.B5.E5.5CSX3k.20.BA.CF.B9.CC.C7.E2.20.B0.B3.B9.DF.5Cobjs.5CConfig_CSIH0_user.
+ .text            000013b0+00000e _r_Config_CSIH0_callback_receiveend..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C3.2E.20SX3k.5C4.2E.20.C4.DA.B5.E5.5CSX3k.20.BA.CF.B9.CC.C7.E2.20.B0.B3.B9.DF.5Cobjs.5CConfig_CSIH0_user.
+ .text            000013a2+00000e _r_Config_CSIH0_callback_sendend..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C3.2E.20SX3k.5C4.2E.20.C4.DA.B5.E5.5CSX3k.20.BA.CF.B9.CC.C7.E2.20.B0.B3.B9.DF.5Cobjs.5CConfig_CSIH0_user.
+ .text            00001306+00009c _r_Config_CSIH0_interrupt_error
+ .text            000011e8+00011e _r_Config_CSIH0_interrupt_send
+ .text            000014b8+000044 _r_Config_INTC_intp5_interrupt
+ .text            00001c3a+000084 _r_Config_TAUD0_13_interrupt
+ .text            00001ea8+0003b4 _r_Config_TAUD0_3_interrupt
+ .text            000022b8+000044 _r_Config_WDT0_interrupt
+ .data            febf02a0+000014 _r_buff..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .R_FDL_Const     00015078+000013 _r_fdl_vStr.R_FDL_GetVersionString.C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20PROTO.5CNX5e_SW1.2E3.5Cobjs.5Cr_fdl_user_if..0
+ .text            00002e1e+00001a _r_main_userinit..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0257+000001 _ret..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf02e0+000016 _rx_16bit_spi..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf02ca+000016 _rx_16bit_spi_id..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .rodata          000008d8+000008 _sampleApp_fdlConfig_enu
+ .bss             febf0462+000006 _scan_results
+ .text            00007e56+000006 _snooze
+ .data            febf011c+000004 _softstart_complete..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf00a0+000004 _spi_action_step..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0430+000001 _spi_error_flag
+ .data            febf0184+000004 _spi_fail..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf042f+000001 _spi_receive_flag
+ .data            febf042e+000001 _spi_send_flag
+ .data            febf03bc+000004 _stall_chk_cnt
+ .data            febf03c0+000004 _stall_chk_time_1ms
+ .data            febf00e0+000004 _stall_cnt..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf00e8+000004 _stall_test_mode..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .text            000077bc+0001a0 _step_check..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0208+000004 _step_check_flag..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0010+000008 _step_position..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf00c4+000004 _step_position_close..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf00c0+000004 _step_position_open..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0090+000004 _step_start_flag..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0024+000004 _step_toggle_flag..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf033c+000004 _time_1ms_3minute
+ .data            febf0344+000004 _time_1ms_3minute_flag
+ .data            febf0404+000004 _time_1ms_Error_chk
+ .data            febf0408+000004 _time_1ms_Error_chk_flag
+ .data            febf0424+000004 _time_1ms_IGN_chk
+ .data            febf0428+000004 _time_1ms_IGN_chk_flag
+ .data            febf03fc+000004 _time_1ms_LIN_BatShort
+ .data            febf03f8+000004 _time_1ms_LIN_BatShort_flag
+ .data            febf03f4+000004 _time_1ms_LIN_GndShort
+ .data            febf03f0+000004 _time_1ms_LIN_GndShort_flag
+ .data            febf03dc+000004 _time_1ms_Moving_chk
+ .data            febf03e0+000004 _time_1ms_Moving_chk_flag
+ .data            febf032c+000004 _time_1ms_adc
+ .data            febf041c+000004 _time_1ms_adc_1s_chk
+ .data            febf0420+000004 _time_1ms_adc_1s_chk_flag
+ .data            febf03a0+000004 _time_1ms_adc_error_chk
+ .data            febf03a4+000004 _time_1ms_adc_error_chk_flag
+ .data            febf0330+000004 _time_1ms_adc_flag
+ .data            febf0388+000004 _time_1ms_antipinch
+ .data            febf038c+000004 _time_1ms_antipinch_flag
+ .data            febf0378+000004 _time_1ms_diag_auto
+ .data            febf037c+000004 _time_1ms_diag_auto_flag
+ .data            febf0334+000004 _time_1ms_external_10s_chk
+ .data            febf0338+000004 _time_1ms_external_10s_chk_flag
+ .data            febf03a8+000004 _time_1ms_fdl_error_chk
+ .data            febf03ac+000004 _time_1ms_fdl_error_chk_flag
+ .data            febf0350+000004 _time_1ms_init_chk
+ .data            febf0354+000004 _time_1ms_init_chk_flag
+ .data            febf0324+000004 _time_1ms_init_move
+ .data            febf0328+000004 _time_1ms_init_move_flag
+ .data            febf0414+000004 _time_1ms_motor_Open_chk
+ .data            febf0418+000004 _time_1ms_motor_Open_chk_flag
+ .data            febf040c+000004 _time_1ms_motor_Short_chk
+ .data            febf0410+000004 _time_1ms_motor_Short_chk_flag
+ .data            febf0390+000004 _time_1ms_motor_acceleration
+ .data            febf0394+000004 _time_1ms_motor_acceleration_flag
+ .data            febf0368+000004 _time_1ms_motor_wait
+ .data            febf036c+000004 _time_1ms_motor_wait_flag
+ .data            febf03b0+000004 _time_1ms_protection_chk
+ .data            febf03b4+000004 _time_1ms_protection_chk_flag
+ .data            febf0360+000004 _time_1ms_protection_mode
+ .data            febf0364+000004 _time_1ms_protection_mode_flag
+ .data            febf0348+000004 _time_1ms_spi
+ .data            febf0398+000004 _time_1ms_spi_error_chk
+ .data            febf039c+000004 _time_1ms_spi_error_chk_flag
+ .data            febf034c+000004 _time_1ms_spi_flag
+ .data            febf0358+000004 _time_1ms_stall_chk
+ .data            febf035c+000004 _time_1ms_stall_chk_flag
+ .data            febf03d4+000004 _time_1ms_step_chk
+ .data            febf03d8+000004 _time_1ms_step_chk_flag
+ .data            febf0370+000004 _time_1ms_voltage_chk_delay
+ .data            febf0374+000004 _time_1ms_voltage_chk_delay_flag
+ .data            febf0380+000004 _time_1ms_voltage_status_change_wait
+ .data            febf0384+000004 _time_1ms_voltage_status_change_wait_flag
+ .data            febf03e4+000004 _time_1ms_wdg_chk
+ .data            febf03e8+000004 _time_1ms_wdg_chk_flag
+ .data            febf0340+000004 _time_1s_3minute
+ .data            febf0314+000004 _time_1us_motor
+ .data            febf0318+000004 _time_1us_motor_flag
+ .data            febf031c+000004 _time_1us_spi
+ .data            febf0320+000004 _time_1us_spi_flag
+ .data            febf03c4+000004 _timer_1ms_init_fail_chk
+ .data            febf03c8+000004 _timer_1ms_init_fail_chk_flag
+ .data            febf03b8+000004 _timer_1ms_lin_bus_inactive
+ .data            febf03cc+000004 _timer_1ms_lin_sleep
+ .data            febf03d0+000004 _timer_1ms_lin_sleep_flag
+ .data            febf01a8+000004 _torque_test_position..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf02b4+000016 _tx_16bit_spi..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0258+000020 _tx_16bit_spi_current_limit..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .text            00007e5c+00000e _unused_isr
+ .data            febf0094+000004 _voltage_chk_delay_complete..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf00f4+000004 _voltage_status_change..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0108+000004 _voltage_status_change_complete..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf00f0+000004 _voltage_status_spi..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf02f6+000012 _w_buff..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf01a4+000004 _wake_up_motor_range_init_chk..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
+ .data            febf0124+000004 _wakeup_chk..C.3A.5CUsers.5Ccts00.5CDesktop.5C.C0.DA.B7.E1.5C1.2E.20.C7.C1.B7.CE.C1.A7.C6.AE.5CAAF.5C2.2E.20NX5e.5C4.2E.20.C4.DA.B5.E5.5CNX5e.20260116.201.2E3.2E1.5CNX5e.20.2D.20260119.201.2E3.2E1.20.B0.B3.B9.DF.5Cobjs.5Cr_cg_main.
