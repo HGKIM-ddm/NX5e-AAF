@@ -1197,6 +1197,7 @@ static void Motor_Close(void)
 	}
 }
 
+<<<<<<< HEAD
 static void Motor_dir_close(void)
 {
 	if (AAF_location_type == RH_TYPE)
@@ -1215,6 +1216,8 @@ static void Motor_dir_close(void)
 	}
 }
 
+=======
+>>>>>>> d4c07df (Motor Action)
 /***********************************************************************************************************************
  * Function Name: Manage_motor_start_status
  * Description  : Manages flags and timers based on the motor start state (ON/OFF).
@@ -1379,6 +1382,7 @@ static void Motor_Action(void)
 {
     // 1. Manage start/stop flags
     Manage_motor_start_status();
+<<<<<<< HEAD
 
     // 2. Handle wait time and acceleration
     if (time_1ms_motor_wait >= MOTOR_WAIT_TIME)
@@ -1586,6 +1590,24 @@ static void Check_limit_arrival(void)
  * Return Value : void
  ***********************************************************************************************************************/
 static void Init_move_0_to_9(void)
+=======
+
+    // 2. Handle wait time and acceleration
+    if (time_1ms_motor_wait >= MOTOR_WAIT_TIME)
+    {
+        Process_active_acceleration();
+    }
+    else 
+    {
+        motor_wait_chk = OFF;
+    }
+
+    // 3. Generate step pulses
+    Generate_step_pulse();
+}
+
+static void Init_move(void)
+>>>>>>> d4c07df (Motor Action)
 {
     switch (init_move_step)
     {
