@@ -1,7 +1,7 @@
 .\bin\project.out  .intvect             500
 .\bin\project.out  EIINTTBL            1432
 .\bin\project.out  .rodata              584
-.\bin\project.out  .text              75474
+.\bin\project.out  .text              75714
 .\bin\project.out  .secinfo             204
 .\bin\project.out  .syscall               6
 .\bin\project.out  .romdata            1081

@@ -497,11 +497,11 @@ int main(void)
 
 	// AAFx_Type = INTERNAL_TYPE; //  NX5e AAF3 INTERNAL_TYPE(LOWER)
 
-	AAFx_Index = AAF_1;			 //
-	AAF_location_type = LH_TYPE; // CW
+	// AAFx_Index = AAF_1;			 //
+	// AAF_location_type = LH_TYPE; // CW
 
-	// AAFx_Index = AAF_2;			 //
-	// AAF_location_type = RH_TYPE; // CCW
+	AAFx_Index = AAF_2;			 //
+	AAF_location_type = RH_TYPE; // CCW
 
 	// AAFx_Index = AAF_3;			 //
 	// AAF_location_type = LH_TYPE; // CW
@@ -1165,183 +1165,185 @@ static void Motor_Close(void)
 	}
 }
 
+/***********************************************************************************************************************
+ * Function Name: Manage_motor_start_status
+ * Description  : Manages flags and timers based on the motor start state (ON/OFF).
+ * Called By    : Motor_Action
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Manage_motor_start_status(void)
+{
+    if (motor_start == ON)
+    {
+        time_1ms_motor_wait_flag = 1;
+    }
+    else if (motor_start == OFF)
+    {
+        time_1ms_motor_wait_flag = 0;
+        time_1ms_motor_wait = 0;
+        time_1us_motor_flag = 0;
+        time_1us_motor = 0;
+        time_1ms_motor_acceleration_flag = 0;
+        time_1ms_motor_acceleration = 0;
+    }
+    else
+    {
+        // Invalid
+    }
+}
+
+/***********************************************************************************************************************
+ * Function Name: Execute_legacy_soft_start
+ * Description  : Handles the legacy detailed soft-start acceleration logic (Previously commented out).
+ * Called By    : Process_active_acceleration (Currently commented out)
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Execute_legacy_soft_start(void)
+{
+    // if (((motor_step_value <= STEP_TIME_1000RPM) && (motor_step_value > STEP_TIME_1250RPM)) && (time_1ms_motor_acceleration >= 4))
+    // {
+    //     motor_step_value--;
+    //     time_1ms_motor_acceleration = 0;
+    // }
+    // else if (((motor_step_value <= STEP_TIME_1250RPM) && (motor_step_value > STEP_TIME_1500RPM)) && (time_1ms_motor_acceleration >= 6))
+    // {
+    //     motor_step_value--;
+    //     time_1ms_motor_acceleration = 0;
+    // }
+    // else if (((motor_step_value <= STEP_TIME_1500RPM) && (motor_step_value > STEP_TIME_1575RPM)) && (time_1ms_motor_acceleration >= 8))
+    // {
+    //     motor_step_value--;
+    //     time_1ms_motor_acceleration = 0;
+    // }
+    // else if (motor_step_value <= STEP_TIME_1575RPM)
+    // {
+    //     motor_step_value = STEP_TIME_1575RPM;
+    //     softstart_complete = ON;
+    // }
+    // else
+    // {
+    //     // Invalid
+    // }
+}
+
+/***********************************************************************************************************************
+ * Function Name: Process_active_acceleration
+ * Description  : Handles the currently active motor acceleration logic (1000RPM -> 1250RPM).
+ * Called By    : Motor_Action
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Process_active_acceleration(void)
+{
+    // Development START
+    if ((AAF_Tx_Position != UNKOWN_POSITION) && (Diag_Mode == 0)) 
+    {
+        AAFx_Position_Status = FlapMoving_Status;
+    }
+    else if (AAF_Tx_Position == UNKOWN_POSITION)
+    {
+        AAFx_Position_Status = Unknown_Status;
+    }
+    else
+    {
+        // Invalid
+    }
+    // Development END
+
+    motor_wait_chk = ON;
+    stall_chk_cnt = ON;
+    time_1ms_motor_acceleration_flag = 1;
+
+    Execute_legacy_soft_start(); //not used
+
+    // Active acceleration logic
+    if (((motor_step_value <= STEP_TIME_1000RPM) && (motor_step_value > STEP_TIME_1250RPM)) && (time_1ms_motor_acceleration >= 10))
+    {
+        motor_step_value--;
+        time_1ms_motor_acceleration = 0;
+    }
+    else
+    {
+        motor_step_value = STEP_TIME_1250RPM;
+        time_1ms_motor_acceleration = 0;
+        softstart_complete = ON;
+    }
+
+    time_1ms_motor_wait = MOTOR_WAIT_TIME;
+}
+
+/***********************************************************************************************************************
+ * Function Name: Generate_step_pulse
+ * Description  : Toggles the GPIO pin to generate motor steps and updates the position counter.
+ * Called By    : Motor_Action
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Generate_step_pulse(void)
+{
+    if ((motor_wait_chk == ON) && (voltage_status_change_complete == COMPLETE))
+    {
+        time_1us_motor_flag = 1;
+
+        if ((time_1us_motor >= motor_step_value * 2U) && (step_toggle_flag == 1U))
+        {
+            PORT.P9 &= ~_PORT_Pn0_OUTPUT_HIGH;
+            step_toggle_flag = 0;
+            time_1us_motor = 0;
+        }
+        else if ((time_1us_motor >= motor_step_value) && (step_toggle_flag == 0U))
+        {
+            PORT.P9 |= _PORT_Pn0_OUTPUT_HIGH;
+            step_toggle_flag = 1;
+
+            if (dir_state == OPEN)
+            {
+                step_position--;
+            }
+            else if (dir_state == CLOSE)
+            {
+                step_position++;
+            }
+            else
+            {
+                // Invalid
+            }
+        }
+        else
+        {
+            // Invalid
+        }
+    }
+}
+
+/***********************************************************************************************************************
+ * Function Name: Motor_Action
+ * Description  : Main function for motor control (State, Acceleration, Step Generation).
+ * Called By    : Main Loop : AAF_App()
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
 static void Motor_Action(void)
 {
-	if (motor_start == ON)
-	{
-		time_1ms_motor_wait_flag = 1;
-	}
-	else if (motor_start == OFF)
-	{
-		time_1ms_motor_wait_flag = 0;
-		time_1ms_motor_wait = 0;
-		time_1us_motor_flag = 0;
-		time_1us_motor = 0;
-		time_1ms_motor_acceleration_flag = 0;
-		time_1ms_motor_acceleration = 0;
-	}
-	else
-	{
-	}
+    // 1. Manage start/stop flags
+    Manage_motor_start_status();
 
-	if (time_1ms_motor_wait >= MOTOR_WAIT_TIME)
-	{
-		//-----------------------------------------development START----------------------------------------
-		if ((AAF_Tx_Position != UNKOWN_POSITION) && (Diag_Mode == 0)) // AAFx_Position_Status
-		{
-			AAFx_Position_Status = FlapMoving_Status;
-		}
-		else if ((AAF_Tx_Position == UNKOWN_POSITION))
-		{
-			AAFx_Position_Status = Unknown_Status; //
-		}
-		else
-		{
-		}
-		//-----------------------------------------development END----------------------------------------
-		motor_wait_chk = ON;
-		stall_chk_cnt = ON;
+    // 2. Handle wait time and acceleration
+    if (time_1ms_motor_wait >= MOTOR_WAIT_TIME)
+    {
+        Process_active_acceleration();
+    }
+    else 
+    {
+        motor_wait_chk = OFF;
+    }
 
-		time_1ms_motor_acceleration_flag = 1;
-		/*
-				if(((motor_step_value <= STEP_TIME_1000RPM) && (motor_step_value > STEP_TIME_1250RPM)) && (time_1ms_motor_acceleration >= 4))
-				{
-					motor_step_value--;
-					time_1ms_motor_acceleration = 0;
-				}
-				else if(((motor_step_value <= STEP_TIME_1250RPM) && (motor_step_value > STEP_TIME_1500RPM)) && (time_1ms_motor_acceleration >= 6))
-				{
-					motor_step_value--;
-					time_1ms_motor_acceleration = 0;
-				}
-				else if(((motor_step_value <= STEP_TIME_1500RPM) && (motor_step_value > STEP_TIME_1575RPM)) && (time_1ms_motor_acceleration >= 8))
-				{
-					motor_step_value--;
-					time_1ms_motor_acceleration = 0;
-				}
-				else if(motor_step_value <= STEP_TIME_1575RPM)
-				{
-					motor_step_value = STEP_TIME_1575RPM;
-
-					softstart_complete = ON;
-				}
-				else
-				{
-
-				}
-				*/
-
-		/*
-				if(adc_avr >= ADC_VOLTAGE_10V)
-				{
-					if(((motor_step_value <= STEP_TIME_1000RPM) && (motor_step_value > STEP_TIME_1250RPM)) && (time_1ms_motor_acceleration >= 4))
-					{
-						motor_step_value--;
-						time_1ms_motor_acceleration = 0;
-					}
-					else if(((motor_step_value <= STEP_TIME_1250RPM) && (motor_step_value > STEP_TIME_1500RPM)) && (time_1ms_motor_acceleration >= 6))
-					{
-						motor_step_value--;
-						time_1ms_motor_acceleration = 0;
-					}
-					else if(((motor_step_value <= STEP_TIME_1500RPM) && (motor_step_value > STEP_TIME_1575RPM)) && (time_1ms_motor_acceleration >= 8))
-					{
-						motor_step_value--;
-						time_1ms_motor_acceleration = 0;
-					}
-					else if(motor_step_value <= STEP_TIME_1575RPM)
-					{
-						motor_step_value = STEP_TIME_1575RPM;
-						time_1ms_motor_acceleration = 0;
-						softstart_complete = ON;
-					}
-					else
-					{
-
-					}
-				}
-				else
-				{
-					if(((motor_step_value <= STEP_TIME_1000RPM) && (motor_step_value > STEP_TIME_1250RPM)) && (time_1ms_motor_acceleration >= 4))
-					{
-						motor_step_value--;
-						time_1ms_motor_acceleration = 0;
-					}
-					else if(((motor_step_value <= STEP_TIME_1250RPM) && (motor_step_value > STEP_TIME_1450RPM)) && (time_1ms_motor_acceleration >= 6))
-					{
-						motor_step_value--;
-						time_1ms_motor_acceleration = 0;
-					}
-					else if(motor_step_value <= STEP_TIME_1450RPM)
-					{
-						motor_step_value = STEP_TIME_1450RPM;
-						time_1ms_motor_acceleration = 0;
-						softstart_complete = ON;
-					}
-					else
-					{
-
-					}
-				}
-				*/
-
-		if (((motor_step_value <= STEP_TIME_1000RPM) && (motor_step_value > STEP_TIME_1250RPM)) && (time_1ms_motor_acceleration >= 10))
-		{
-			motor_step_value--;
-			time_1ms_motor_acceleration = 0;
-		}
-		else
-		{
-			motor_step_value = STEP_TIME_1250RPM;
-			time_1ms_motor_acceleration = 0;
-			softstart_complete = ON;
-		}
-		time_1ms_motor_wait = MOTOR_WAIT_TIME;
-	}
-	else if (time_1ms_motor_wait < MOTOR_WAIT_TIME)
-	{
-		motor_wait_chk = OFF;
-	}
-	else
-	{
-	}
-
-	if ((motor_wait_chk == ON) && (voltage_status_change_complete == COMPLETE))
-	// if(motor_start == ON)
-	{
-		time_1us_motor_flag = 1;
-
-		if ((time_1us_motor >= motor_step_value * 2U) && (step_toggle_flag == 1U))
-		{
-			PORT.P9 &= ~_PORT_Pn0_OUTPUT_HIGH;
-			step_toggle_flag = 0;
-			time_1us_motor = 0;
-		}
-		else if ((time_1us_motor >= motor_step_value) && (step_toggle_flag == 0U))
-		{
-			PORT.P9 |= _PORT_Pn0_OUTPUT_HIGH;
-			step_toggle_flag = 1;
-
-			if (dir_state == OPEN)
-			{
-				step_position--;
-			}
-			else if (dir_state == CLOSE)
-			{
-				step_position++;
-			}
-			else
-			{
-			}
-		}
-		else
-		{
-		}
-	}
+    // 3. Generate step pulses
+    Generate_step_pulse();
 }
-//-----------------------------------------development START----------------------------------------
 
-//-----------------------------------------development END----------------------------------------
 static void Init_move(void)
 {
 	switch (init_move_step)
