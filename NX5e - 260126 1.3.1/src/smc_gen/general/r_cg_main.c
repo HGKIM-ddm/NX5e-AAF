@@ -43,417 +43,260 @@ Includes
 Global variables and functions
 ***********************************************************************************************************************/
 /* Start user code for global. Do not edit comment generated here */
-static void DRV8899_Init(void);
-static void DRV8899_Wakeup(void);
-static void DRV8899_Sleep(void);
-static void DRV_On(void);
-static void DRV_Off(void);
-static void Motor_Open(void);
-static void Motor_Close(void);
-static void Motor_Action(void);
-void RLIN3_slave_init(void);
-static void Lin_Transceiver_On(void);
-static void Lin_Transceiver_Off(void);
-void Clear_DataBuffer(void);
-void RLIN_Slave_Receive(uint8_t Data_length);
-void RLIN_Slave_Transmit(uint8_t *databuf, uint8_t Data_length);
-void Get_reponse_RxData(uint8_t *RxData);
-void RLIN3_slave_init(void);
-void RLIN_Slave_NoResponse(void);
-void RLIN30_interrupt(void);
-void RLIN30_transmit_interrupt(void);
-void RLIN30_receive_complete_interrupt(void);
-void RLIN30_status_interrupt(void);
-static void Init_move(void);
-static void VDC_adc(void);
+/***********************************************************************************************************************
+ * Section 2: Global Variable Declarations
+ * Description : Buffers, Flags, Counters, and State Variables
+ ***********************************************************************************************************************/
 
-static void ERROR_chk(void);
-static void Tx_position_complete_chk(void);
-static void Flash_memory_write(void);
-static void Flash_memory_read(void);
-
-static void Operating_mode(void);
-static void Lin_rx_data_chk(void); // V
-static void Lin_tx_data_chk(void); // V
-static void MCU_sleep(void);	   // V
-static void SPI_chk(void);
-static void Stall_chk(void);
-static void CHK_external_factors(void);
-static void Fail_safety_mode(void);
-static void Initialize_variables(void);
-static void Lin_bus_chk(void);
-static void SPI_select_pin_Off(void);
-static void Protection_Mode(void);
-static void Voltage_chk_current_limit_init(void);
-static void Current_limiting_select(void);
-static void Antipinch_move(void); // V
-static void Lin_sleep(void);	  // V
-static void Torque_Test_Mode(void);
-
-static void Init_direction(void);
-static void LIMP_HOME(void);		  // V
-static void step_check(void);		  // V
-static void Re_Init(void);			  // V
-static void IGN_On_Memory_read(void); // V
-//static void LIN_Short_Chk(void);
-static void Error_FaultClear(void);
-static void Motor_SPI_Init(void);
-static void LIN_Diag_Rx(void);
-static void LIN_Diag_Action(void);
-
-void AAF_communicate_chk(void);
-// ADC chk MAX 4096
-/*
- V    adc_data
-
-0.8	652
-0.9	732
-1.0	813
-1.1	895
-1.2	975
-1.3	1058
-1.4	1139
-1.5	1224
-1.6	1304
-1.7	1386
-1.8	1467
-1.9	1548
-2.0	1627
-2.1	1711
-2.2	1793
-2.3	1874
-2.4	1955
-2.5	2036
-2.6	2119
-2.7	2203
-2.8	2283
-2.9	2366
-3.0	2447
-3.1	2527
-3.2	2610
-3.3	2694
-3.4	2777
-3.5	2858
-3.6	2939
-3.7	3020
-3.8	3101
-3.9	3183
-4.0	3267
-4.1	3349
-4.2	3431
-4.3	3513
-4.4	3593
-4.5	3674
-4.6	3758
-4.7	3841
-4.8	3923
-4.9	4003
-
-*/
-
-#define OFF 0U
-#define ON 1U
-
-#define FAIL 0U
-#define PASS 1U
-#define WAITING 2U
-
-#define UNKNOWN 0U
-#define STOP 0U
-#define INIT 3U
-
-#define WAIT 0U
-#define COMPLETE 1U
-
-#define CLOSE 0U
-#define OPEN_1ST 1U
-#define OPEN_2ND 2U
-#define OPEN 3U
-#define DIAG_MODE_OPEN 4U
-#define DIAG_MODE_CLOSE 5U
-#define DIAG_MODE_AUTO 6U
-#define UNKOWN_POSITION 7U
-
-#define Unknown_Status 0U
-#define Open_Status 1U
-#define Close_Status 2U
-#define FlapMoving_Status 3U
-
-#define FLAP_START 0U
-#define FLAP_MOVING 1U
-#define FLAP_STOP 7U
-// RPM = 60 / (t * 2 * (360 / step angle))
-// t*10000 == 10us 5us
-// PPS = RPM * (360 / step angle) / 60
-// PPS = RPM * (360 / step angle) / 60 >> RPM = PPS * (ANGLE / 360) * 60
-// #define STEP_TIME_1125RPM 28U // 450PPS
-#define STEP_TIME_1250RPM 25U // 500PPS(4000) = 25, 450PPS(3600) = 27~28
-#define STEP_TIME_1000RPM 41U
-
-#define REFERENCE_POSITION 30000U // 30000
-#define LIMIT_POSITION 1800U
-#define OPEN_1ST_POSITION 1300U
-#define OPEN_2ND_POSITION 900U
-#define TOLERANCE 100U
-#define ERROR_RANGE 5U
-// init action
-#define INIT_ACTION_POSITION 1450U
-
-#define ADC_UNDER_VOLTAGE_7V 1262U // AAF V1.2 260123 ADC CHECK PCB VER
-#define ADC_UNDER_VOLTAGE_8_5V 1566U
-#define ADC_UNDER_VOLTAGE_9V 1667U
-#define ADC_OVER_VOLTAGE_16V 3087U
-#define ADC_OVER_VOLTAGE_16_5V 3188U
-#define ADC_OVER_VOLTAGE_18V 3490U
-
-// #define ADC_VOLTAGE_9_5V 1769U
-// #define ADC_VOLTAGE_10V 1868U
-// #define ADC_VOLTAGE_10_5V 1969U
-// #define ADC_VOLTAGE_11V 2069U
-// #define ADC_VOLTAGE_11_5V 2171U
-// #define ADC_VOLTAGE_12V 2273U
-#define ADC_VOLTAGE_13_5V 2587U
-#define ADC_VOLTAGE_13_7V 2627U
-// #define ADC_VOLTAGE_13_8V 2641U
-// #define ADC_VOLTAGE_14V 2681U
-// #define ADC_VOLTAGE_14_4V 2761U
-// #define ADC_VOLTAGE_14_5V 2781U
-// #define ADC_VOLTAGE_14_6V 2801U
-// #define ADC_VOLTAGE_14_7V 2821U
-#define ADC_VOLTAGE_14_8V 2847U
-#define ADC_VOLTAGE_15V 2887U
-
-#define MOTOR_STALL_CHK_NORMAL_VALUE 160U
-#define MOTOR_CW_STALL_CHK_HIGH_VALUE 255U	// 180
-#define MOTOR_CCW_STALL_CHK_HIGH_VALUE 255U // 180
-
-#define MOTOR_CW_STALL_CHK_VALUE_LOW_VOLTAGE_1ST 50U  // 135  600 PPS 160
-#define MOTOR_CCW_STALL_CHK_VALUE_LOW_VOLTAGE_1ST 50U // 145	600 PPS 160
-
-#define MOTOR_CW_STALL_CHK_VALUE_LOW_VOLTAGE_2ND 50U  // 135  600 PPS 160
-#define MOTOR_CCW_STALL_CHK_VALUE_LOW_VOLTAGE_2ND 50U // 145	600 PPS 160
-
-#define MOTOR_CW_STALL_CHK_VALUE_NORMAL_VOLTAGE 50U	 // 135  600 PPS 160
-#define MOTOR_CCW_STALL_CHK_VALUE_NORMAL_VOLTAGE 50U // 145	600 PPS 160
-
-#define MOTOR_CW_STALL_CHK_VALUE_HIGH_VOLTAGE_1ST 50U  // 135  600 PPS 160
-#define MOTOR_CCW_STALL_CHK_VALUE_HIGH_VOLTAGE_1ST 50U // 145	600 PPS 160
-
-#define AAF_ERROR_ANGLE 5U // V
-#define AAF_FULL_ANGLE 90U
-#define AAF_1ST_OPEN_ANGLE 65U
-#define AAF_2ST_OPEN_ANGLE 45U
-#define STEP_POSITION_MINIMUM_RANGE 12000U // 12000//11000-18500 AAF3 // 8000-13000 AAF1,2
-// #define STEP_POSITION_MINIMUM_RANGE 130U	//12000
-#define STEP_POSITION_MAXIMUM_RANGE 15500U // Close - Open = 11628 30% margin
-
-// #define POSITION_MAXIMUM_RANGE 55000U
-// #define LIMITSTEP_MAXIMUM_RANGE 1700U
-#define POSITION_MAXIMUM_RANGE 70000U
-#define LIMITSTEP_MAXIMUM_RANGE 3000U
-#define MINUTE_3 180U // test DEFAULT 180 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#define LIN_BUS_CHK_TIME_4_SEC 4000U
-
-#define STALL_CNT_DEFAULT 30000U
-#define STALL_CNT_COMPARISON_VAL 5U // 15default
-
-#define STALL_CHK_WAIT_TIME 250U // 250
-
-#define MOTOR_WAIT_TIME 50U // 30default
-
-#define AAF_WAITING 0U
-#define AAF_OPERATE 1U
-#define TRAVEL_RANGE_COMPLETE_CHECK 2U
-#define CHECK_AAF_CONDITION 3U
-#define AAF_INITIALIZATION 4U
-#define FINISHED_OPERATE 5U
-
-#define START_INITIALIZATION 0U
-#define CHECK_TRAVELRANGE 1U
-#define TRAVEL_RANGE_ERROR 2U
-#define NORMAL_INITIALIZATION 3U
-#define WAIT_INITIALIZATION 4U
-
-#define START_INITIALIZATION_CLOSE 3U
-#define START_INITIALIZATION_OPEN 0U
-
-#define AAF_1 1U
-#define AAF_2 2U
-#define AAF_3 3U
-#define INTERNAL_TYPE 0U
-#define EXTERNAL_TYPE 1U
-
-#define DURING_INITIALIZATION 0U
-#define NORMAL_FINISHED_INITIALIZATION 1U
-#define ABNORMAL_FINISHED_INITIALIZATION 2U
-#define INVALID_STATUS_OF_INITIALIZATION 3U
-
-#define AAFx1 1U
-#define AAFx2 2U
-#define AAFx3 3U
-
-#define NO_ERROR 0U
-#define ERROR 1U
-#define AAF_CIRCUIT_OPEN 1U
-#define AAF_CIRCUIT_SHORT 1U
-#define MOTOR_FAULT 0x100U
-#define UNDER_VOLTAGE 1U
-#define OVER_VOLTAGE 1U
-#define OVER_CURRENT 0x800U
-#define HIGH_TEMPERATURE 0x200U
-
-#define NOT_OPEN_BY_EXTERNAL_FACTORS 1U
-#define NOT_CLOSE_BY_EXTERNAL_FACTORS 2U
-#define OPEN_CIRCUIT 1U
-#define SHORT_CIRCUIT_BATTERY 1U
-#define SHORT_CIRCUIT_GROUND 1U
-
-#define SENSOR_NO 0U
-#define SENSOR_X1 1U
-#define SENSOR_X2 2U
-#define SENSOR_X3 3U
-#define SENSOR_X4 4U
-
-#define MOTOR_NORMAL 0U
-#define MOTOR_STALL 1U
-
-#define RH_TYPE 0U
-#define LH_TYPE 1U
-
-#define NORMAL_MODE 0U
-
-#define LOW_VOLTAGE_1ST 1U
-#define LOW_VOLTAGE_2ND 2U
-#define NORMAL_VOLTAGE 3U
-#define HIGH_VOLTAGE_1ST 4U
-#define HIGH_VOLTAGE_2ND 5U
-
-#define INITIALIZATION 1U
-#define ANTIWAIT 2U
-
-#define Shutdown_Check 0U
-#define Normal_Shutdown 1U
+/* 2.1 Communication Buffers (LIN / SPI) */
 static uint8_t GetIDbuffer;
-static uint8_t Slave_RxData1[8];   /*reception data store array*/
-static uint8_t Slave_RxSwData1[8]; /*reception data store array*/
-static uint8_t Slave_TxData[8];
-static uint8_t error_status;
-static uint8_t ID_chk_rxdata[11];
-static uint16_t tx_16bit_spi[11];
-static uint16_t tx_16bit_spi_current_limit[16];
-static uint16_t rx_16bit_spi_id[11];
-static uint16_t rx_16bit_spi[11];
-static unsigned int motor_wait_chk;
-unsigned int time_1us_motor;
-unsigned int time_1us_motor_flag;
-unsigned int time_1us_spi;
-unsigned int time_1us_spi_flag;
-unsigned int time_1ms_init_move;
-unsigned int time_1ms_init_move_flag;
-unsigned int time_1ms_adc;
-unsigned int time_1ms_adc_flag;
-unsigned int time_1ms_external_10s_chk;
-unsigned int time_1ms_external_10s_chk_flag;
-unsigned int time_1ms_3minute;
-unsigned int time_1s_3minute;
-unsigned int time_1ms_3minute_flag;
-unsigned int time_1ms_spi;
-unsigned int time_1ms_spi_flag;
-unsigned int time_1ms_init_chk;
-unsigned int time_1ms_init_chk_flag;
-unsigned int time_1ms_stall_chk;
-unsigned int time_1ms_stall_chk_flag;
-unsigned int time_1ms_protection_mode;
-unsigned int time_1ms_protection_mode_flag;
-unsigned int time_1ms_motor_wait;
-unsigned int time_1ms_motor_wait_flag;
-unsigned int time_1ms_voltage_chk_delay;
-unsigned int time_1ms_voltage_chk_delay_flag;
-unsigned int time_1ms_diag_auto;
-unsigned int time_1ms_diag_auto_flag;
-static uint16_t bat_adc;
-unsigned char spi_send_flag;
-unsigned char spi_receive_flag;
-unsigned char spi_error_flag;
-static uint8_t w_buff[18];
-static uint32_t r_buff[5];
-unsigned int timer_1ms_lin_bus_inactive;
-static unsigned int lin_bus_inactive_flag;
-unsigned int stall_chk_cnt;
-unsigned int stall_chk_time_1ms;
-unsigned int time_1ms_antipinch;
-unsigned int time_1ms_antipinch_flag;
-unsigned int time_1ms_spi_error_chk;
-unsigned int time_1ms_spi_error_chk_flag;
-unsigned int time_1ms_adc_error_chk;
-unsigned int time_1ms_adc_error_chk_flag;
-unsigned int time_1ms_fdl_error_chk;
-unsigned int time_1ms_fdl_error_chk_flag;
-
+static uint8_t Slave_RxData1[8]; /*reception data store array*/
 static uint8_t Slave_TxData[8] = {
-	0,
+    0,
 }; /*Transmission data store array*/
-static uint8_t Slave_SwData[8] = {
-	0,
-}; /*Transmission data store array*/
-static uint8_t error_status = 0;
-
 static uint8_t ID_chk_rxdata[11] = {
-	0,
+    0,
+};
+static uint8_t w_buff[18] = {
+    0,
+};
+static uint32_t r_buff[5] = {
+    0,
 };
 
+static uint8_t Slave_SwData[8] = {
+    0,
+}; /* Transmission data store array  */
+
 static uint16_t tx_16bit_spi[11] = {
-	0x4000, // [0] (R) FAULT Status
-	0x4200, // [1] (R) DIAG Status 1
-	0x4400, // [2] (R) DIAG Status 2
-	0x0691, // [3] ?  瑜섏젣?
-	0x080F, // [4] (RW)CTRL 2
-	0x0A05, // [5] (RW)CTRL 3
-	0x0C3E, // [6] (RW)CTRL 4	3E (open load on) 0C36 0C3A
-	0x0E10, // [7] (RW)CTRL 5
-	0x1000, // [8] (RW)CTRL 6	stall threshold
-	0x5200, // [9] (R) CTRL 7	stall count
-	0x5400	// [10](R) CTRL 8
+    0x4000, // [0] (R) FAULT Status
+    0x4200, // [1] (R) DIAG Status 1
+    0x4400, // [2] (R) DIAG Status 2
+    0x0691, // [3] ?  瑜섏젣?
+    0x080F, // [4] (RW)CTRL 2
+    0x0A05, // [5] (RW)CTRL 3
+    0x0C3E, // [6] (RW)CTRL 4   3E (open load on) 0C36 0C3A
+    0x0E10, // [7] (RW)CTRL 5
+    0x1000, // [8] (RW)CTRL 6   stall threshold
+    0x5200, // [9] (R) CTRL 7   stall count
+    0x5400  // [10](R) CTRL 8
 };
 
 static uint16_t tx_16bit_spi_current_limit[16] = {
-	0x0601,
-	0x0611,
-	0x0621,
-	0x0631,
-	0x0641,
-	0x0651,
-	0x0661,
-	0x0671,
-	0x0681,
-	0x0691,
-	0x06A1,
-	0x06B1,
-	0x06C1,
-	0x06D1,
-	0x06E1,
-	0x06F1};
+    0x0601,
+    0x0611,
+    0x0621,
+    0x0631,
+    0x0641,
+    0x0651,
+    0x0661,
+    0x0671,
+    0x0681,
+    0x0691,
+    0x06A1,
+    0x06B1,
+    0x06C1,
+    0x06D1,
+    0x06E1,
+    0x06F1};
 
 static uint16_t rx_16bit_spi_id[11] = {
-	0x4000,
-	0x4200,
-	0x4400,
-	0x4600,
-	0x4800,
-	0x4A00,
-	0x4C00,
-	0x4E00,
-	0x5000,
-	0x5200,
-	0x5400};
+    0x4000,
+    0x4200,
+    0x4400,
+    0x4600,
+    0x4800,
+    0x4A00,
+    0x4C00,
+    0x4E00,
+    0x5000,
+    0x5200,
+    0x5400};
 
 static uint16_t rx_16bit_spi[11] = {
-	0,
+    0,
 };
 uint16_t fault_clear[1] = {
-	0x0CBA};
+    0x0CBA};
+
+/* 2.2 Motor Control Variables */
 static unsigned int motor_start = OFF;
 static unsigned int motor_wait_chk = 0;
+static unsigned long long step_position = 0;
+static unsigned int dir_state = 0;
+static unsigned int step_toggle_flag = 0;
+static unsigned int init_move_step = 0;
+static unsigned int motor_open_load = 0;
+static unsigned int motor_step_value = 0;
+static volatile unsigned int softstart_complete = 0;
+static unsigned int motor_stall_value = 255;
+static unsigned int motor_stall_flag = 0;
+static unsigned int motor_cw_stall_value = 0;
+static unsigned int motor_ccw_stall_value = 0;
+static unsigned int step_start_flag = 0;
+
+/* 2.3 AAF Application Variables */
+static unsigned int aaf_step = 0;
+static unsigned int aaf_action = 0;
+static unsigned int aaf_init_step = 0;
+static unsigned int aaf_action_complete_chk = 0;
+static unsigned int flap_move = FLAP_STOP;
+static unsigned int step_position_open = 0;
+static unsigned int step_position_close = 0;
+static unsigned int limit_step_position = 0;
+static unsigned int open_1st_step_position = 0;
+static unsigned int open_2nd_step_position = 0;
+static unsigned int protection_function = 0;
+static unsigned int protection_Mode_step = 0;
+static unsigned int AAF_location_type = 0;
+static unsigned int AAF_OverCurrent = 0;
+static unsigned int AAF_LINOut = 0;
+static unsigned int AAFx_Type = 0;
+static unsigned int AAFx_InitStatus = 0;
+static unsigned int AAFx_Index = 0;
+static unsigned int TotalNumOfAAF = 0;
+static unsigned int AAFx_Circuit_Open = 0;
+static unsigned int AAFx_Circuit_Short = 0;
+static unsigned int AAFx_Motor_Fault = 0;
+static unsigned int AAFx_Low_Volt = 0;
+static unsigned int AAFx_Over_Volt = 0;
+
+static unsigned int AAF1_TargetPosition = 0;
+static unsigned int AAF2_TargetPosition = 0;
+static unsigned int AAF3_TargetPosition = 0;
+static unsigned int AAF1_TargetPosition_select = 0;
+static unsigned int AAF2_TargetPosition_select = 0;
+static unsigned int AAF3_TargetPosition_select = 0;
+
+static unsigned int AAF_ProtectionMode_Rx = 0;
+static volatile unsigned int AAF_ProtectionMode_Tx = 0;
+static unsigned int AAF_Tx_Position = 0;
+static unsigned int AAF_Tx_Position_LIN = 0;
+static volatile unsigned int AAF_Maximum_Torque_Test_Mode = 0;
+static unsigned int torque_test_position = 0;
+
+static unsigned int ReqRespAAFID = 0;
+static unsigned int ReqAAF1DiagMode = 0;
+static unsigned int ReqAAF2DiagMode = 0;
+static unsigned int ReqAAF3DiagMode = 0;
+static unsigned int EngRunSta = 0;
+static unsigned int HevRdy = 0;
+static unsigned int Req_ChkSum_Rx = 0;
+static unsigned int Req_Alive_Rx = 0;
+static unsigned int AAFx_Mode = 0;
+
+static unsigned int AAFx_SNSR_SCG = 0;
+static unsigned int AAFx_SNSR_SCB = 0;
+static unsigned int AAFx_SNSR_OC = 0;
+static unsigned int AAFx_Position_Status = 0;
+static unsigned int AAFx_ErrorStatus = 0;
+static unsigned int TotalNumOfAAFSensor = 0;
+static unsigned int AAFx_SNSR1_Position = 0;
+static unsigned int AAFx_SNSR2_Position = 0;
+static unsigned int AAFx_SNSR3_Position = 0;
+static unsigned int AAFx_SNSR4_Position = 0;
+static unsigned int Req_ChkSum_Tx = 0;
+static unsigned int Req_Alive_Tx = 0;
+
+/* 2.4 Communication Flags & Status */
+static volatile uint8_t error_status;
+static unsigned int lin_aaf_command = 0;
+static unsigned int lin_rx_pass_flag = 0;
+static unsigned int lin_rx_chk_flag = 0;
+static unsigned int AAF_LIN_ChkSum_CHK = 0;
+static unsigned int AAF_LIN_ChkSum_CHK_value = 0;
+unsigned char spi_send_flag = 0;
+unsigned char spi_receive_flag = 0;
+unsigned char spi_error_flag = 0;
+static unsigned int spi_action_step = 0;
+static char ret = 0;
+unsigned int timer_1ms_lin_bus_inactive = 0;
+static unsigned int lin_bus_inactive_flag = 0;
+static unsigned int lin_sleep_step = 0;
+unsigned int timer_1ms_lin_sleep = 0;
+unsigned int timer_1ms_lin_sleep_flag = 0;
+static void LIN_Diag_Rx(void);     /* [cite: 9, 194] */
+static void LIN_Diag_Action(void); /*  */
+/* 2.5 ADC & Power Variables */
+static uint16_t bat_adc = 0;
+static unsigned int adc_chk[10] = {
+    0,
+};
+static unsigned int adc_sum = 0;
+static unsigned int adc_avr = 0;
+static unsigned int adc_chk_ok_flag = 0;
+static unsigned int adc_chk_ready = 0;
+uint16_t scan_results[3];
+
+static unsigned int voltage_status_spi = 0;
+static unsigned int voltage_status_change = 0;
+static unsigned int voltage_status_change_complete = 0;
+static unsigned int voltage_chk_delay_complete = 0;
+static unsigned int Under_Voltage_Deceted = 0U;
+static unsigned int Over_Voltage_Deceted = 0U;
+static unsigned int First_Powerchk = 0U;
+
+/* 2.6 Fault & Diagnosis */
+static unsigned int fail_safety_flag = 0;
+static unsigned int fail_safety_1_cycle_flag = 0;
+static unsigned int fail_safety_step = 0;
+unsigned int stall_chk_cnt = 0;
+unsigned int stall_chk_time_1ms = 0;
+static unsigned int stall_cnt = STALL_CNT_DEFAULT;
+static unsigned int stall_test_mode = 0;
+static unsigned int evrdy_on_flag = 0;
+static unsigned int diag_mode_auto_dir = 0;
+static unsigned int diag_mode_auto_action = 0;
+static unsigned int fdl_fail = 0;
+static volatile unsigned int wake_up_motor_range_init_chk = 0;
+static unsigned int LIMP_HOME_Count = 0;
+static unsigned int LIMP_HOME_step = 0;
+static uint8_t DTC_Status = 0;
+static unsigned int motor_fault_chk = 0U;
+static unsigned int power_chk = 0U;
+static unsigned int Diag_Mode = 0U;
+static unsigned int Diag_Mode_chk = 0U;
+unsigned int Short_chk = 0U;
+unsigned int LIN_Short_Sleep = 0U;
+static unsigned int Short_Detected = 0U;
+static unsigned int Open_Detected = 0U;
+static unsigned int Short_fault_check = 0U;
+static unsigned int Open_fault_check = 0U;
+static unsigned int motor_Short_chk_count = 0U;
+static unsigned int motor_Open_chk_count = 0U;
+
+/* 2.7 Antipinch */
+static unsigned int antipinch_step = 0;
+static unsigned int antipinch_previous_action = INITIALIZATION;
+static unsigned int antipinch_action_on = 0;
+
+/* 2.8 Flash Memory Variables (Shadow RAM) */
+static unsigned int close_memory_write = 0; // close step
+static unsigned int close_memory_read = 0;
+static unsigned int open_memory_write = 0; // open step
+static unsigned int open_memory_read = 0;
+static unsigned int now_step_memory_write = 0; // now step
+static unsigned int now_step_memory_read = 0;
+static unsigned int position_memory_write = 0; // AAFx_Position
+static unsigned int position_memory_read = 0;
+static unsigned int Initial_memory_write = 0; // evrdy flag
+static unsigned int Initial_memory_read = 0;
+static unsigned int position_Initial_combined_read = 0; // AAFx_Position+evrdy flag
+static unsigned int limit_memory_write = 0; // limit step(5%)
+static unsigned int limit_memory_read = 0;
+static unsigned int position_status_memory_write = 0; // AAFx_Position_Status
+static unsigned int position_status_memory_read = 0;
+static unsigned int AAFx_InitStatus_memory_write = 0; // AAFx_InitStatus
+static unsigned int AAFx_InitStatus_memory_read = 0;
+static unsigned int position_Initstatus_combined_read = 0; // AAFx_Position_Status+AAFx_InitStatus
+static unsigned int DTC_memory_write = 0; // DTC
+static unsigned int DTC_memory_read = 0;
+static unsigned int power_chk_memory_write = 0; // power chk
+static unsigned int power_chk_memory_read = 0;
+static unsigned int First_Powerchk_memory_write = 0U;
+static unsigned int First_Powerchk_memory_read = 0U;
+
+/* 2.9 Timers (1us / 1ms Counters) */
 unsigned int time_1us_motor = 0;
 unsigned int time_1us_motor_flag = 0;
 unsigned int time_1us_spi = 0;
@@ -478,11 +321,11 @@ unsigned int time_1ms_protection_mode_flag = 0;
 unsigned int time_1ms_motor_wait = 0;
 unsigned int time_1ms_motor_wait_flag = 0;
 unsigned int time_1ms_voltage_chk_delay = 0;
-unsigned int time_1ms_voltage_chk_delay_flag = 0;
+unsigned int time_1ms_volt_chk_dly_flag = 0;
 unsigned int time_1ms_diag_auto = 0;
 unsigned int time_1ms_diag_auto_flag = 0;
-unsigned int time_1ms_voltage_status_change_wait = 0;
-unsigned int time_1ms_voltage_status_change_wait_flag = 0;
+unsigned int time_1ms_volt_stat_chg_wait = 0;
+unsigned int time_1ms_volt_stat_chg_wait_flag = 0;
 unsigned int time_1ms_antipinch = 0;
 unsigned int time_1ms_antipinch_flag = 0;
 unsigned int time_1ms_motor_acceleration = 0;
@@ -493,295 +336,111 @@ unsigned int time_1ms_adc_error_chk = 0;
 unsigned int time_1ms_adc_error_chk_flag = 0;
 unsigned int time_1ms_fdl_error_chk = 0;
 unsigned int time_1ms_fdl_error_chk_flag = 0;
-
 unsigned int time_1ms_protection_chk = 0;
 unsigned int time_1ms_protection_chk_flag = 0;
-
-static uint16_t bat_adc = 0;
-
-static unsigned long long step_position = 0;
-static unsigned int dir_state = 0;
-static unsigned int step_toggle_flag = 0;
-static unsigned int init_move_step = 0;
-
-static unsigned int motor_open_load = 0;
-static unsigned int aaf_step = 0;
-static unsigned int aaf_action = 0;
-static unsigned int lin_aaf_command = 0;
-static unsigned int aaf_init_step = 0;
-static unsigned int lin_rx_pass_flag = 0;
-
-static unsigned int AAF_LINOut = 0;
-static unsigned int AAFx_Type = 0;
-static unsigned int AAFx_InitStatus = 0;
-static unsigned int AAFx_Index = 0;
-static unsigned int TotalNumOfAAF = 0;
-static unsigned int AAFx_Circuit_Open = 0;
-static unsigned int AAFx_Circuit_Short = 0;
-static unsigned int AAFx_Motor_Fault = 0;
-static unsigned int AAFx_Low_Volt = 0;
-static unsigned int AAFx_Over_Volt = 0;
-static unsigned int AAF_OverCurrent = 0;
-
-static unsigned int lin_rx_chk_flag = 0;
-static unsigned int AAF1_TargetPosition = 0;
-static unsigned int AAF2_TargetPosition = 0;
-static unsigned int AAF3_TargetPosition = 0;
-static unsigned int AAF_ProtectionMode_Rx = 0;
-static unsigned int AAF_ProtectionMode_Tx = 0;
-static unsigned int AAF_Tx_Position = 0;
-static unsigned int AAF_Tx_Position_LIN = 0;
-static unsigned int step_start_flag = 0;
-
-static unsigned int voltage_chk_delay_complete = 0;
-
-static unsigned int adc_chk[10] = {
-	0,
-};
-static unsigned int adc_sum = 0;
-static unsigned int adc_avr = 0;
-
-unsigned char spi_send_flag = 0;
-unsigned char spi_receive_flag = 0;
-unsigned char spi_error_flag = 0;
-
-static unsigned int spi_action_step = 0;
-
-static char ret = 0;
-
-static uint8_t w_buff[18] = {
-	0,
-};
-static uint32_t r_buff[5] = {
-	0,
-};
-
-static unsigned int aaf_action_complete_chk = 0;
-
-unsigned int timer_1ms_lin_bus_inactive = 0;
-
-static unsigned int lin_bus_inactive_flag = 0;
-
-static unsigned int motor_stall_value = 255;
-static unsigned int motor_stall_flag = 0;
-
-static unsigned int fail_safety_flag = 0;
-static unsigned int fail_safety_1_cycle_flag = 0;
-static unsigned int fail_safety_step = 0;
-
-static unsigned int step_position_open = 0;
-static unsigned int step_position_close = 0;
-
-unsigned int stall_chk_cnt = 0;
-unsigned int stall_chk_time_1ms = 0;
-
-static unsigned int limit_step_position = 0;
-static unsigned int open_1st_step_position = 0;
-static unsigned int open_2nd_step_position = 0;
-
-static unsigned int protection_function = 0;
-
-static unsigned int protection_Mode_step = 0;
-
-static unsigned int AAF_location_type = 0;
-
-static unsigned int stall_cnt = STALL_CNT_DEFAULT;
-
-static unsigned int adc_chk_ok_flag = 0;
-
-static unsigned int stall_test_mode = 0;
-
-static unsigned int Calibration_move_exception = 0;
-
-static unsigned int evrdy_on_flag = 0;
-
-static unsigned int voltage_status_spi = 0;
-static unsigned int voltage_status_change = 0;
-
-// static unsigned int current_value = 0;
-
-static unsigned int motor_cw_stall_value = 0;
-static unsigned int motor_ccw_stall_value = 0;
-
-static unsigned int diag_mode_auto_dir = 0;
-static unsigned int diag_mode_auto_action = 0;
-
-static unsigned int voltage_status_change_complete = 0;
-
-static unsigned int antipinch_step = 0;
-static unsigned int antipinch_previous_action = INITIALIZATION;
-static unsigned int antipinch_action_on = 0;
-
-static unsigned int motor_step_value = 0;
-static unsigned int softstart_complete = 0;
-
 unsigned int timer_1ms_init_fail_chk = 0;
 unsigned int timer_1ms_init_fail_chk_flag = 0;
-
-static unsigned int lin_sleep_step = 0;
-
-unsigned int timer_1ms_lin_sleep = 0;
-unsigned int timer_1ms_lin_sleep_flag = 0;
-
-static unsigned int wakeup_chk = 1; // wakeup
-
-//-----------------------------------------------------------------------------------------FLASH Initialize
-static unsigned int close_memory_write = 0; // close step
-static unsigned int close_memory_read = 0;
-
-static unsigned int open_memory_write = 0; // open step
-static unsigned int open_memory_read = 0;
-
-static unsigned int now_step_memory_write = 0; // now step
-static unsigned int now_step_memory_read = 0;
-
-static unsigned int position_memory_write = 0; // AAFx_Position
-static unsigned int position_memory_read = 0;
-static unsigned int Initial_memory_write = 0; // evrdy flag
-static unsigned int Initial_memory_read = 0;
-static unsigned int position_Initial_combined_read = 0; // AAFx_Position+evrdy flag
-
-static unsigned int limit_memory_write = 0; // limit step(5%)
-static unsigned int limit_memory_read = 0;
-
-static unsigned int position_status_memory_write = 0; // AAFx_Position_Status
-static unsigned int position_status_memory_read = 0;
-static unsigned int AAFx_InitStatus_memory_write = 0; // AAFx_InitStatus
-static unsigned int AAFx_InitStatus_memory_read = 0;
-static unsigned int position_Initstatus_combined_read = 0; // AAFx_Position_Status+AAFx_InitStatus
-
-static unsigned int DTC_memory_write = 0; // DTC
-static unsigned int DTC_memory_read = 0;
-
-static unsigned int power_chk_memory_write = 0; // power chk
-static unsigned int power_chk_memory_read = 0;
-
-//-----------------------------------------------------------------------------------------FLASH Initialize
-
-static unsigned int flap_move = FLAP_STOP;
-
-static unsigned int spi_fail = 0;
-
-static unsigned int adc_fail = 0;
-
-static unsigned int fdl_fail = 0;
-
-static unsigned int adc_chk_ready = 0;
-
-static unsigned int AAF1_TargetPosition_select = 0;
-static unsigned int AAF2_TargetPosition_select = 0;
-static unsigned int AAF3_TargetPosition_select = 0;
-
-static unsigned int AAF_LIN_ChkSum_CHK = 0;
-static unsigned int AAF_LIN_ChkSum_CHK_value = 0;
-
-static unsigned int wake_up_motor_range_init_chk = 0;
-
-static unsigned int torque_test_position = 0;
-
-static unsigned int ReqRespAAFID = 0;
-static unsigned int ReqAAF1DiagMode = 0;
-static unsigned int ReqAAF2DiagMode = 0;
-static unsigned int ReqAAF3DiagMode = 0;
-static unsigned int EngRunSta = 0;
-static unsigned int HevRdy = 0;
-static unsigned int Req_ChkSum_Rx = 0;
-static unsigned int Req_Alive_Rx = 0;
-static unsigned int AAFx_Mode = 0;
-
-static unsigned int AAFx_SNSR_SCG = 0;
-static unsigned int AAFx_SNSR_SCB = 0;
-static unsigned int AAFx_SNSR_OC = 0;
-static unsigned int AAFx_Position_Status = 0;
-static unsigned int AAFx_ErrorStatus = 0;
-static unsigned int TotalNumOfAAFSensor = 0;
-static unsigned int AAFx_SNSR1_Position = 0;
-static unsigned int AAFx_SNSR2_Position = 0;
-static unsigned int AAFx_SNSR3_Position = 0;
-static unsigned int AAFx_SNSR4_Position = 0;
-
-static unsigned int Req_ChkSum_Tx = 0;
-static unsigned int Req_Alive_Tx = 0;
-
-#define Initial_Value 0U
-
-static unsigned int step_check_ok = 0U;
-uint16_t scan_results[3];
-
-static unsigned int test = 0U;
-//-----------------------------------------development----------------------------------------
-static unsigned int LIMP_HOME_Count = 0;
-static unsigned int LIMP_HOME_step = 0;
-// static unsigned int Re_Init_check = 0;
-// static unsigned int Re_Init_check_flag = 0;
-// static unsigned int Re_Init_check_prev = 0;
-uint8_t DTC_Status = 0;
-
-static unsigned int step_check_flag = 0;
 unsigned int time_1ms_step_chk = 0;
 unsigned int time_1ms_step_chk_flag = 0;
-
+static unsigned int step_check_flag = 0;
 unsigned int time_1ms_Moving_chk = 0;
 unsigned int time_1ms_Moving_chk_flag = 0;
-
-static unsigned int AAF_Init_Flag = 0;
-static unsigned int AAF_Init_Flag_tog = 0;
-static unsigned int AAF_Flap_Fixation_Test_Mode = 0;
-static unsigned int AAF_Flap_Fixation_Test_Mode_tog = 0;
-static unsigned int AAF_Maximum_Torque_Test_Mode = 0;
-static unsigned int AAF_Maximum_Torque_Test_Mode_tog = 0;
-
-#define No_ErrorStatus 0U
-#define Open_ErrorStatus 1U
-#define Close_ErrorStatus 2U
-
-static unsigned int motor_fault_chk = 0U;
-static unsigned int power_chk = 0U;
-static unsigned int Diag_Mode = 0U;
-static unsigned int Diag_Mode_chk = 0U;
-
 unsigned int time_1ms_wdg_chk = 0U;
 unsigned int time_1ms_wdg_chk_flag = 0U;
-unsigned int Short_chk = 0U;
 unsigned int time_1ms_LIN_GndShort_flag = 0U;
 unsigned int time_1ms_LIN_GndShort = 0U;
 unsigned int time_1ms_LIN_BatShort_flag = 0U;
 unsigned int time_1ms_LIN_BatShort = 0U;
-unsigned int LIN_Short_Sleep = 0U;
-
 unsigned int time_1ms_Error_chk = 0U;
 unsigned int time_1ms_Error_chk_flag = 0U;
-
-static unsigned int First_Powerchk = 0U;
-static unsigned int First_Powerchk_memory_write = 0U;
-static unsigned int First_Powerchk_memory_read = 0U;
-
 unsigned int time_1ms_motor_Short_chk = 0U;
 unsigned int time_1ms_motor_Short_chk_flag = 0U;
-
 unsigned int time_1ms_motor_Open_chk = 0U;
 unsigned int time_1ms_motor_Open_chk_flag = 0U;
-
-static unsigned int motor_Short_chk_count = 0U;
-static unsigned int motor_Open_chk_count = 0U;
-
 unsigned int time_1ms_adc_1s_chk = 0U;
 unsigned int time_1ms_adc_1s_chk_flag = 0U;
-static unsigned int Under_Voltage_Deceted = 0U;
-static unsigned int Over_Voltage_Deceted = 0U;
-static unsigned int Short_Detected = 0U;
-static unsigned int Open_Detected = 0U;
-static unsigned int Short_fault_check = 0U;
-static unsigned int Open_fault_check = 0U;
 unsigned int time_1ms_IGN_chk = 0U;
 unsigned int time_1ms_IGN_chk_flag = 0U;
+
+//development
 static unsigned int SW_Chk = 0U;
-static unsigned int LIN_Short_Ok = 0U;
 static unsigned int Open_Min_Limit = 0U;
 static unsigned int Open_Max_Limit = 0U;
 static unsigned int Close_Min_Limit = 0U;
 static unsigned int Close_Max_Limit = 0U;
-//-----------------------------------------development----------------------------------------
+static unsigned int test = 0U;
+static uint8_t Slave_RxSwData1[8];      /*  */
+static unsigned int wakeup_chk = 1;      /*  */
+static unsigned int spi_fail = 0;        /*  */
+static unsigned int LIN_Short_Ok = 0U;   /*  */
+
+/***********************************************************************************************************************
+ * Section 3: Function Prototypes
+ * Description : Declaration of Internal and External Functions
+ ***********************************************************************************************************************/
+
+/* 3.1 Driver / Hardware Control Functions */
+static void DRV8899_Init(void);
+static void DRV8899_Wakeup(void);
+static void DRV8899_Sleep(void);
+static void DRV_On(void);
+static void DRV_Off(void);
+static void Motor_Open(void);
+static void Motor_Close(void);
+static void Motor_Action(void);
+static void Motor_SPI_Init(void);
+static void SPI_select_pin_Off(void);
+static void VDC_adc(void);
+static void Flash_memory_write(void);
+static void Flash_memory_read(void);
+static void IGN_On_Memory_read(void);
+
+/* 3.2 Communication Functions (LIN / SPI) */
+void RLIN3_slave_init(void);
+static void Lin_Transceiver_On(void);
+static void Lin_Transceiver_Off(void);
+void Clear_DataBuffer(void);
+void RLIN_Slave_Receive(uint8_t Data_length);
+void RLIN_Slave_Transmit(uint8_t *databuf, uint8_t Data_length);
+void Get_reponse_RxData(uint8_t *RxData);
+void RLIN_Slave_NoResponse(void);
+static void Lin_rx_data_chk(void); // V
+static void Lin_tx_data_chk(void); // V
+static void SPI_chk(void);
+static void Lin_bus_chk(void);
+static void Lin_sleep(void);      // V
+
+/* 3.3 Application Logic Functions */
+static void Operating_mode(void);
+static void MCU_sleep(void);       // V
+static void Stall_chk(void);
+static void CHK_external_factors(void);
+static void Fail_safety_mode(void);
+static void Protection_Mode(void);
+static void Voltage_chk_current_limit_init(void);
+static void Current_limiting_select(void);
+static void Antipinch_move(void); // V
+static void Torque_Test_Mode(void);
+static void LIMP_HOME(void);          // V
+static void Init_move(void);
+static void step_check(void);         // V
+static void Re_Init(void);            // V
+static void LIN_Short_Chk(void);
+static void Error_FaultClear(void);
+static void ERROR_chk(void);
+static void Tx_position_complete_chk(void);
+
+/* 3.4 AAF Application Functions */
+static void AAF_Init(void);
+static void AAF_communicate_chk(void);
+static void AAF_mode_chk(void);
+static void AAF_App(void);
+
+/* 3.5 Interrupt Service Routines */
+void RLIN30_interrupt(void);
+void RLIN30_transmit_interrupt(void);
+void RLIN30_receive_complete_interrupt(void);
+void RLIN30_status_interrupt(void);
 
 /* End user code. Do not edit comment generated here */
 void r_main_userinit(void);
@@ -792,7 +451,7 @@ void r_main_userinit(void);
  * Arguments    : None
  * Return Value : None
  ***********************************************************************************************************************/
-void main(void)
+int main(void)
 {
 	r_main_userinit();
 	/* Start user code for main. Do not edit comment generated here */
@@ -867,7 +526,7 @@ void main(void)
 	Motor_SPI_Init();
 
 	motor_stall_value = (unsigned int)(rx_16bit_spi[9] & 0xFFU);
-	time_1ms_voltage_chk_delay_flag = 1; // POWER ON AFTER 500ms
+	time_1ms_volt_chk_dly_flag = 1; // POWER ON AFTER 500ms
 
 	motor_cw_stall_value = MOTOR_CW_STALL_CHK_VALUE_NORMAL_VOLTAGE;
 	motor_ccw_stall_value = MOTOR_CCW_STALL_CHK_VALUE_NORMAL_VOLTAGE;
@@ -969,7 +628,7 @@ void main(void)
  * Arguments    : None
  * Return Value : None
  ***********************************************************************************************************************/
-static void r_main_userinit(void)
+void r_main_userinit(void)
 {
 	DI();
 	/* Start user code for r_main_userinit. Do not edit comment generated here */
@@ -985,7 +644,7 @@ static void r_main_userinit(void)
  * Arguments    : uint8_t x : setting data buff value
  * Return Value : None
  ***********************************************************************************************************************/
-static void Clear_DataBuffer(void)
+void Clear_DataBuffer(void)
 {
 	uint8_t i;
 	// uint32_t Databuf_adr;
@@ -1005,7 +664,7 @@ static void Clear_DataBuffer(void)
  * Arguments    : uint8_t Data_length : receive data length.
  * Return Value : None
  ***********************************************************************************************************************/
-static void RLIN_Slave_Receive(uint8_t Data_length)
+void RLIN_Slave_Receive(uint8_t Data_length)
 {
 	Clear_DataBuffer();
 	// RLN30.LDFC = 0x20;		   /*b5=1:enhanced checksum mode; b4=0:Reception*/
@@ -1028,8 +687,7 @@ static void RLIN_Slave_Receive(uint8_t Data_length)
 				 uint8_t Data_length : transmit data length.
 * Return Value : None
 ***********************************************************************************************************************/
-
-static void RLIN_Slave_Transmit(uint8_t *databuf, uint8_t Data_length)
+void RLIN_Slave_Transmit(uint8_t *databuf, uint8_t Data_length)
 {
 	uint8_t i;
 	// uint32_t  Databuf_adr;
@@ -1062,7 +720,7 @@ static void RLIN_Slave_Transmit(uint8_t *databuf, uint8_t Data_length)
  * Arguments    : uint8_t * RxData : a avriable array for store Data
  * Return Value : None
  ***********************************************************************************************************************/
-static void Get_reponse_RxData(uint8_t *RxData)
+void Get_reponse_RxData(uint8_t *RxData)
 {
 	uint8_t i, k;
 	// uint32_t Databuf_adr;
@@ -1083,7 +741,7 @@ static void Get_reponse_RxData(uint8_t *RxData)
  * Arguments    : None
  * Return Value : None
  ***********************************************************************************************************************/
-static void RLIN3_slave_init(void)
+void RLIN3_slave_init(void)
 {
 	R_PORT_SetAltFunc(Port10, 10, Alt2, Output);
 	R_PORT_SetAltFunc(Port10, 9, Alt2, Input);
@@ -1162,7 +820,7 @@ static void RLIN3_slave_init(void)
  * Arguments    : uint8_t Data_length : receive data length.
  * Return Value : None
  ***********************************************************************************************************************/
-static void RLIN_Slave_NoResponse(void)
+void RLIN_Slave_NoResponse(void)
 {
 	RLN30.LTRC = 0x04; /* setting LNRR=1, No response request*/
 }
@@ -2018,18 +1676,18 @@ static void VDC_adc(void)
 	{
 		voltage_chk_delay_complete = 1;
 		time_1ms_voltage_chk_delay = 0;
-		time_1ms_voltage_chk_delay_flag = 0;
+		time_1ms_volt_chk_dly_flag = 0;
 		Voltage_chk_current_limit_init();
 	}
 	else
 	{
 	}
 
-	if ((time_1ms_voltage_status_change_wait >= 10U) && (motor_start == OFF))
+	if ((time_1ms_volt_stat_chg_wait >= 10U) && (motor_start == OFF))
 	{
 		voltage_status_change_complete = COMPLETE;
-		time_1ms_voltage_status_change_wait = 0;
-		time_1ms_voltage_status_change_wait_flag = 0;
+		time_1ms_volt_stat_chg_wait = 0;
+		time_1ms_volt_stat_chg_wait_flag = 0;
 	}
 }
 
@@ -3706,7 +3364,7 @@ static void SPI_chk(void)
 
 		voltage_status_change_complete = WAIT;
 
-		time_1ms_voltage_status_change_wait_flag = 1;
+		time_1ms_volt_stat_chg_wait_flag = 1;
 
 		spi_action_step = 1;
 

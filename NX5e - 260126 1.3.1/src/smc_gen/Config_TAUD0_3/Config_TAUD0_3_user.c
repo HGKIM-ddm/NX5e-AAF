@@ -57,11 +57,11 @@ extern unsigned int stall_chk_time_1ms;
 extern unsigned int time_1ms_motor_wait;
 extern unsigned int time_1ms_motor_wait_flag;
 extern unsigned int time_1ms_voltage_chk_delay;
-extern unsigned int time_1ms_voltage_chk_delay_flag;
+extern unsigned int time_1ms_volt_chk_dly_flag;
 extern unsigned int time_1ms_diag_auto;
 extern unsigned int time_1ms_diag_auto_flag;
-extern unsigned int time_1ms_voltage_status_change_wait;
-extern unsigned int time_1ms_voltage_status_change_wait_flag;
+extern unsigned int time_1ms_volt_stat_chg_wait;
+extern unsigned int time_1ms_volt_stat_chg_wait_flag;
 extern unsigned int time_1ms_motor_acceleration;
 extern unsigned int time_1ms_motor_acceleration_flag;
 extern unsigned int timer_1ms_init_fail_chk;
@@ -206,7 +206,7 @@ void r_Config_TAUD0_3_interrupt(void)
 	    time_1ms_motor_wait++;
     }
 
-    if(time_1ms_voltage_chk_delay_flag == 1)
+    if(time_1ms_volt_chk_dly_flag == 1)
     {
 	    time_1ms_voltage_chk_delay++;
     }
@@ -216,9 +216,9 @@ void r_Config_TAUD0_3_interrupt(void)
 	    time_1ms_diag_auto++;
     }
 
-    if(time_1ms_voltage_status_change_wait_flag == 1)
+    if(time_1ms_volt_stat_chg_wait_flag == 1)
     {
-	    time_1ms_voltage_status_change_wait++;
+	    time_1ms_volt_stat_chg_wait++;
     }
 
     if(time_1ms_motor_acceleration_flag == 1)
