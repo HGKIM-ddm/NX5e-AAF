@@ -1198,6 +1198,9 @@ static void Motor_Close(void)
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> bdd6f71 (Init move)
 static void Motor_dir_close(void)
 {
 	if (AAF_location_type == RH_TYPE)
@@ -1216,8 +1219,11 @@ static void Motor_dir_close(void)
 	}
 }
 
+<<<<<<< HEAD
 =======
 >>>>>>> d4c07df (Motor Action)
+=======
+>>>>>>> bdd6f71 (Init move)
 /***********************************************************************************************************************
  * Function Name: Manage_motor_start_status
  * Description  : Manages flags and timers based on the motor start state (ON/OFF).
@@ -1606,6 +1612,7 @@ static void Init_move_0_to_9(void)
     Generate_step_pulse();
 }
 
+<<<<<<< HEAD
 static void Init_move(void)
 >>>>>>> d4c07df (Motor Action)
 {
@@ -1637,6 +1644,229 @@ static void Init_move(void)
     }
 }
 
+=======
+/***********************************************************************************************************************
+ * Function Name: Start_motor_move_init
+ * Description  : Start the motor drive, initialize the relevant variables and move on to the next step
+ * Called By    : Process_init_step_0_to_9
+ * Arguments    : next_step - Next Case
+ * dir       - Motor Drive Direction (OPEN / CLOSE)
+ * is_case0  - first entry (Case 0) or not (TRUE: Perform additional initialization / FALSE: not)
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Start_motor_move_init(uint8_t next_step, uint8_t dir, uint8_t is_case0)
+{
+    if (dir == OPEN) Motor_dir_open();
+    else             Motor_dir_close();
+
+    DRV8899_On();
+    motor_start = ON;
+    
+    // (Case 0, 6, 9)
+    motor_stall_flag = MOTOR_NORMAL;
+    stall_chk_time_1ms = 0;
+    motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE;
+    time_1ms_spi = 0;
+    AAF_Tx_Position = UNKOWN_POSITION;
+    AAFx_Position_Status = Unknown_Status;
+    antipinch_previous_action = INITIALIZATION;
+    time_1ms_init_chk = 0;
+    time_1ms_init_chk_flag = 1; 
+
+    // (Case 0)
+    if (is_case0 == TRUE)
+    {
+        time_1ms_external_10s_chk_flag = OFF;
+        time_1ms_external_10s_chk = 0;
+        step_position = REFERENCE_POSITION;
+    }
+
+    init_move_step = next_step;
+}
+
+
+/***********************************************************************************************************************
+ * Function Name: Check_stall_and_move
+ * Called By: Init_move (Case 4, 7, 10)
+ * next_step: next case
+ * retry_step: Steps to move in case of failure (timeout)
+ * dir: OPEN, CLOSE DIRECTION
+ ***********************************************************************************************************************/
+static void Check_stall_and_move(uint8_t next_step, uint8_t retry_step, uint8_t dir)
+{
+    if ((motor_stall_flag == MOTOR_STALL) || (time_1ms_init_chk >= 4500U))
+    {
+    
+        DRV8899_Off();
+        motor_start = OFF;
+        
+        if (dir == CLOSE) step_position_close = step_position;
+        else              step_position_open = step_position;
+
+        stall_chk_cnt = 0;
+        stall_chk_time_1ms = 0;
+        softstart_complete = OFF;
+        motor_step_value = STEP_TIME_1000RPM;
+        timer_1ms_init_fail_chk_flag = 0;
+        timer_1ms_init_fail_chk = 0;
+
+        init_move_step = next_step;
+    }
+    else
+    {
+        timer_1ms_init_fail_chk_flag = 1;
+
+        if (timer_1ms_init_fail_chk >= 5000U)
+        {
+            init_move_step = retry_step;
+
+            timer_1ms_init_fail_chk_flag = 0;
+            timer_1ms_init_fail_chk = 0;
+        }
+    }
+}
+
+/***********************************************************************************************************************
+ * Function Name: Wait_delay_move
+ * Description  : Wait 100 ms and move to the next step (Step 5, 8, 11 common)
+ * Called By    : Process_init_step_0_to_9, Process_init_step_10_to_15
+ * Arguments    : next_step - next case
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Wait_delay_move(uint8_t next_step)
+{
+    time_1ms_init_move_flag = 1;
+
+    if (time_1ms_init_move >= 100U)
+    {
+        time_1ms_init_move_flag = 0;
+        time_1ms_init_move = 0;
+        init_move_step = next_step;
+
+        time_1ms_init_chk_flag = 0; 
+        time_1ms_init_chk = 0;      
+    }
+}
+
+/***********************************************************************************************************************
+ * Function Name: Move_to_limit_position
+ * Description  : Calculate the target position based on the entire learned stroke and start moving to that position
+ * Called By    : Init_move (Case 13)
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Move_to_limit_position(void)
+{
+	if (step_position <= step_position_open + limit_step_position)
+	{
+		Motor_dir_close();						 // dir CLOSE
+		DRV8899_On();							 // drv on
+		motor_start = ON;					 // step start
+		time_1ms_external_10s_chk_flag = ON; // 10s chk timer on
+
+		motor_stall_flag = MOTOR_NORMAL; // stall reset
+		// stall_chk_cnt = 0;			 stall reset
+		stall_chk_time_1ms = 0;							  // stall reset
+		motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE; // stall reset
+		time_1ms_spi = 0;
+
+		init_move_step = 14;
+	}
+	else
+	{
+		time_1ms_external_10s_chk_flag = ON; // 10s chk timer on
+
+		init_move_step = 14;
+	}
+}
+
+/***********************************************************************************************************************
+ * Function Name: Check_limit_arrival
+ * Description  : Monitor for target position reach or abnormal stall occurrence on the move
+ * Called By    : Init_move (Case 14)
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Check_limit_arrival(void)
+{
+	if (((motor_stall_flag == MOTOR_STALL) || ((step_position_close - step_position_open) <= STEP_POSITION_MINIMUM_RANGE)) && (stall_test_mode == 0U))
+	{
+		DRV8899_Off();
+		motor_start = OFF;
+		fail_safety_1_cycle_flag = OFF;
+		softstart_complete = OFF;
+		motor_step_value = STEP_TIME_1000RPM;
+		timer_1ms_init_fail_chk_flag = 0;
+		timer_1ms_init_fail_chk = 0;
+	}
+	else if (step_position >= step_position_open + limit_step_position)
+	{
+		DRV8899_Off();
+		motor_start = OFF;
+		// step_position_open = step_position;
+		stall_chk_cnt = 0;
+		stall_chk_time_1ms = 0; // stall reset
+		time_1ms_external_10s_chk_flag = OFF;
+		time_1ms_external_10s_chk = 0;
+		softstart_complete = OFF;
+		motor_step_value = STEP_TIME_1000RPM;
+		timer_1ms_init_fail_chk_flag = 0;
+		timer_1ms_init_fail_chk = 0;
+
+		init_move_step = 15;
+	}
+	else
+	{
+		timer_1ms_init_fail_chk_flag = 1;
+
+		if (timer_1ms_init_fail_chk >= 5000U)
+		{
+			init_move_step = 0;
+
+			timer_1ms_init_fail_chk_flag = 0;
+			timer_1ms_init_fail_chk = 0;
+		}
+	}
+}
+
+/***********************************************************************************************************************
+ * Function Name: Init_move_0_to_9
+ * Description  : case 0 ~ 9
+ * Called By    : Init_move 
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Init_move_0_to_9(void)
+{
+    switch (init_move_step)
+    {
+    case 0:
+        Start_motor_move_init(4, OPEN, TRUE); // Case 0 TRUE
+        break;
+    case 4:
+        Check_stall_and_move(5, 0, OPEN);
+        break;
+    case 5:
+        Wait_delay_move(6);
+        break;
+    case 6:
+        Start_motor_move_init(7, CLOSE, FALSE);
+        break;
+    case 7:
+        Check_stall_and_move(8, 6, CLOSE);
+        break;
+    case 8:
+        Wait_delay_move(9);
+        break;
+    case 9:
+        Start_motor_move_init(10, OPEN, FALSE);
+        break;
+    default:
+        break;
+    }
+}
+
+>>>>>>> bdd6f71 (Init move)
 /***********************************************************************************************************************
  * Function Name: Init_move_10_to_15
  * Description  : case 10 ~ 15
