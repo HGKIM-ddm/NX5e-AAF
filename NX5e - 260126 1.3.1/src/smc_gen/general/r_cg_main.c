@@ -820,7 +820,7 @@ void RLIN3_slave_init(void)
  * Arguments    : uint8_t Data_length : receive data length.
  * Return Value : None
  ***********************************************************************************************************************/
-static void RLIN_Slave_NoResponse(void)
+void RLIN_Slave_NoResponse(void)
 {
 	RLN30.LTRC = 0x04; /* setting LNRR=1, No response request*/
 }
