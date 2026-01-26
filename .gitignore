@@ -1,0 +1,23 @@
+# --- 아까 문제된 파일 및 오타 파일 ---
+*.bin
+*.bin‘
+
+# --- 컴파일/빌드 결과물 (쓰레기 파일) ---
+*.hex
+*.elf
+*.map
+*.o
+*.d
+*.obj
+*.srec
+
+# --- 빌드 폴더 통째로 무시 ---
+/bin/
+/objs/
+/Debug/
+/Release/
+/Flash/
+
+# --- 윈도우/시스템 임시 파일 ---
+Thumbs.db
+Desktop.ini
