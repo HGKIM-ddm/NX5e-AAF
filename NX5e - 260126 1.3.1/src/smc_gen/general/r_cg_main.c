@@ -1197,10 +1197,6 @@ static void Motor_Close(void)
 	}
 }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> bdd6f71 (Init move)
 static void Motor_dir_close(void)
 {
 	if (AAF_location_type == RH_TYPE)
@@ -1219,11 +1215,6 @@ static void Motor_dir_close(void)
 	}
 }
 
-<<<<<<< HEAD
-=======
->>>>>>> d4c07df (Motor Action)
-=======
->>>>>>> bdd6f71 (Init move)
 /***********************************************************************************************************************
  * Function Name: Manage_motor_start_status
  * Description  : Manages flags and timers based on the motor start state (ON/OFF).
@@ -1388,7 +1379,6 @@ static void Motor_Action(void)
 {
     // 1. Manage start/stop flags
     Manage_motor_start_status();
-<<<<<<< HEAD
 
     // 2. Handle wait time and acceleration
     if (time_1ms_motor_wait >= MOTOR_WAIT_TIME)
@@ -1404,247 +1394,6 @@ static void Motor_Action(void)
     Generate_step_pulse();
 }
 
-/***********************************************************************************************************************
- * Function Name: Start_motor_move_init
- * Description  : Start the motor drive, initialize the relevant variables and move on to the next step
- * Called By    : Process_init_step_0_to_9
- * Arguments    : next_step - Next Case
- * dir       - Motor Drive Direction (OPEN / CLOSE)
- * is_case0  - first entry (Case 0) or not (TRUE: Perform additional initialization / FALSE: not)
- * Return Value : void
- ***********************************************************************************************************************/
-static void Start_motor_move_init(uint8_t next_step, uint8_t dir, uint8_t is_case0)
-{
-    if (dir == OPEN) Motor_dir_open();
-    else             Motor_dir_close();
-
-    DRV8899_On();
-    motor_start = ON;
-    
-    // (Case 0, 6, 9)
-    motor_stall_flag = MOTOR_NORMAL;
-    stall_chk_time_1ms = 0;
-    motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE;
-    time_1ms_spi = 0;
-    AAF_Tx_Position = UNKOWN_POSITION;
-    AAFx_Position_Status = Unknown_Status;
-    antipinch_previous_action = INITIALIZATION;
-    time_1ms_init_chk = 0;
-    time_1ms_init_chk_flag = 1; 
-
-    // (Case 0)
-    if (is_case0 == TRUE)
-    {
-        time_1ms_external_10s_chk_flag = OFF;
-        time_1ms_external_10s_chk = 0;
-        step_position = REFERENCE_POSITION;
-    }
-
-    init_move_step = next_step;
-}
-
-
-/***********************************************************************************************************************
- * Function Name: Check_stall_and_move
- * Called By: Init_move (Case 4, 7, 10)
- * next_step: next case
- * retry_step: Steps to move in case of failure (timeout)
- * dir: OPEN, CLOSE DIRECTION
- ***********************************************************************************************************************/
-static void Check_stall_and_move(uint8_t next_step, uint8_t retry_step, uint8_t dir)
-{
-    if ((motor_stall_flag == MOTOR_STALL) || (time_1ms_init_chk >= 4500U))
-    {
-    
-        DRV8899_Off();
-        motor_start = OFF;
-        
-        if (dir == CLOSE) step_position_close = step_position;
-        else              step_position_open = step_position;
-
-        stall_chk_cnt = 0;
-        stall_chk_time_1ms = 0;
-        softstart_complete = OFF;
-        motor_step_value = STEP_TIME_1000RPM;
-        timer_1ms_init_fail_chk_flag = 0;
-        timer_1ms_init_fail_chk = 0;
-
-        init_move_step = next_step;
-    }
-    else
-    {
-        timer_1ms_init_fail_chk_flag = 1;
-
-        if (timer_1ms_init_fail_chk >= 5000U)
-        {
-            init_move_step = retry_step;
-
-            timer_1ms_init_fail_chk_flag = 0;
-            timer_1ms_init_fail_chk = 0;
-        }
-    }
-}
-
-/***********************************************************************************************************************
- * Function Name: Wait_delay_move
- * Description  : Wait 100 ms and move to the next step (Step 5, 8, 11 common)
- * Called By    : Process_init_step_0_to_9, Process_init_step_10_to_15
- * Arguments    : next_step - next case
- * Return Value : void
- ***********************************************************************************************************************/
-static void Wait_delay_move(uint8_t next_step)
-{
-    time_1ms_init_move_flag = 1;
-
-    if (time_1ms_init_move >= 100U)
-    {
-        time_1ms_init_move_flag = 0;
-        time_1ms_init_move = 0;
-        init_move_step = next_step;
-
-        time_1ms_init_chk_flag = 0; 
-        time_1ms_init_chk = 0;      
-    }
-}
-
-/***********************************************************************************************************************
- * Function Name: Move_to_limit_position
- * Description  : Calculate the target position based on the entire learned stroke and start moving to that position
- * Called By    : Init_move (Case 13)
- * Arguments    : void
- * Return Value : void
- ***********************************************************************************************************************/
-static void Move_to_limit_position(void)
-{
-	if (step_position <= step_position_open + limit_step_position)
-	{
-		Motor_dir_close();						 // dir CLOSE
-		DRV8899_On();							 // drv on
-		motor_start = ON;					 // step start
-		time_1ms_external_10s_chk_flag = ON; // 10s chk timer on
-
-		motor_stall_flag = MOTOR_NORMAL; // stall reset
-		// stall_chk_cnt = 0;			 stall reset
-		stall_chk_time_1ms = 0;							  // stall reset
-		motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE; // stall reset
-		time_1ms_spi = 0;
-
-		init_move_step = 14;
-	}
-	else
-	{
-		time_1ms_external_10s_chk_flag = ON; // 10s chk timer on
-
-		init_move_step = 14;
-	}
-}
-
-/***********************************************************************************************************************
- * Function Name: Check_limit_arrival
- * Description  : Monitor for target position reach or abnormal stall occurrence on the move
- * Called By    : Init_move (Case 14)
- * Arguments    : void
- * Return Value : void
- ***********************************************************************************************************************/
-static void Check_limit_arrival(void)
-{
-	if (((motor_stall_flag == MOTOR_STALL) || ((step_position_close - step_position_open) <= STEP_POSITION_MINIMUM_RANGE)) && (stall_test_mode == 0U))
-	{
-		DRV8899_Off();
-		motor_start = OFF;
-		fail_safety_1_cycle_flag = OFF;
-		softstart_complete = OFF;
-		motor_step_value = STEP_TIME_1000RPM;
-		timer_1ms_init_fail_chk_flag = 0;
-		timer_1ms_init_fail_chk = 0;
-	}
-	else if (step_position >= step_position_open + limit_step_position)
-	{
-		DRV8899_Off();
-		motor_start = OFF;
-		// step_position_open = step_position;
-		stall_chk_cnt = 0;
-		stall_chk_time_1ms = 0; // stall reset
-		time_1ms_external_10s_chk_flag = OFF;
-		time_1ms_external_10s_chk = 0;
-		softstart_complete = OFF;
-		motor_step_value = STEP_TIME_1000RPM;
-		timer_1ms_init_fail_chk_flag = 0;
-		timer_1ms_init_fail_chk = 0;
-
-		init_move_step = 15;
-	}
-	else
-	{
-		timer_1ms_init_fail_chk_flag = 1;
-
-		if (timer_1ms_init_fail_chk >= 5000U)
-		{
-			init_move_step = 0;
-
-			timer_1ms_init_fail_chk_flag = 0;
-			timer_1ms_init_fail_chk = 0;
-		}
-	}
-}
-
-/***********************************************************************************************************************
- * Function Name: Init_move_0_to_9
- * Description  : case 0 ~ 9
- * Called By    : Init_move 
- * Arguments    : void
- * Return Value : void
- ***********************************************************************************************************************/
-static void Init_move_0_to_9(void)
-=======
-
-    // 2. Handle wait time and acceleration
-    if (time_1ms_motor_wait >= MOTOR_WAIT_TIME)
-    {
-        Process_active_acceleration();
-    }
-    else 
-    {
-        motor_wait_chk = OFF;
-    }
-
-    // 3. Generate step pulses
-    Generate_step_pulse();
-}
-
-<<<<<<< HEAD
-static void Init_move(void)
->>>>>>> d4c07df (Motor Action)
-{
-    switch (init_move_step)
-    {
-    case 0:
-        Start_motor_move_init(4, OPEN, TRUE); // Case 0 TRUE
-        break;
-    case 4:
-        Check_stall_and_move(5, 0, OPEN);
-        break;
-    case 5:
-        Wait_delay_move(6);
-        break;
-    case 6:
-        Start_motor_move_init(7, CLOSE, FALSE);
-        break;
-    case 7:
-        Check_stall_and_move(8, 6, CLOSE);
-        break;
-    case 8:
-        Wait_delay_move(9);
-        break;
-    case 9:
-        Start_motor_move_init(10, OPEN, FALSE);
-        break;
-    default:
-        break;
-    }
-}
-
-=======
 /***********************************************************************************************************************
  * Function Name: Start_motor_move_init
  * Description  : Start the motor drive, initialize the relevant variables and move on to the next step
@@ -1866,7 +1615,6 @@ static void Init_move_0_to_9(void)
     }
 }
 
->>>>>>> bdd6f71 (Init move)
 /***********************************************************************************************************************
  * Function Name: Init_move_10_to_15
  * Description  : case 10 ~ 15
@@ -2039,323 +1787,290 @@ static void VDC_adc(void)
 	}
 }
 
+/***********************************************************************************************************************
+ * Function Name: Check_voltage_error
+ * Description  : 전압 상태(저전압/과전압)를 체크하고 임계값 이탈 시 모터를 정지하거나 보호 모드로 진입함
+ * Arguments    : void
+ * Return Value : 1 (즉시 정지 상황), 0 (정상 또는 대기 상황)
+ ***********************************************************************************************************************/
+static uint8_t Check_voltage_error(void)
+{
+    if (adc_chk_ok_flag != 10U) return 0;
+
+    // 1. 저전압 (Under Voltage)
+    if (adc_avr <= ADC_UNDER_VOLTAGE_7V)
+    {
+        DRV_Off();
+        motor_start = OFF;
+        stall_chk_cnt = 0;
+        stall_chk_time_1ms = 0;
+        softstart_complete = OFF;
+        motor_step_value = STEP_TIME_1000RPM;
+        AAFx_InitStatus = DURING_INITIALIZATION;
+        AAF_Tx_Position = UNKOWN_POSITION;
+        AAFx_Position_Status = Unknown_Status;
+        AAFx_Low_Volt = UNDER_VOLTAGE;
+        return 1; // 원본의 return; 로직 반영
+    }
+
+    if ((AAFx_Low_Volt == UNDER_VOLTAGE) && (protection_function == ON))
+    {
+        if (adc_avr >= ADC_UNDER_VOLTAGE_9V)
+        {
+            AAFx_Low_Volt = NO_ERROR;
+            protection_function = OFF;
+            protection_Mode_step = 0;
+            Under_Voltage_Deceted = 0;
+            time_1ms_adc_1s_chk = 0;
+            time_1ms_adc_1s_chk_flag = 0;
+            Re_Init();
+        }
+    }
+    else if (adc_avr <= ADC_UNDER_VOLTAGE_8_5V)
+    {
+        if (Under_Voltage_Deceted == 0)
+        {
+            Under_Voltage_Deceted = 1;
+            time_1ms_adc_1s_chk = 0;
+            time_1ms_adc_1s_chk_flag = 1;
+        }
+        if ((Under_Voltage_Deceted == 1) && (time_1ms_adc_1s_chk >= 1000))
+        {
+            AAFx_Low_Volt = UNDER_VOLTAGE;
+            protection_function = ON;
+            DTC_Status |= 0x20;
+            time_1ms_adc_1s_chk = 1000;
+            time_1ms_adc_1s_chk_flag = 0;
+        }
+    }
+    else if (Under_Voltage_Deceted == 1)
+    {
+        Under_Voltage_Deceted = 0;
+        time_1ms_adc_1s_chk = 0;
+        time_1ms_adc_1s_chk_flag = 0;
+    }
+
+    // 2. 과전압 (Over Voltage)
+    if (adc_avr >= ADC_OVER_VOLTAGE_18V)
+    {
+        DRV_Off();
+        motor_start = OFF;
+        stall_chk_cnt = 0;
+        stall_chk_time_1ms = 0;
+        softstart_complete = OFF;
+        motor_step_value = STEP_TIME_1000RPM;
+        AAFx_InitStatus = DURING_INITIALIZATION;
+        AAF_Tx_Position = UNKOWN_POSITION;
+        AAFx_Position_Status = Unknown_Status;
+        AAFx_Over_Volt = OVER_VOLTAGE;
+        return 1; // 원본의 return; 로직 반영
+    }
+
+    if ((AAFx_Over_Volt == OVER_VOLTAGE) && (protection_function == ON))
+    {
+        if (adc_avr <= ADC_OVER_VOLTAGE_16V)
+        {
+            AAFx_Over_Volt = NO_ERROR;
+            protection_function = OFF;
+            protection_Mode_step = 0;
+            Re_Init();
+        }
+    }
+    else if (adc_avr >= ADC_OVER_VOLTAGE_16_5V)
+    {
+        if (Over_Voltage_Deceted == 0)
+        {
+            Over_Voltage_Deceted = 1;
+            time_1ms_adc_1s_chk = 0;
+            time_1ms_adc_1s_chk_flag = 1;
+        }
+        if ((Over_Voltage_Deceted == 1) && (time_1ms_adc_1s_chk >= 1000))
+        {
+            AAFx_Over_Volt = OVER_VOLTAGE;
+            protection_function = ON;
+            DTC_Status |= 0x40;
+            time_1ms_adc_1s_chk = 1000;
+            time_1ms_adc_1s_chk_flag = 0;
+        }
+    }
+    else if (Over_Voltage_Deceted == 1)
+    {
+        Over_Voltage_Deceted = 0;
+        time_1ms_adc_1s_chk = 0;
+        time_1ms_adc_1s_chk_flag = 0;
+    }
+
+    return 0;
+}
+
+/***********************************************************************************************************************
+ * Function Name: Check_short_error
+ * Description  : 모터 쇼트(과전류) 감지 시 재시도를 수행하고, 10회 실패 시 영구 고장 처리함
+ ***********************************************************************************************************************/
+static void Check_short_error(void)
+{
+    if (AAFx_Circuit_Short == AAF_CIRCUIT_SHORT) return;
+
+    if ((AAF_OverCurrent == OVER_CURRENT) && (Short_Detected == 0))
+    {
+        time_1ms_motor_Short_chk = 0;
+        time_1ms_motor_Short_chk_flag = 1;
+        Short_Detected = 1;
+        Short_fault_check = 0;
+        motor_Short_chk_count++; 
+        DRV_Off();
+        motor_start = OFF;
+        stall_chk_cnt = 0;
+        stall_chk_time_1ms = 0;
+        softstart_complete = OFF;
+        motor_step_value = STEP_TIME_1000RPM;
+        AAF_Tx_Position = UNKOWN_POSITION;
+        AAFx_Position_Status = Unknown_Status;
+    }
+    else if (Short_Detected == 1)
+    {
+        if ((time_1ms_motor_Short_chk >= 200) && (Short_fault_check == 0))
+        {
+            Error_FaultClear();
+            Short_fault_check = 1;
+        }
+        AAF_OverCurrent = (unsigned int)(rx_16bit_spi[9] & 0x800U);
+        if (time_1ms_motor_Short_chk >= 1000)
+        {
+            if ((AAF_OverCurrent == NO_ERROR) && (Short_fault_check == 1))
+            {
+                Re_Init();
+                time_1ms_motor_Short_chk = 0;
+                time_1ms_motor_Short_chk_flag = 0;
+                Short_Detected = 0;
+            }
+            else if ((AAF_OverCurrent == OVER_CURRENT) && (motor_Short_chk_count < 10))
+            {
+                Short_Detected = 0;
+            }
+        }
+        if (motor_Short_chk_count >= 10)
+        {
+            DRV_Off();
+            motor_start = OFF;
+            AAFx_Circuit_Short = AAF_CIRCUIT_SHORT;
+            DRV8899_Sleep();
+            DTC_Status |= 0x04;
+            time_1ms_motor_Short_chk_flag = 0;
+            Short_Detected = 0;
+            Flash_memory_write();
+        }
+    }
+}
+
+/***********************************************************************************************************************
+ * Function Name: Check_open_error
+ * Description  : 모터 단선(Open Load) 감지 시 재시도를 수행하고, 10회 실패 시 영구 고장으로 판단함
+ ***********************************************************************************************************************/
+static void Check_open_error(void)
+{
+    if (AAFx_Motor_Fault == 1) return;
+
+    if ((motor_open_load == MOTOR_FAULT) && (Open_Detected == 0))
+    {
+        time_1ms_motor_Open_chk = 0;
+        time_1ms_motor_Open_chk_flag = 1;
+        Open_Detected = 1;
+        Open_fault_check = 0;
+        motor_Open_chk_count++; 
+        DRV_Off();
+        motor_start = OFF;
+        stall_chk_cnt = 0;
+        stall_chk_time_1ms = 0;
+        softstart_complete = OFF;
+        motor_step_value = STEP_TIME_1000RPM;
+        AAF_Tx_Position = UNKOWN_POSITION;
+        AAFx_Position_Status = Unknown_Status;
+    }
+    else if (Open_Detected == 1)
+    {
+        if ((time_1ms_motor_Open_chk >= 200) && (Open_fault_check == 0))
+        {
+            Error_FaultClear();
+            Open_fault_check = 1;
+        }
+        motor_open_load = (unsigned int)(rx_16bit_spi[9] & 0x100U);
+        if (time_1ms_motor_Open_chk >= 1000)
+        {
+            if ((motor_open_load == NO_ERROR) && (Open_fault_check == 1))
+            {
+                Re_Init();
+                time_1ms_motor_Open_chk = 0;
+                time_1ms_motor_Open_chk_flag = 0;
+                Open_Detected = 0;
+            }
+            else if ((motor_open_load == MOTOR_FAULT) && (motor_Open_chk_count < 10))
+            {
+                Open_Detected = 0;
+            }
+        }
+    }
+    if (motor_Open_chk_count >= 10)
+    {
+        DRV_Off();
+        motor_start = OFF;
+        AAFx_Motor_Fault = 1;
+        DRV8899_Sleep();
+        DTC_Status |= 0x10;
+        time_1ms_motor_Open_chk_flag = 0;
+        Flash_memory_write();
+    }
+}
+
+/***********************************************************************************************************************
+ * Function Name: ERROR_chk
+ * Description  : 외부 보호 요청, 전압, 드라이버 결함, 쇼트/오픈 상태를 순차적으로 체크함 
+ ***********************************************************************************************************************/
 static void ERROR_chk(void)
 {
-	if (AAF_ProtectionMode_Rx == ON)
-	{
-		protection_function = ON;
-		AAF_ProtectionMode_Tx = ON;
-	}
-	else if ((AAF_ProtectionMode_Rx == OFF) && (stall_test_mode == 0U))
-	{
-		if (adc_chk_ok_flag == 10U)
-		{
-			if (adc_avr <= ADC_UNDER_VOLTAGE_7V)
-			{
-				DRV_Off();
-				motor_start = OFF;
-				stall_chk_cnt = 0;
-				stall_chk_time_1ms = 0;
-				softstart_complete = OFF;
-				motor_step_value = STEP_TIME_1000RPM;
-				AAFx_InitStatus = DURING_INITIALIZATION;
-				AAF_Tx_Position = UNKOWN_POSITION;
-				AAFx_Position_Status = Unknown_Status;
-				AAFx_Low_Volt = UNDER_VOLTAGE;
+    if (AAF_ProtectionMode_Rx == ON)
+    {
+        protection_function = ON;
+        AAF_ProtectionMode_Tx = ON;
+    }
+    else if ((AAF_ProtectionMode_Rx == OFF) && (stall_test_mode == 0U))
+    {
+        // 1. 전압 체크 (내부 return 로직 포함)
+        if (Check_voltage_error() == 1) return;
 
-				return;
-			}
-			if ((AAFx_Low_Volt == UNDER_VOLTAGE) && (protection_function == ON))
-			{
-				if (adc_avr >= ADC_UNDER_VOLTAGE_9V)
-				{
-					AAFx_Low_Volt = NO_ERROR;
-					protection_function = OFF;
-					protection_Mode_step = 0;
-					Under_Voltage_Deceted = 0;
-					time_1ms_adc_1s_chk = 0;
-					time_1ms_adc_1s_chk_flag = 0;
-					Re_Init();
-				}
-			}
-			else if (adc_avr <= ADC_UNDER_VOLTAGE_8_5V)
-			{
-				if (Under_Voltage_Deceted == 0)
-				{
-					Under_Voltage_Deceted = 1;
-					time_1ms_adc_1s_chk = 0;
-					time_1ms_adc_1s_chk_flag = 1;
-				}
-				if ((Under_Voltage_Deceted == 1) && (time_1ms_adc_1s_chk >= 1000))
-				{
-					AAFx_Low_Volt = UNDER_VOLTAGE;
-					protection_function = ON;
-					DTC_Status |= 0x20;
-					time_1ms_adc_1s_chk = 1000;
-					time_1ms_adc_1s_chk_flag = 0;
-				}
-			}
-			else
-			{
-				if (Under_Voltage_Deceted == 1)
-				{
-					Under_Voltage_Deceted = 0;
-					time_1ms_adc_1s_chk = 0;
-					time_1ms_adc_1s_chk_flag = 0;
-				}
-			}
-			if (adc_avr >= ADC_OVER_VOLTAGE_18V)
-			{
-				DRV_Off();
-				motor_start = OFF;
-				stall_chk_cnt = 0;
-				stall_chk_time_1ms = 0;
-				softstart_complete = OFF;
-				motor_step_value = STEP_TIME_1000RPM;
-				AAFx_InitStatus = DURING_INITIALIZATION;
-				AAF_Tx_Position = UNKOWN_POSITION;
-				AAFx_Position_Status = Unknown_Status;
-				AAFx_Over_Volt = OVER_VOLTAGE;
+        // 2. 모터 초기화 결함 체크
+        if (((AAFx_InitStatus == ABNORMAL_FINISHED_INITIALIZATION)) && (motor_fault_chk == 1))
+        {
+            DRV8899_Sleep();
+            AAFx_Motor_Fault = 1;
+            DTC_Status |= 0x10;
+        }
+        else
+        {
+            AAFx_Motor_Fault = NO_ERROR;
+        }
 
-				return;
-			}
+        // 3. 쇼트 체크
+        Check_short_error();
 
-			if ((AAFx_Over_Volt == OVER_VOLTAGE) && (protection_function == ON))
-			{
-				if (adc_avr <= ADC_OVER_VOLTAGE_16V)
-				{
-					AAFx_Over_Volt = NO_ERROR;
-					protection_function = OFF;
-					protection_Mode_step = 0;
-					Re_Init();
-				}
-			}
-			else
-			{
-				if (adc_avr >= ADC_OVER_VOLTAGE_16_5V)
-				{
-					if (Over_Voltage_Deceted == 0)
-					{
-						Over_Voltage_Deceted = 1;
-						time_1ms_adc_1s_chk = 0;
-						time_1ms_adc_1s_chk_flag = 1;
-					}
+        // 4. 오픈 체크 (내부 AAFx_Motor_Fault 리턴 포함)
+        Check_open_error();
 
-					if ((Over_Voltage_Deceted == 1) && (time_1ms_adc_1s_chk >= 1000))
-					{
-						AAFx_Over_Volt = OVER_VOLTAGE;
-						protection_function = ON;
-						DTC_Status |= 0x40;
-						time_1ms_adc_1s_chk = 1000;
-						time_1ms_adc_1s_chk_flag = 0;
-					}
-
-					else
-					{
-					}
-				}
-				else
-				{
-					if (Over_Voltage_Deceted == 1)
-					{
-						Over_Voltage_Deceted = 0;
-						time_1ms_adc_1s_chk = 0;
-						time_1ms_adc_1s_chk_flag = 0;
-					}
-				}
-			}
-		}
-
-		if (((AAFx_InitStatus == ABNORMAL_FINISHED_INITIALIZATION)) && (motor_fault_chk == 1))
-		{
-			DRV8899_Sleep();
-			AAFx_Motor_Fault = 1;
-			// protection_function = ON;
-			DTC_Status |= 0x10;
-			// DTC_memory_write = DTC_memory_write | 0x01;
-			// AAF_ProtectionMode_Tx = ON;	// protection mode?占쏙옙 vpc ?占쏙옙?占쏙옙
-		}
-		else
-		{
-			AAFx_Motor_Fault = NO_ERROR;
-		}
-		// =========================================================
-		// 1. (Initial Detection)
-		// =========================================================
-		if (AAFx_Circuit_Short == AAF_CIRCUIT_SHORT)
-		{
-			return;
-		}
-
-		if ((AAF_OverCurrent == OVER_CURRENT) && (Short_Detected == 0))
-		{
-			time_1ms_motor_Short_chk = 0;
-			time_1ms_motor_Short_chk_flag = 1;
-			Short_Detected = 1;
-			Short_fault_check = 0;
-			motor_Short_chk_count++;
-			DRV_Off();
-			motor_start = OFF;
-			stall_chk_cnt = 0;
-			stall_chk_time_1ms = 0;
-			softstart_complete = OFF;
-			motor_step_value = STEP_TIME_1000RPM;
-			AAF_Tx_Position = UNKOWN_POSITION;
-			AAFx_Position_Status = Unknown_Status;
-		}
-
-		// =========================================================
-		// 2. (Monitoring & Retry)
-		// =========================================================
-
-		else if (Short_Detected == 1)
-		{
-
-			if ((time_1ms_motor_Short_chk >= 200) && (Short_fault_check == 0))
-			{
-				Error_FaultClear();
-				// motor_Short_chk_count++;
-				Short_fault_check = 1;
-			}
-
-			AAF_OverCurrent = (unsigned int)(rx_16bit_spi[9] & 0x800U);
-
-			if (time_1ms_motor_Short_chk >= 1000)
-			{
-				if ((AAF_OverCurrent == NO_ERROR) && (Short_fault_check == 1))
-				{
-					Re_Init();
-					time_1ms_motor_Short_chk = 0;
-					time_1ms_motor_Short_chk_flag = 0;
-					Short_Detected = 0;
-				}
-
-				else if ((AAF_OverCurrent == OVER_CURRENT) && (motor_Short_chk_count < 10))
-				{
-					// time_1ms_motor_Short_chk = 0;
-					// Short_fault_check = 0;
-					Short_Detected = 0;
-				}
-
-				else
-				{
-					// invalid
-				}
-			}
-
-			if ((motor_Short_chk_count >= 10))
-			{
-				DRV_Off();
-				motor_start = OFF;
-				AAFx_Circuit_Short = AAF_CIRCUIT_SHORT;
-				DRV8899_Sleep();
-				DTC_Status |= 0x04;
-				// time_1ms_motor_Short_chk = 0;
-				time_1ms_motor_Short_chk_flag = 0;
-				// Short_fault_check = 0;
-				Short_Detected = 0;
-				Flash_memory_write();
-			}
-		}
-
-		else
-		{
-			// invalid
-		}
-		 //LIN_Short_Chk();
-
-		if (AAFx_Motor_Fault == 1)
-		{
-			return;
-		}
-		if ((motor_open_load == MOTOR_FAULT) && (Open_Detected == 0))
-		{
-			time_1ms_motor_Open_chk = 0;
-			time_1ms_motor_Open_chk_flag = 1;
-			Open_Detected = 1;
-			Open_fault_check = 0;
-			motor_Open_chk_count++;
-			DRV_Off();
-			motor_start = OFF;
-			stall_chk_cnt = 0;
-			stall_chk_time_1ms = 0;
-			softstart_complete = OFF;
-			motor_step_value = STEP_TIME_1000RPM;
-			AAF_Tx_Position = UNKOWN_POSITION;
-			AAFx_Position_Status = Unknown_Status;
-		}
-
-		else if (Open_Detected == 1)
-		{
-			if ((time_1ms_motor_Open_chk >= 200) && (Open_fault_check == 0))
-			{
-				Error_FaultClear();
-				Open_fault_check = 1;
-			}
-
-			motor_open_load = (unsigned int)(rx_16bit_spi[9] & 0x100U);
-
-			if (time_1ms_motor_Open_chk >= 1000)
-			{
-				if ((motor_open_load == NO_ERROR) && (Open_fault_check == 1))
-				{
-					Re_Init();
-					// motor_Open_chk_count++;
-					time_1ms_motor_Open_chk = 0;
-					time_1ms_motor_Open_chk_flag = 0;
-					Open_Detected = 0;
-				}
-
-				else if ((motor_open_load == MOTOR_FAULT) && (motor_Open_chk_count < 10))
-				{
-					// time_1ms_motor_Open_chk = 0;
-					// Open_fault_check = 0;
-					Open_Detected = 0;
-				}
-
-				else
-				{
-					// invalid
-				}
-			}
-
-			else
-			{
-				// invalid
-			}
-		}
-		if ((motor_Open_chk_count >= 10))
-		{
-			DRV_Off();
-			motor_start = OFF;
-			AAFx_Motor_Fault = 1;
-			DRV8899_Sleep();
-			DTC_Status |= 0x10;
-			// time_1ms_motor_Open_chk = 0;
-			time_1ms_motor_Open_chk_flag = 0;
-
-			// Open_fault_check = 1;
-			Flash_memory_write();
-		}
-
-		if (First_Powerchk == 1)
-		{
-			if (fdl_fail >= 10)
-			{
-				AAFx_Circuit_Open = AAF_CIRCUIT_OPEN;
-				protection_function = ON;
-			}
-			else
-			{
-				AAFx_Circuit_Open = NO_ERROR;
-			}
-		}
-
-		LIMP_HOME();
-	}
-	else
-	{
-	}
+        // 5. FDL/LIMP HOME 체크
+        if (First_Powerchk == 1)
+        {
+            if (fdl_fail >= 10)
+            {
+                AAFx_Circuit_Open = AAF_CIRCUIT_OPEN;
+                protection_function = ON;
+            }
+            else
+            {
+                AAFx_Circuit_Open = NO_ERROR;
+            }
+        }
+        LIMP_HOME();
+    }
 }
 
 static void Tx_position_complete_chk(void)
