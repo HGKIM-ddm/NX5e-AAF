@@ -2140,7 +2140,7 @@ static void Flash_memory_write(void)
 
 	time_1ms_fdl_error_chk_flag = 1;
 
-	if (ret < 0) // error
+	if (ret < (char)0) // error
 	{
 		while (1)
 		{
@@ -2156,7 +2156,7 @@ static void Flash_memory_write(void)
 
 	time_1ms_fdl_error_chk_flag = 1;
 
-	if (ret < 0) // error
+	if (ret < (char)0) // error
 	{
 		while (1)
 		{
@@ -2179,7 +2179,7 @@ static void Flash_memory_read(void)
 
 	time_1ms_fdl_error_chk_flag = 1;
 
-	if (ret < 0) // error
+	if (ret < (char)0) // error
 	{
 		while (1)
 		{
@@ -2214,6 +2214,7 @@ static void Flash_memory_read(void)
 	power_chk_memory_read = (unsigned int)(r_buff[3] >> 16) & 0xF;
 	First_Powerchk_memory_read = (unsigned int)(r_buff[4]) & 0xF;
 }
+
 void Re_Init(void)
 {
 	/*DRV_Off();							  // drv of
@@ -2251,116 +2252,50 @@ void Re_Init(void)
 	evrdy_on_flag = OFF;
 }
 
-static void Operating_mode(void)
+/***********************************************************************************************************************
+ * Function Name: lin_command_to_action
+ * Description  : LIN 명령을 받아 모터 드라이버를 깨우고 해당 동작 모드로 설정함
+ * Arguments    : action - 실행할 동작 (OPEN, CLOSE, OPEN_1ST 등)
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void lin_command_to_action(unsigned int action)
 {
-	switch (aaf_step)
+    DRV8899_Wakeup();
+    time_1ms_diag_auto = 0;
+    time_1ms_diag_auto_flag = OFF;
+    diag_mode_auto_action = OFF;
+    
+    aaf_action = action;
+    aaf_step = AAF_OPERATE;
+}
+
+/***********************************************************************************************************************
+ * Function Name: Setup_action
+ * Description  : LIN 명령(lin_aaf_command)을 해석하여 적절한 Action 모드로 진입 준비를 수행함
+ * Called By    : Process_operating_waiting
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Setup_action(void) {
+
+	if ((lin_aaf_command == OPEN) || (lin_aaf_command == CLOSE) ||
+        (lin_aaf_command == OPEN_1ST) || (lin_aaf_command == OPEN_2ND))
+    {
+        lin_command_to_action(lin_aaf_command);
+	}
+	else if ((lin_aaf_command == DIAG_MODE_OPEN) && (AAF_Tx_Position != DIAG_MODE_OPEN)) // lin init command chk
 	{
-	case AAF_WAITING:
-		if ((step_start_flag == ON) && (lin_bus_inactive_flag == OFF))
-		{
-			if (lin_aaf_command == OPEN) // lin open command chk
-			{
-				DRV8899_Wakeup();
+		lin_command_to_action(DIAG_MODE_OPEN);
+	}
+	else if ((lin_aaf_command == DIAG_MODE_CLOSE) && (AAF_Tx_Position != DIAG_MODE_CLOSE)) // lin init command chk
+	{
+		lin_command_to_action(DIAG_MODE_CLOSE);
+	}
+	else if (lin_aaf_command == DIAG_MODE_AUTO) // lin init command chk
+	{
+		DRV8899_Wakeup();
 
-				time_1ms_diag_auto = 0;
-				time_1ms_diag_auto_flag = OFF;
-				diag_mode_auto_action = OFF;
-
-				aaf_action = OPEN;
-				aaf_step = AAF_OPERATE;
-			}
-			else if (lin_aaf_command == CLOSE) // lin close command chk
-			{
-				DRV8899_Wakeup();
-
-				time_1ms_diag_auto = 0;
-				time_1ms_diag_auto_flag = OFF;
-				diag_mode_auto_action = OFF;
-
-				aaf_action = CLOSE;
-				aaf_step = AAF_OPERATE;
-			}
-			else if (lin_aaf_command == OPEN_1ST) // lin init command chk
-			{
-				DRV8899_Wakeup();
-
-				time_1ms_diag_auto = 0;
-				time_1ms_diag_auto_flag = OFF;
-				diag_mode_auto_action = OFF;
-
-				aaf_action = OPEN_1ST;
-				aaf_step = AAF_OPERATE;
-			}
-			else if (lin_aaf_command == OPEN_2ND) // lin init command chk
-			{
-				DRV8899_Wakeup();
-
-				time_1ms_diag_auto = 0;
-				time_1ms_diag_auto_flag = OFF;
-				diag_mode_auto_action = OFF;
-
-				aaf_action = OPEN_2ND;
-				aaf_step = AAF_OPERATE;
-			}
-			else if ((lin_aaf_command == DIAG_MODE_OPEN) && (AAF_Tx_Position != DIAG_MODE_OPEN)) // lin init command chk
-			{
-				DRV8899_Wakeup();
-
-				time_1ms_diag_auto = 0;
-				time_1ms_diag_auto_flag = OFF;
-				diag_mode_auto_action = OFF;
-
-				aaf_action = DIAG_MODE_OPEN;
-				aaf_step = AAF_OPERATE;
-			}
-			else if ((lin_aaf_command == DIAG_MODE_CLOSE) && (AAF_Tx_Position != DIAG_MODE_CLOSE)) // lin init command chk
-			{
-				DRV8899_Wakeup();
-
-				time_1ms_diag_auto = 0;
-				time_1ms_diag_auto_flag = OFF;
-				diag_mode_auto_action = OFF;
-
-				aaf_action = DIAG_MODE_CLOSE;
-				aaf_step = AAF_OPERATE;
-			}
-			else if (lin_aaf_command == DIAG_MODE_AUTO) // lin init command chk
-			{
-				DRV8899_Wakeup();
-
-				if (diag_mode_auto_action == ON)
-				{
-					if (diag_mode_auto_dir == OPEN)
-					{
-						diag_mode_auto_dir = CLOSE;
-					}
-					else if (diag_mode_auto_dir == CLOSE)
-					{
-						diag_mode_auto_dir = OPEN;
-					}
-					else
-					{
-					}
-				}
-				else
-				{
-					diag_mode_auto_action = ON;
-					diag_mode_auto_dir = OPEN;
-				}
-
-				time_1ms_diag_auto_flag = ON;
-				aaf_action = DIAG_MODE_AUTO;
-				aaf_step = AAF_OPERATE;
-			}
-			else
-			{
-			}
-
-			aaf_action_complete_chk = FLAP_START;
-
-			step_start_flag = OFF;
-		}
-		else if ((diag_mode_auto_action == ON) && (lin_bus_inactive_flag == OFF))
+		if (diag_mode_auto_action == ON)
 		{
 			if (diag_mode_auto_dir == OPEN)
 			{
@@ -2372,425 +2307,553 @@ static void Operating_mode(void)
 			}
 			else
 			{
+				//invalid
 			}
-
-			aaf_action = DIAG_MODE_AUTO;
-			aaf_step = AAF_OPERATE;
-
-			aaf_action_complete_chk = FLAP_START;
-			time_1ms_diag_auto_flag = ON;
-			step_start_flag = OFF;
 		}
 		else
 		{
+			diag_mode_auto_action = ON;
+			diag_mode_auto_dir = OPEN;
+		}
+
+		time_1ms_diag_auto_flag = ON;
+		aaf_action = DIAG_MODE_AUTO;
+		aaf_step = AAF_OPERATE;
+	}
+	else
+	{
+		//invalid
+	}
+
+	aaf_action_complete_chk = FLAP_START;
+
+	step_start_flag = OFF;
+
+}
+
+/***********************************************************************************************************************
+ * Function Name: Setup_auto_action
+ * Description  : 진단 자동(Auto) 모드 실행 중, 방향을 전환하여 연속 동작을 설정함
+ * Called By    : Process_operating_waiting
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Setup_auto_action(void)
+{
+    if (diag_mode_auto_dir == OPEN)
+    {
+        diag_mode_auto_dir = CLOSE;
+    }
+    else if (diag_mode_auto_dir == CLOSE)
+    {
+        diag_mode_auto_dir = OPEN;
+    }
+    else
+    {
+        // Invalid 
+    }
+
+    aaf_action = DIAG_MODE_AUTO;
+    aaf_step = AAF_OPERATE;
+
+    aaf_action_complete_chk = FLAP_START;
+    time_1ms_diag_auto_flag = ON;
+    step_start_flag = OFF;
+}
+
+/***********************************************************************************************************************
+ * Function Name: Process_operating_waiting
+ * Description  : AAF_WAITING 상태에서 LIN 명령 수신 여부 또는 자동 모드 플래그를 확인하여 동작을 시작함
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Process_operating_waiting(void)
+{
+	if ((step_start_flag == ON) && (lin_bus_inactive_flag == OFF))
+	{
+		Setup_action();
+	}
+	else if ((diag_mode_auto_action == ON) && (lin_bus_inactive_flag == OFF))
+	{
+		Setup_auto_action();
+	}
+	else
+	{
+		// invalid
+	}
+
+}   
+
+/***********************************************************************************************************************
+ * Function Name: Action_normal_operate
+ * Description  : 일반 동작(Normal Mode)을 위해 모터 방향 설정, 드라이버 On, 각종 감지 타이머를 활성화함
+ * Arguments    : direction - 모터 이동 방향 (OPEN / CLOSE)
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Action_normal_operate(unsigned int direction)
+{
+	if (direction == OPEN) Motor_dir_open();
+    else Motor_dir_close();
+
+    DRV8899_On();
+    motor_start = ON;
+    time_1ms_external_10s_chk_flag = ON; 
+    time_1ms_stall_chk_flag = ON;
+    stall_chk_time_1ms = 0;
+    motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE;
+
+    if (direction == OPEN) flap_move = OPEN;
+    else flap_move = CLOSE;
+
+    Diag_Mode = 0;
+    aaf_step = TRAVEL_RANGE_COMPLETE_CHECK;
+}
+
+/***********************************************************************************************************************
+ * Function Name: Action_diag_operate
+ * Description  : 진단 동작(Diagnostic Mode)을 위해 모터를 구동하고 진단 모드 플래그(Diag_Mode)를 설정함
+ * Arguments    : direction - 모터 이동 방향
+ * is_auto   - 자동 반복 모드 여부 (ON/OFF)
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Action_diag_operate(unsigned int direction, unsigned int is_auto)
+{
+    if (direction == OPEN) Motor_dir_open();
+    else Motor_dir_close();
+
+    DRV8899_On();
+    motor_start = ON;
+    time_1ms_stall_chk_flag = ON;
+    stall_chk_time_1ms = 0;
+    motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE;
+    Diag_Mode = 1;
+
+    if (direction == OPEN) flap_move = OPEN;
+    else flap_move = CLOSE;
+
+	// time_1ms_init_chk_flag = 1;
+    
+	if (is_auto == ON)
+    {
+        time_1ms_diag_auto_flag = 1;
+    }
+	
+    aaf_step = TRAVEL_RANGE_COMPLETE_CHECK;
+}
+
+/***********************************************************************************************************************
+ * Function Name: Process_normal_operate
+ * Description  : 현재 스텝 위치(step_position)와 목표 위치를 비교하여 모터를 구동할지, 완료 상태로 넘길지 결정함
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Process_normal_operate(void)
+{
+    if (aaf_action == OPEN)
+    {
+        if (step_position >= (step_position_open + limit_step_position))
+        {
+            Action_normal_operate(OPEN);
+        }
+        else
+        {
+            aaf_step = TRAVEL_RANGE_COMPLETE_CHECK;
+        }
+    }
+    else if (aaf_action == CLOSE)
+    {
+        if (step_position <= (step_position_close - limit_step_position))
+        {
+            Action_normal_operate(CLOSE);
+        }
+        else
+        {
+            aaf_step = TRAVEL_RANGE_COMPLETE_CHECK;
+        }
+    }
+    else if (aaf_action == OPEN_1ST)
+    {
+        if (step_position <= (step_position_open + open_1st_step_position))
+        {
+            Action_normal_operate(CLOSE);
+        }
+        else  
+        {
+            Action_normal_operate(OPEN);
+        }
+
+		Diag_Mode = 0;
+        aaf_step = TRAVEL_RANGE_COMPLETE_CHECK;
+    }
+    else if (aaf_action == OPEN_2ND)
+    {
+        if (step_position <= (step_position_open + open_2nd_step_position))
+        {
+            Action_normal_operate(CLOSE);
+        }
+        else
+        {
+            Action_normal_operate(OPEN);
+        }
+
+		Diag_Mode = 0;
+        aaf_step = TRAVEL_RANGE_COMPLETE_CHECK;
+    }
+	else
+	{
+		//invalid
+	}
+}
+
+/***********************************************************************************************************************
+ * Function Name: Process_diag_operate
+ * Description  : 진단 모드 요청에 따라 강제 열림/닫힘 또는 오토 사이클 동작을 수행함
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Process_diag_operate(void)
+{
+    if (aaf_action == DIAG_MODE_OPEN)
+    {
+        Action_diag_operate(OPEN, OFF);
+    }
+    else if (aaf_action == DIAG_MODE_CLOSE)
+    {
+        Action_diag_operate(CLOSE, OFF);
+    }
+    else if ((aaf_action == DIAG_MODE_AUTO) && (diag_mode_auto_dir == OPEN))
+    {
+        Action_diag_operate(OPEN, ON); //auto
+    }
+    else if ((aaf_action == DIAG_MODE_AUTO) && (diag_mode_auto_dir == CLOSE))
+    {
+        Action_diag_operate(CLOSE, ON); //auto
+    }
+    else
+    {
+        // invalid 
+    }
+}
+
+/***********************************************************************************************************************
+ * Function Name: Process_operating_operate
+ * Description  : AAF_OPERATE 상태에서 요청된 액션 타입(일반/진단)에 따라 적절한 처리 함수를 호출함
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Process_operating_operate(void)
+{
+    if ((aaf_action == OPEN) || (aaf_action == CLOSE) || 
+        (aaf_action == OPEN_1ST) || (aaf_action == OPEN_2ND))
+    {
+        Process_normal_operate();
+    }
+    else
+    {
+        Process_diag_operate();
+    }
+
+    aaf_action_complete_chk = FLAP_MOVING;
+}
+
+/***********************************************************************************************************************
+ * Function Name: Check_stall
+ * Description  : 동작 중 스톨(모터 걸림) 발생 시 모터를 정지하고 상태를 업데이트함
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Check_stall(void)
+{
+	// if(((motor_stall_flag == MOTOR_STALL) && (time_1ms_stall_chk >= 100)) || (time_1ms_init_chk >= 4800))
+	if ((motor_stall_flag == MOTOR_STALL) && (time_1ms_stall_chk >= 100U))
+	{
+		DRV_Off();
+		motor_start = OFF;
+		softstart_complete = OFF;
+		motor_step_value = STEP_TIME_1000RPM;
+
+		if (aaf_action == DIAG_MODE_OPEN)
+		{
+			AAF_Tx_Position = DIAG_MODE_OPEN;
+			aaf_step = FINISHED_OPERATE;
+		}
+		else if (aaf_action == DIAG_MODE_CLOSE)
+		{
+			AAF_Tx_Position = DIAG_MODE_CLOSE;
+			aaf_step = FINISHED_OPERATE;
+		}
+		else if (aaf_action == DIAG_MODE_AUTO)
+		{
+			AAF_Tx_Position = DIAG_MODE_AUTO;
+			aaf_step = FINISHED_OPERATE;
+		}
+		else
+		{
+			//invalid
+		}
+		
+		time_1ms_external_10s_chk_flag = OFF; // 10s chk timer on
+		time_1ms_external_10s_chk = 0;
+		aaf_step = CHECK_AAF_CONDITION;
+		time_1ms_init_chk_flag = 0; // test
+		time_1ms_init_chk = 0;		// test
+
+		aaf_action = FLAP_STOP;
+	}
+}
+
+/***********************************************************************************************************************
+ * Function Name: Process_operating_Range_Chk
+ * Description  : 목표 위치 도달 여부를 확인하고, 도달 시 TX 포지션을 업데이트한 후 종료 상태로 전환함
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Process_operating_Range_Chk(void)
+{
+	if ((aaf_action == OPEN) && (step_position <= (step_position_open + limit_step_position))) //
+	{
+		AAF_Tx_Position = OPEN;
+		Tx_position_complete_chk();
+		aaf_step = FINISHED_OPERATE;
+	}
+	else if ((aaf_action == CLOSE) && (step_position >= (step_position_close - limit_step_position)))
+	{
+		AAF_Tx_Position = CLOSE;
+		Tx_position_complete_chk();
+		aaf_step = FINISHED_OPERATE;
+	}
+	else if ((aaf_action == OPEN_1ST) && ((step_position >= (step_position_open + open_1st_step_position - ERROR_RANGE)) && (step_position <= (step_position_open + open_1st_step_position + ERROR_RANGE))))
+	{
+		AAF_Tx_Position = OPEN_1ST;
+		Tx_position_complete_chk();
+		aaf_step = FINISHED_OPERATE;
+	}
+	else if ((aaf_action == OPEN_2ND) && ((step_position >= (step_position_open + open_2nd_step_position - ERROR_RANGE)) && (step_position <= (step_position_open + open_2nd_step_position + ERROR_RANGE))))
+	{
+		AAF_Tx_Position = OPEN_2ND;
+		Tx_position_complete_chk();
+		aaf_step = FINISHED_OPERATE;
+	}
+	else if ((aaf_action == DIAG_MODE_OPEN) && (step_position <= (step_position_open + limit_step_position)))
+	{
+		AAF_Tx_Position = DIAG_MODE_OPEN;
+		aaf_step = FINISHED_OPERATE;
+	}
+	else if ((aaf_action == DIAG_MODE_CLOSE) && (step_position >= (step_position_close - limit_step_position)))
+	{
+		AAF_Tx_Position = DIAG_MODE_CLOSE;
+		aaf_step = FINISHED_OPERATE;
+	}
+	else if ((aaf_action == DIAG_MODE_AUTO) && (diag_mode_auto_dir == OPEN) && (step_position <= (step_position_open + limit_step_position)))
+	{
+		AAF_Tx_Position = DIAG_MODE_AUTO;
+		aaf_step = FINISHED_OPERATE;
+	}
+	else if ((aaf_action == DIAG_MODE_AUTO) && (diag_mode_auto_dir == CLOSE) && (step_position >= (step_position_close - limit_step_position)))
+	{
+		AAF_Tx_Position = DIAG_MODE_AUTO;
+		aaf_step = FINISHED_OPERATE;
+	}
+	else{
+		Check_stall();
+	}
+}
+
+/***********************************************************************************************************************
+ * Function Name: Process_operating_check_condition
+ * Description  : 스톨 발생 후 정지 상태에서 끼임(Anti-Pinch) 감지를 위한 초기화 및 플래그 설정을 수행함
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Process_operating_check_condition(void)
+{
+	if (flap_move == OPEN)
+	{
+		antipinch_previous_action = OPEN;
+		antipinch_action_on = ON;
+
+		motor_start = OFF;
+		stall_chk_cnt = 0;
+		stall_chk_time_1ms = 0; // stall reset
+
+		flap_move = FLAP_STOP;
+	}
+	else if (flap_move == CLOSE)
+	{
+		antipinch_previous_action = CLOSE;
+		antipinch_action_on = ON;
+
+		motor_start = OFF;
+		stall_chk_cnt = 0;
+		stall_chk_time_1ms = 0; // stall reset
+
+		flap_move = FLAP_STOP;
+	}
+	else
+	{
+		//invalid
+	}
+
+	time_1ms_stall_chk = 0;		 // test
+	time_1ms_stall_chk_flag = 0; // test	
+}
+
+/***********************************************************************************************************************
+ * Function Name: Process_operating_init
+ * Description  : 시스템 초기화 시퀀스(학습 모드)를 단계별로 처리함
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Process_operating_init(void)
+{
+switch (aaf_init_step)
+	{
+	case START_INITIALIZATION:
+		AAFx_InitStatus = DURING_INITIALIZATION;
+
+		if (fail_safety_flag == ON)
+		{
+			init_move_step = 0;
+		}
+
+		aaf_init_step = CHECK_TRAVELRANGE;
+
+		break;
+
+	case CHECK_TRAVELRANGE:
+		Init_move();
+
+		if ((init_move_step == 19U) && (fail_safety_flag == OFF))
+		{
+			init_move_step = 0;
+			aaf_init_step = NORMAL_INITIALIZATION;
 		}
 
 		break;
 
+	case TRAVEL_RANGE_ERROR:
+
+		break;
+
+	case NORMAL_INITIALIZATION:
+		aaf_step = FINISHED_OPERATE;
+		AAF_Tx_Position = OPEN;
+		AAFx_Position_Status = Open_Status;
+		AAFx_InitStatus = NORMAL_FINISHED_INITIALIZATION;
+
+		break;
+
+	default:
+		break;
+	}
+}
+
+/***********************************************************************************************************************
+ * Function Name: Process_operating_finish
+ * Description  : 모든 동작이 완료된 후 드라이버를 끄고 변수들을 초기화하며 대기 상태(AAF_WAITING)로 전환함
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Process_operating_finish(void)
+{
+	DRV_Off();							  // drv of
+	motor_start = OFF;					  // step stop
+	time_1ms_external_10s_chk_flag = OFF; // 10s chk timer off
+	time_1ms_external_10s_chk = 0;
+
+	if ((AAF_Tx_Position == OPEN) && (Diag_Mode == 0))
+	{
+			AAFx_Position_Status = Open_Status;
+	}
+	else if ((AAF_Tx_Position == CLOSE) && (Diag_Mode == 0))
+	{
+		AAFx_Position_Status = Close_Status;
+	}
+	else if ((AAF_Tx_Position == DIAG_MODE_OPEN) || (AAF_Tx_Position == DIAG_MODE_CLOSE) || (AAF_Tx_Position == DIAG_MODE_AUTO))
+	{
+		AAFx_Position_Status = Unknown_Status;
+	}
+	else
+	{
+		//invalid
+	}
+
+	time_1ms_stall_chk = 0;		 // test
+	time_1ms_stall_chk_flag = 0; // test
+	softstart_complete = OFF;
+	motor_step_value = STEP_TIME_1000RPM;
+	time_1ms_init_chk_flag = 0;						  // test
+	time_1ms_init_chk = 0;							  // test
+	stall_chk_cnt = 0;								  // stall reset
+	stall_chk_time_1ms = 0;							  // stall reset
+	motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE; // stall reset
+	if (aaf_action == DIAG_MODE_AUTO)
+	{
+		if (time_1ms_diag_auto >= 5000U)
+		{
+			time_1ms_diag_auto = 0;
+			time_1ms_diag_auto_flag = 0;
+
+			AAF_Tx_Position = DIAG_MODE_AUTO;
+
+			aaf_action = FLAP_STOP;
+			aaf_action_complete_chk = FLAP_STOP;
+			aaf_step = AAF_WAITING;
+		}
+	}
+	else
+	{
+		aaf_action = FLAP_STOP;
+		aaf_action_complete_chk = FLAP_STOP;
+		aaf_step = AAF_WAITING;
+	}
+}
+
+/***********************************************************************************************************************
+ * Function Name: Operating_mode
+ * Description  : AAF 시스템의 메인 상태 머신(State Machine). 현재 단계(aaf_step)에 따라 적절한 프로세스를 호출함
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Operating_mode(void)
+{
+	switch (aaf_step)
+	{
+	case AAF_WAITING:
+		
+		Process_operating_waiting();
+		
+		break;
+
 	case AAF_OPERATE:
 
-		if (aaf_action == OPEN)
-		{
-			if (step_position >= (step_position_open + limit_step_position))
-			{
-				Motor_Open();						 // dir OPEN
-				DRV_On();							 // drv on
-				motor_start = ON;					 // step start
-				time_1ms_external_10s_chk_flag = ON; // 10s chk timer on
-				time_1ms_stall_chk_flag = ON;		 // test
-
-				stall_chk_time_1ms = 0;							  // stall reset
-				motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE; // stall reset
-
-				flap_move = OPEN;
-				Diag_Mode = 0;
-				aaf_step = TRAVEL_RANGE_COMPLETE_CHECK;
-			}
-			else
-			{
-				aaf_step = TRAVEL_RANGE_COMPLETE_CHECK;
-			}
-		}
-		else if (aaf_action == CLOSE)
-		{
-			if (step_position <= (step_position_close - limit_step_position))
-			{
-				Motor_Close();						 // dir CLOSE
-				DRV_On();							 // drv on
-				motor_start = ON;					 // step start
-				time_1ms_external_10s_chk_flag = ON; // 10s chk timer on
-				time_1ms_stall_chk_flag = ON;		 // test
-
-				stall_chk_time_1ms = 0;							  // stall reset
-				motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE; // stall reset
-
-				flap_move = CLOSE;
-				Diag_Mode = 0;
-				aaf_step = TRAVEL_RANGE_COMPLETE_CHECK;
-			}
-			else
-			{
-				aaf_step = TRAVEL_RANGE_COMPLETE_CHECK;
-			}
-		}
-		else if (aaf_action == OPEN_1ST)
-		{
-			if (step_position <= (step_position_open + open_1st_step_position))
-			{
-				Motor_Close();						 // dir CLOSE
-				DRV_On();							 // drv on
-				motor_start = ON;					 // step start
-				time_1ms_external_10s_chk_flag = ON; // 10s chk timer on
-				time_1ms_stall_chk_flag = ON;		 // test
-
-				stall_chk_time_1ms = 0;							  // stall reset
-				motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE; // stall reset
-
-				flap_move = CLOSE;
-				Diag_Mode = 0;
-				aaf_step = TRAVEL_RANGE_COMPLETE_CHECK;
-			}
-			else if (step_position >= step_position_open + open_1st_step_position)
-			{
-				Motor_Open();						 // dir OPEN
-				DRV_On();							 // drv on
-				motor_start = ON;					 // step start
-				time_1ms_external_10s_chk_flag = ON; // 10s chk timer on
-				time_1ms_stall_chk_flag = ON;		 // test
-
-				stall_chk_time_1ms = 0;							  // stall reset
-				motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE; // stall reset
-
-				flap_move = OPEN;
-				Diag_Mode = 0;
-				aaf_step = TRAVEL_RANGE_COMPLETE_CHECK;
-			}
-			else
-			{
-				Diag_Mode = 0;
-				aaf_step = TRAVEL_RANGE_COMPLETE_CHECK;
-			}
-		}
-		else if (aaf_action == OPEN_2ND)
-		{
-			if (step_position <= (step_position_open + open_2nd_step_position))
-			{
-				Motor_Close();						 // dir CLOSE
-				DRV_On();							 // drv on
-				motor_start = ON;					 // step start
-				time_1ms_external_10s_chk_flag = ON; // 10s chk timer on
-				time_1ms_stall_chk_flag = ON;		 // test
-
-				stall_chk_time_1ms = 0;							  // stall reset
-				motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE; // stall reset
-
-				flap_move = CLOSE;
-				Diag_Mode = 0;
-				aaf_step = TRAVEL_RANGE_COMPLETE_CHECK;
-			}
-			else if (step_position >= (step_position_open + open_2nd_step_position))
-			{
-				Motor_Open();						 // dir OPEN
-				DRV_On();							 // drv on
-				motor_start = ON;					 // step start
-				time_1ms_external_10s_chk_flag = ON; // 10s chk timer on
-				time_1ms_stall_chk_flag = ON;		 // test
-
-				stall_chk_time_1ms = 0;							  // stall reset
-				motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE; // stall reset
-
-				flap_move = OPEN;
-				Diag_Mode = 0;
-				aaf_step = TRAVEL_RANGE_COMPLETE_CHECK;
-			}
-			else
-			{
-				Diag_Mode = 0;
-				aaf_step = TRAVEL_RANGE_COMPLETE_CHECK;
-			}
-		}
-		else if (aaf_action == DIAG_MODE_OPEN)
-		{
-
-			Motor_Open();				  // dir OPEN
-			DRV_On();					  // drv on
-			motor_start = ON;			  // step start
-			time_1ms_stall_chk_flag = ON; // test
-
-			stall_chk_time_1ms = 0;							  // stall reset
-			motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE; // stall reset
-			Diag_Mode = 1;
-			flap_move = OPEN;
-			// time_1ms_init_chk_flag = 1;
-			aaf_step = TRAVEL_RANGE_COMPLETE_CHECK;
-		}
-		else if (aaf_action == DIAG_MODE_CLOSE)
-		{
-
-			Motor_Close();				  // dir CLOSE
-			DRV_On();					  // drv on
-			motor_start = ON;			  // step start
-			time_1ms_stall_chk_flag = ON; // test
-
-			stall_chk_time_1ms = 0;							  // stall reset
-			motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE; // stall reset
-			Diag_Mode = 1;
-			flap_move = CLOSE;
-			// time_1ms_init_chk_flag = 1;
-			aaf_step = TRAVEL_RANGE_COMPLETE_CHECK;
-		}
-		else if ((aaf_action == DIAG_MODE_AUTO) && (diag_mode_auto_dir == OPEN))
-		{
-
-			Motor_Open();				  // dir OPEN
-			DRV_On();					  // drv on
-			motor_start = ON;			  // step start
-			time_1ms_stall_chk_flag = ON; // test
-
-			stall_chk_time_1ms = 0;							  // stall reset
-			motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE; // stall reset
-			Diag_Mode = 1;
-			flap_move = OPEN;
-			// time_1ms_init_chk_flag = 1;
-			time_1ms_diag_auto_flag = 1;
-
-			aaf_step = TRAVEL_RANGE_COMPLETE_CHECK;
-		}
-		else if ((aaf_action == DIAG_MODE_AUTO) && (diag_mode_auto_dir == CLOSE))
-		{
-
-			Motor_Close();				  // dir CLOSE
-			DRV_On();					  // drv on
-			motor_start = ON;			  // step start
-			time_1ms_stall_chk_flag = ON; // test
-			Diag_Mode = 1;
-			stall_chk_time_1ms = 0;							  // stall reset
-			motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE; // stall reset
-
-			flap_move = CLOSE;
-			// time_1ms_init_chk_flag = 1;
-			time_1ms_diag_auto_flag = 1;
-
-			aaf_step = TRAVEL_RANGE_COMPLETE_CHECK;
-		}
-		else
-		{
-		}
-		aaf_action_complete_chk = FLAP_MOVING;
+		Process_operating_operate();
 
 		break;
 
 	case TRAVEL_RANGE_COMPLETE_CHECK:
 
-		if ((aaf_action == OPEN) && (step_position <= (step_position_open + limit_step_position))) //
-		{
-			AAF_Tx_Position = OPEN;
-			Tx_position_complete_chk();
-			aaf_step = FINISHED_OPERATE;
-		}
-		else if ((aaf_action == CLOSE) && (step_position >= (step_position_close - limit_step_position)))
-		{
-			AAF_Tx_Position = CLOSE;
-			Tx_position_complete_chk();
-			aaf_step = FINISHED_OPERATE;
-		}
-		else if ((aaf_action == OPEN_1ST) && ((step_position >= (step_position_open + open_1st_step_position - ERROR_RANGE)) && (step_position <= (step_position_open + open_1st_step_position + ERROR_RANGE))))
-		{
-			AAF_Tx_Position = OPEN_1ST;
-			Tx_position_complete_chk();
-			aaf_step = FINISHED_OPERATE;
-		}
-		else if ((aaf_action == OPEN_2ND) && ((step_position >= (step_position_open + open_2nd_step_position - ERROR_RANGE)) && (step_position <= (step_position_open + open_2nd_step_position + ERROR_RANGE))))
-		{
-			AAF_Tx_Position = OPEN_2ND;
-			Tx_position_complete_chk();
-			aaf_step = FINISHED_OPERATE;
-		}
-		else if ((aaf_action == DIAG_MODE_OPEN) && (step_position <= (step_position_open + limit_step_position)))
-		{
-			AAF_Tx_Position = DIAG_MODE_OPEN;
-			aaf_step = FINISHED_OPERATE;
-		}
-		else if ((aaf_action == DIAG_MODE_CLOSE) && (step_position >= (step_position_close - limit_step_position)))
-		{
-			AAF_Tx_Position = DIAG_MODE_CLOSE;
-			aaf_step = FINISHED_OPERATE;
-		}
-		else if ((aaf_action == DIAG_MODE_AUTO) && (diag_mode_auto_dir == OPEN) && (step_position <= (step_position_open + limit_step_position)))
-		{
-			AAF_Tx_Position = DIAG_MODE_AUTO;
-			aaf_step = FINISHED_OPERATE;
-		}
-		else if ((aaf_action == DIAG_MODE_AUTO) && (diag_mode_auto_dir == CLOSE) && (step_position >= (step_position_close - limit_step_position)))
-		{
-			AAF_Tx_Position = DIAG_MODE_AUTO;
-			aaf_step = FINISHED_OPERATE;
-		}
-		// else if(((motor_stall_flag == MOTOR_STALL) && (time_1ms_stall_chk >= 100)) || (time_1ms_init_chk >= 4800))
-		else if ((motor_stall_flag == MOTOR_STALL) && (time_1ms_stall_chk >= 100U))
-		{
-			DRV_Off();
-			motor_start = OFF;
-			softstart_complete = OFF;
-			motor_step_value = STEP_TIME_1000RPM;
-			if (aaf_action == DIAG_MODE_OPEN)
-			{
-				AAF_Tx_Position = DIAG_MODE_OPEN;
-				aaf_step = FINISHED_OPERATE;
-			}
-			else if (aaf_action == DIAG_MODE_CLOSE)
-			{
-				AAF_Tx_Position = DIAG_MODE_CLOSE;
-				aaf_step = FINISHED_OPERATE;
-			}
-			else if (aaf_action == DIAG_MODE_AUTO)
-			{
-				AAF_Tx_Position = DIAG_MODE_AUTO;
-				aaf_step = FINISHED_OPERATE;
-			}
-			else
-			{
-			}
-			time_1ms_external_10s_chk_flag = OFF; // 10s chk timer on
-			time_1ms_external_10s_chk = 0;
-			aaf_step = CHECK_AAF_CONDITION;
-			time_1ms_init_chk_flag = 0; // test
-			time_1ms_init_chk = 0;		// test
-
-			aaf_action = FLAP_STOP;
-		}
-		else
-		{
-		}
+	    Process_operating_Range_Chk();
+		
 		break;
 
 	case CHECK_AAF_CONDITION:
-		if (flap_move == OPEN)
-		{
-			antipinch_previous_action = OPEN;
-			antipinch_action_on = ON;
 
-			motor_start = OFF;
-			stall_chk_cnt = 0;
-			stall_chk_time_1ms = 0; // stall reset
+		Process_operating_check_condition();
 
-			flap_move = FLAP_STOP;
-		}
-		else if (flap_move == CLOSE)
-		{
-			antipinch_previous_action = CLOSE;
-			antipinch_action_on = ON;
-
-			motor_start = OFF;
-			stall_chk_cnt = 0;
-			stall_chk_time_1ms = 0; // stall reset
-
-			flap_move = FLAP_STOP;
-		}
-
-		time_1ms_stall_chk = 0;		 // test
-		time_1ms_stall_chk_flag = 0; // test
 		break;
 
 	case AAF_INITIALIZATION:
 
 		// init action
 
-		switch (aaf_init_step)
-		{
-		case START_INITIALIZATION:
-			AAFx_InitStatus = DURING_INITIALIZATION;
-
-			if (fail_safety_flag == ON)
-			{
-				init_move_step = 0;
-			}
-
-			aaf_init_step = CHECK_TRAVELRANGE;
-
-			break;
-
-		case CHECK_TRAVELRANGE:
-			Init_move();
-
-			if ((init_move_step == 19U) && (fail_safety_flag == OFF))
-			{
-				init_move_step = 0;
-				aaf_init_step = NORMAL_INITIALIZATION;
-			}
-
-			break;
-
-		case TRAVEL_RANGE_ERROR:
-
-			break;
-
-		case NORMAL_INITIALIZATION:
-			aaf_step = FINISHED_OPERATE;
-			AAF_Tx_Position = OPEN;
-			AAFx_Position_Status = Open_Status;
-			AAFx_InitStatus = NORMAL_FINISHED_INITIALIZATION;
-
-			break;
-
-		default:
-			break;
-		}
+		Process_operating_init();
 
 		break;
 
 	case FINISHED_OPERATE:
 
-		DRV_Off();							  // drv of
-		motor_start = OFF;					  // step stop
-		time_1ms_external_10s_chk_flag = OFF; // 10s chk timer off
-		time_1ms_external_10s_chk = 0;
-
-		if ((AAF_Tx_Position == OPEN) && (Diag_Mode == 0))
-		{
-			AAFx_Position_Status = Open_Status;
-		}
-		else if ((AAF_Tx_Position == CLOSE) && (Diag_Mode == 0))
-		{
-			AAFx_Position_Status = Close_Status;
-		}
-		else if ((AAF_Tx_Position == DIAG_MODE_OPEN) || (AAF_Tx_Position == DIAG_MODE_CLOSE) || (AAF_Tx_Position == DIAG_MODE_AUTO))
-		{
-			AAFx_Position_Status = Unknown_Status;
-		}
-		else
-		{
-		}
-
-		time_1ms_stall_chk = 0;		 // test
-		time_1ms_stall_chk_flag = 0; // test
-		softstart_complete = OFF;
-		motor_step_value = STEP_TIME_1000RPM;
-		time_1ms_init_chk_flag = 0;						  // test
-		time_1ms_init_chk = 0;							  // test
-		stall_chk_cnt = 0;								  // stall reset
-		stall_chk_time_1ms = 0;							  // stall reset
-		motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE; // stall reset
-		if (aaf_action == DIAG_MODE_AUTO)
-		{
-			if (time_1ms_diag_auto >= 5000U)
-			{
-				time_1ms_diag_auto = 0;
-				time_1ms_diag_auto_flag = 0;
-
-				AAF_Tx_Position = DIAG_MODE_AUTO;
-
-				aaf_action = FLAP_STOP;
-				aaf_action_complete_chk = FLAP_STOP;
-				aaf_step = AAF_WAITING;
-			}
-		}
-		else
-		{
-			aaf_action = FLAP_STOP;
-			aaf_action_complete_chk = FLAP_STOP;
-			aaf_step = AAF_WAITING;
-		}
+		Process_operating_finish();
 
 		break;
 
