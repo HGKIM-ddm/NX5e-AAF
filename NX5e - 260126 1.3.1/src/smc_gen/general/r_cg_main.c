@@ -385,6 +385,10 @@ static void DRV8899_Wakeup(void);
 static void DRV8899_Sleep(void);
 static void DRV_On(void);
 static void DRV_Off(void);
+static void DRV8899_On(void);
+static void DRV8899_Off(void);
+static void Motor_dir_open(void);
+static void Motor_dir_close(void);
 static void Motor_Open(void);
 static void Motor_Close(void);
 static void Motor_Action(void);
@@ -3843,364 +3847,388 @@ static void CHK_external_factors(void)
 	}
 }
 
+/***********************************************************************************************************************
+ * Function Name: Set_AAF_ID
+ * Description  : AAF 모듈 인덱스(1~3)에 따라 통신 ID 데이터(ID_chk_rxdata)를 설정함.
+ * (원본 Case 0의 ID 설정 로직 분리)
+ * Called By    : Fail_safety_init
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Set_AAF_ID(void)
+{
+    if (AAFx_Index == AAF_1)
+    {
+        ID_chk_rxdata[4] = 0x03U;
+    }
+    else if (AAFx_Index == AAF_2)
+    {
+        ID_chk_rxdata[4] = 0x18U;
+    }
+    else if (AAFx_Index == AAF_3)
+    {
+        ID_chk_rxdata[5] = 0x03U;
+    }
+    else
+    {
+        // Invalid Index
+    }
+}
+
+/***********************************************************************************************************************
+ * Function Name: Fail_safety_init
+ * Description  : Fail-Safety 각 사이클(1차, 2차, 최종) 시작 시 하드웨어 및 변수를 초기화함.
+ * Called By    : Run_fail_safety_cycle_1 (Step 0), Run_fail_safety_cycle_2 (Step 6), Run_fail_safety_final (Step 12)
+ * Arguments    : next_step - 초기화 후 이동할 다음 Fail-Safety Step
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Fail_safety_init(unsigned int next_step)
+{
+    // 1. 공통 초기화
+    DRV_Off();                                    // 모터 드라이버 Off
+    motor_start = OFF;                            // 스텝 생성 중지
+    time_1ms_external_10s_chk_flag = OFF;         
+    time_1ms_external_10s_chk = 0;
+    aaf_action = FLAP_STOP;
+    aaf_action_complete_chk = FLAP_STOP;
+
+    time_1ms_stall_chk = 0;
+    time_1ms_stall_chk_flag = 0;
+
+    stall_chk_cnt = 0;
+    stall_chk_time_1ms = 0;
+    motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE;
+
+    aaf_step = AAF_INITIALIZATION;                // 메인 상태를 초기화 모드로 변경
+    aaf_init_step = START_INITIALIZATION;
+    AAF_Tx_Position = UNKOWN_POSITION;
+    AAFx_Position_Status = Unknown_Status;
+    lin_aaf_command = OPEN;
+    softstart_complete = OFF;
+    motor_step_value = STEP_TIME_1000RPM;
+
+    init_move_step = START_INITIALIZATION_OPEN;
+
+    // 2. [Case 0 전용] 1차 사이클 시작 시 ID 데이터 설정
+    if (next_step == 1U)
+    {
+        Set_AAF_ID();
+    }
+
+    // 3. [Case 12 전용] Final 사이클 시작 시 Ready 플래그 해제
+    if (next_step == 13U)
+    {
+        evrdy_on_flag = OFF;
+    }
+
+    // 4. 다음 단계 설정 및 사이클 플래그 On
+    fail_safety_step = next_step;
+    fail_safety_1_cycle_flag = ON;
+}
+
+/***********************************************************************************************************************
+ * Function Name: Fail_safety_check_init_end
+ * Description  : 초기화 이동(Init Move) 시퀀스가 완료되었는지 확인하고 정상 상태로 복귀함.
+ * Called By    : Case 1, 7, 13
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Fail_safety_check_init_end(void)
+{
+    if (init_move_step == 19U) // Init_move 함수 내 완료 조건
+    {
+        init_move_step = 0;
+        aaf_init_step = NORMAL_INITIALIZATION;
+        fail_safety_step = 0;
+        fail_safety_flag = OFF;
+        fail_safety_1_cycle_flag = OFF;
+        AAFx_ErrorStatus = No_ErrorStatus;
+    }
+}
+
+/***********************************************************************************************************************
+ * Function Name: Command_to_action_next_step
+ * Description  : LIN 명령(OPEN/CLOSE)을 수신하여 실제 동작(Action) 변수를 설정함.
+ * Called By    : Case 2, 8
+ * Arguments    : next_step - 다음 단계
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Command_to_action_next_step(unsigned int next_step)
+{
+    if ((lin_aaf_command == OPEN) || (lin_aaf_command == CLOSE))
+    {
+        DRV8899_Wakeup();
+
+        if (lin_aaf_command == OPEN)
+        {
+            aaf_action = OPEN;
+        }
+        else
+        {
+            aaf_action = CLOSE;
+        }
+        
+        motor_stall_flag = MOTOR_NORMAL;
+        stall_chk_time_1ms = 0;
+        motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE;
+        fail_safety_step = next_step;
+    }
+    else
+    {
+        // invalid
+    }
+}
+
+/***********************************************************************************************************************
+ * Function Name: Action_start_next_step
+ * Description  : 설정된 Action에 따라 모터를 물리적으로 구동 시작함.
+ * Called By    : Case 3, 9
+ * Arguments    : next_step - 다음 단계
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Action_start_next_step(unsigned int next_step)
+{
+   if ((aaf_action == OPEN) || (aaf_action == CLOSE))
+    {
+        if (aaf_action == OPEN)
+        {
+            Motor_dir_open(); 
+        }
+        else
+        {
+            Motor_dir_close();
+        }
+
+        DRV8899_On();           
+        motor_start = ON;
+        time_1ms_init_chk_flag = 1;
+        fail_safety_step = next_step;       
+    }
+    else
+    {
+        // invalid
+    }
+}
+
+/***********************************************************************************************************************
+ * Function Name: Check_stall_stop_next_step
+ * Description  : 동작 중 스톨(Stall) 또는 타임아웃 발생 시 모터를 정지하고 다음 단계로 이동함.
+ * (Case 4, 10에서는 Tx Position을 업데이트하고, Case 15에서는 업데이트하지 않음)
+ * Called By    : Case 4, 10, 15
+ * Arguments    : next_step - 다음 단계
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Check_stall_stop_next_step(unsigned int next_step)
+{
+    if ((motor_stall_flag == MOTOR_STALL) || (time_1ms_init_chk >= 4500U))
+    {
+        DRV_Off();
+        motor_start = OFF;
+        stall_chk_cnt = 0;
+        stall_chk_time_1ms = 0;
+        
+        fail_safety_step = next_step;
+        
+        aaf_action = FLAP_STOP;
+        time_1ms_init_chk_flag = 0;
+        time_1ms_init_chk = 0;
+        softstart_complete = OFF;
+        motor_step_value = STEP_TIME_1000RPM;
+
+        // [중요 수정] 원본 로직 복구: Step 16(Final Fail)으로 가는 경우가 아닐 때만 위치 업데이트
+        if (next_step != 16U)
+        {
+            if (aaf_action == OPEN)
+            {
+                AAF_Tx_Position = OPEN;
+            }
+            else if (aaf_action == CLOSE)
+            {
+                AAF_Tx_Position = CLOSE;
+            }
+        }
+    }
+}
+
+/***********************************************************************************************************************
+ * Function Name: Execute_final_recovery_action
+ * Description  : 마지막 복구 시도(Case 14)를 위해 강제 OPEN 동작을 수행함.
+ * Called By    : Run_fail_safety_final
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Execute_final_recovery_action(void)
+{
+    DRV8899_Wakeup();
+
+    aaf_action = OPEN;
+    motor_stall_flag = MOTOR_NORMAL;
+    stall_chk_cnt = 0;
+    stall_chk_time_1ms = 0;
+    motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE;
+    
+    Motor_dir_open(); 
+    DRV8899_On();     
+    motor_start = ON;
+    time_1ms_init_chk_flag = 1;
+    
+    fail_safety_step = 15;
+}
+
+/* =========================================================================================
+ * Fail Safety Cycle Execution Functions
+ * ========================================================================================= */
+
+/***********************************************************************************************************************
+ * Function Name: Run_fail_safety_cycle_1
+ * Description  : Fail-Safety 1차 사이클 (Step 0 ~ 5) 실행. 
+ * 초기화 -> 명령 확인 -> 구동 -> 스톨 감지 -> 3분 대기
+ * Called By    : Fail_safety_mode
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Run_fail_safety_cycle_1(void)
+{
+    switch (fail_safety_step)
+    {
+    case 0:
+        Fail_safety_init(1); 
+        break;
+    case 1:
+        Fail_safety_check_init_end();
+        break;
+    case 2:
+        Command_to_action_next_step(3);
+        break;
+    case 3:
+        Action_start_next_step(4);
+        break;
+    case 4:
+        Check_stall_stop_next_step(5);
+        break;
+    case 5:
+        time_1ms_3minute_flag = 1;
+        antipinch_step = 0;
+
+        if (time_1s_3minute >= MINUTE_3)
+        {
+            time_1ms_3minute_flag = 0;
+            time_1s_3minute = 0;
+            time_1ms_3minute = 0;
+            fail_safety_step = 6;
+        }
+        break;
+    default:
+        break;
+    }
+}
+
+/***********************************************************************************************************************
+ * Function Name: Run_fail_safety_cycle_2
+ * Description  : Fail-Safety 2차 사이클 (Step 6 ~ 11) 실행.
+ * 1차 사이클과 동일한 과정을 한 번 더 반복함.
+ * Called By    : Fail_safety_mode
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Run_fail_safety_cycle_2(void)
+{
+    switch (fail_safety_step)
+    {
+    case 6:
+        Fail_safety_init(7);
+        break;
+    case 7:
+        Fail_safety_check_init_end();
+        break;
+    case 8:
+        Command_to_action_next_step(9);
+        break;
+    case 9:
+        Action_start_next_step(10);
+        break;
+    case 10:
+        Check_stall_stop_next_step(11);
+        break;
+    case 11:
+        time_1ms_3minute_flag = 1;
+        antipinch_step = 0;
+
+        if (time_1s_3minute >= MINUTE_3)
+        {
+            time_1ms_3minute_flag = 0;
+            time_1s_3minute = 0;
+            time_1ms_3minute = 0;
+            fail_safety_step = 12;
+        }
+        break;
+    default:
+        break;
+    }
+}
+
+/***********************************************************************************************************************
+ * Function Name: Run_fail_safety_final
+ * Description  : Fail-Safety 최종 사이클 (Step 12 ~ 16) 실행.
+ * 초기화 -> 강제 OPEN 시도 -> 실패 시 최종 에러 확정
+ * Called By    : Fail_safety_mode
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Run_fail_safety_final(void)
+{
+    switch (fail_safety_step)
+    {
+    case 12:
+        Fail_safety_init(13);
+        break;
+    case 13:
+        Fail_safety_check_init_end();
+        break;
+    case 14:
+        Execute_final_recovery_action();
+        break;
+    case 15:
+        Check_stall_stop_next_step(16);
+        break;
+    case 16:
+        AAF_Tx_Position = UNKOWN_POSITION;
+        AAFx_Position_Status = Unknown_Status;
+        AAFx_InitStatus = ABNORMAL_FINISHED_INITIALIZATION;
+        motor_fault_chk = 1;
+        break;
+    default:
+        break;
+    }
+}
+
+/* =========================================================================================
+ * Main Fail Safety Mode Dispatcher
+ * ========================================================================================= */
+
+/***********************************************************************************************************************
+ * Function Name: Fail_safety_mode
+ * Description  : Fail-Safety 모드의 진입점. 현재 단계(step)에 따라 1차/2차/최종 사이클 함수를 호출함.
+ * Called By    : Safety_protect_chk
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
 static void Fail_safety_mode(void)
 {
-	if (fail_safety_flag == ON)
-	{
-		switch (fail_safety_step)
-		{
-		case 0:									  // 1st cycle start
-			DRV_Off();							  // drv of
-			motor_start = OFF;					  // step stop
-			time_1ms_external_10s_chk_flag = OFF; // 10s chk timer off
-			time_1ms_external_10s_chk = 0;
-			aaf_action = FLAP_STOP;
-			aaf_action_complete_chk = FLAP_STOP;
-
-			time_1ms_stall_chk = 0;		 // test
-			time_1ms_stall_chk_flag = 0; // test
-
-			stall_chk_cnt = 0;		// stall reset
-			stall_chk_time_1ms = 0; // stall reset
-
-			motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE; // stall reset
-
-			aaf_step = AAF_INITIALIZATION;		  // MCU is reset, AAF is initialized.
-			aaf_init_step = START_INITIALIZATION; // MCU is reset, AAF is initialized.
-			AAF_Tx_Position = UNKOWN_POSITION;
-			AAFx_Position_Status = Unknown_Status;
-			lin_aaf_command = OPEN;
-			softstart_complete = OFF;
-			motor_step_value = STEP_TIME_1000RPM;
-
-			if (AAFx_Index == AAF_1)
-			{
-				ID_chk_rxdata[4] = 0x03;
-			}
-			else if (AAFx_Index == AAF_2)
-			{
-				ID_chk_rxdata[4] = 0x18;
-			}
-			else if (AAFx_Index == AAF_3)
-			{
-				ID_chk_rxdata[5] = 0x03;
-			}
-			else
-			{
-			}
-
-			init_move_step = START_INITIALIZATION_OPEN; // MCU is reset, AAF is initialized.
-
-			fail_safety_step = 1;
-			fail_safety_1_cycle_flag = ON;
-			break;
-
-		case 1:
-			if (init_move_step == 19U)
-			{
-				init_move_step = 0;
-				aaf_init_step = NORMAL_INITIALIZATION;
-				fail_safety_step = 0;
-				fail_safety_flag = OFF;
-				fail_safety_1_cycle_flag = OFF;
-				AAFx_ErrorStatus = No_ErrorStatus;
-			}
-			break;
-
-		case 2:
-			if (lin_aaf_command == OPEN) // lin open command chk
-			{
-				DRV8899_Wakeup();
-				aaf_action = OPEN;
-				motor_stall_flag = MOTOR_NORMAL;				  // stall reset
-				stall_chk_time_1ms = 0;							  // stall reset
-				motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE; // stall reset
-				fail_safety_step = 3;
-			}
-			else if (lin_aaf_command == CLOSE) // lin close command chk
-			{
-				DRV8899_Wakeup();
-				aaf_action = CLOSE;
-				motor_stall_flag = MOTOR_NORMAL;				  // stall reset
-				stall_chk_time_1ms = 0;							  // stall reset
-				motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE; // stall reset
-				fail_safety_step = 3;
-			}
-			else
-			{
-			}
-			break;
-
-		case 3:
-			if (aaf_action == OPEN)
-			{
-				Motor_Open();				// dir OPEN
-				DRV_On();					// drv on
-				motor_start = ON;			// step start
-				time_1ms_init_chk_flag = 1; // test
-				fail_safety_step = 4;
-			}
-			else if (aaf_action == CLOSE)
-			{
-				Motor_Close();				// dir CLOSE
-				DRV_On();					// drv on
-				motor_start = ON;			// step start
-				time_1ms_init_chk_flag = 1; // test
-				fail_safety_step = 4;
-			}
-			else
-			{
-			}
-			break;
-
-		case 4:
-			if ((motor_stall_flag == MOTOR_STALL) || (time_1ms_init_chk >= 4500U))
-			{
-				DRV_Off();
-				motor_start = OFF;
-				stall_chk_cnt = 0;
-				stall_chk_time_1ms = 0; // stall reset
-				fail_safety_step = 5;
-				aaf_action = FLAP_STOP;
-				time_1ms_init_chk_flag = 0;
-				time_1ms_init_chk = 0;
-				softstart_complete = OFF;
-				motor_step_value = STEP_TIME_1000RPM;
-
-				if (aaf_action == OPEN)
-				{
-					AAF_Tx_Position = OPEN;
-				}
-				else if (aaf_action == CLOSE)
-				{
-					AAF_Tx_Position = CLOSE;
-				}
-			}
-			break;
-
-		case 5:
-			time_1ms_3minute_flag = 1;
-			antipinch_step = 0;
-
-			if (time_1s_3minute >= MINUTE_3)
-			{
-				time_1ms_3minute_flag = 0;
-				time_1s_3minute = 0;
-				time_1ms_3minute = 0;
-				fail_safety_step = 6;
-			}
-			break;
-
-		case 6:									  // 1st cycle start
-			DRV_Off();							  // drv of
-			motor_start = OFF;					  // step stop
-			time_1ms_external_10s_chk_flag = OFF; // 10s chk timer off
-			time_1ms_external_10s_chk = 0;
-			aaf_action = FLAP_STOP;
-			aaf_action_complete_chk = FLAP_STOP;
-
-			time_1ms_stall_chk = 0;		 // test
-			time_1ms_stall_chk_flag = 0; // test
-
-			stall_chk_cnt = 0;		// stall reset
-			stall_chk_time_1ms = 0; // stall reset
-
-			motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE; // stall reset
-
-			aaf_step = AAF_INITIALIZATION;		  // MCU is reset, AAF is initialized.
-			aaf_init_step = START_INITIALIZATION; // MCU is reset, AAF is initialized.
-			AAF_Tx_Position = UNKOWN_POSITION;	  //
-			AAFx_Position_Status = Unknown_Status;
-			lin_aaf_command = OPEN;
-			softstart_complete = OFF;
-			motor_step_value = STEP_TIME_1000RPM;
-
-			init_move_step = START_INITIALIZATION_OPEN; // MCU is reset, AAF is initialized.
-
-			fail_safety_step = 7;
-			fail_safety_1_cycle_flag = ON;
-			break;
-
-		case 7:
-			if (init_move_step == 19U)
-			{
-				init_move_step = 0;
-				aaf_init_step = NORMAL_INITIALIZATION;
-				fail_safety_step = 0;
-				fail_safety_flag = OFF;
-				fail_safety_1_cycle_flag = OFF;
-				AAFx_ErrorStatus = No_ErrorStatus;
-			}
-			break;
-
-		case 8:
-			if (lin_aaf_command == OPEN) // lin open command chk
-			{
-				DRV8899_Wakeup();
-				aaf_action = OPEN;
-				motor_stall_flag = MOTOR_NORMAL;				  // stall reset
-				stall_chk_time_1ms = 0;							  // stall reset
-				motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE; // stall reset
-				fail_safety_step = 9;
-			}
-			else if (lin_aaf_command == CLOSE) // lin close command chk
-			{
-				DRV8899_Wakeup();
-				aaf_action = CLOSE;
-				motor_stall_flag = MOTOR_NORMAL;				  // stall reset
-				stall_chk_time_1ms = 0;							  // stall reset
-				motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE; // stall reset
-				fail_safety_step = 9;
-			}
-			else
-			{
-			}
-			break;
-
-		case 9:
-			if (aaf_action == OPEN)
-			{
-				Motor_Open();				// dir OPEN
-				DRV_On();					// drv on
-				motor_start = ON;			// step start
-				time_1ms_init_chk_flag = 1; // test
-				fail_safety_step = 10;
-			}
-			else if (aaf_action == CLOSE)
-			{
-				Motor_Close();				// dir CLOSE
-				DRV_On();					// drv on
-				motor_start = ON;			// step start
-				time_1ms_init_chk_flag = 1; // test
-				fail_safety_step = 10;
-			}
-			else
-			{
-			}
-			break;
-
-		case 10:
-			if ((motor_stall_flag == MOTOR_STALL) || (time_1ms_init_chk >= 4500U))
-			{
-				DRV_Off();
-				motor_start = OFF;
-				stall_chk_cnt = 0;
-				stall_chk_time_1ms = 0; // stall reset
-				fail_safety_step = 11;
-				aaf_action = FLAP_STOP;
-				time_1ms_init_chk_flag = 0;
-				time_1ms_init_chk = 0;
-				softstart_complete = OFF;
-				motor_step_value = STEP_TIME_1000RPM;
-
-				if (aaf_action == OPEN)
-				{
-					AAF_Tx_Position = OPEN;
-				}
-				else if (aaf_action == CLOSE)
-				{
-					AAF_Tx_Position = CLOSE;
-				}
-			}
-			break;
-
-		case 11:
-			time_1ms_3minute_flag = 1;
-
-			if (time_1s_3minute >= MINUTE_3)
-			{
-				time_1ms_3minute_flag = 0;
-				time_1s_3minute = 0;
-				time_1ms_3minute = 0;
-				fail_safety_step = 12;
-			}
-			break;
-
-		case 12:								  // 1st cycle start
-			DRV_Off();							  // drv of
-			motor_start = OFF;					  // step stop
-			time_1ms_external_10s_chk_flag = OFF; // 10s chk timer off
-			time_1ms_external_10s_chk = 0;
-			aaf_action = FLAP_STOP;
-			aaf_action_complete_chk = FLAP_STOP;
-
-			time_1ms_stall_chk = 0;		 // test
-			time_1ms_stall_chk_flag = 0; // test
-
-			stall_chk_cnt = 0;		// stall reset
-			stall_chk_time_1ms = 0; // stall reset
-
-			motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE; // stall reset
-
-			aaf_step = AAF_INITIALIZATION;		  // MCU is reset, AAF is initialized.
-			aaf_init_step = START_INITIALIZATION; // MCU is reset, AAF is initialized.
-			AAF_Tx_Position = UNKOWN_POSITION;
-			AAFx_Position_Status = Unknown_Status;
-			lin_aaf_command = OPEN;
-			softstart_complete = OFF;
-			motor_step_value = STEP_TIME_1000RPM;
-			evrdy_on_flag = OFF;
-			init_move_step = START_INITIALIZATION_OPEN; // MCU is reset, AAF is initialized.
-
-			fail_safety_step = 13;
-			fail_safety_1_cycle_flag = ON;
-			break;
-
-		case 13:
-			if (init_move_step == 19U)
-			{
-				init_move_step = 0;
-				aaf_init_step = NORMAL_INITIALIZATION;
-				fail_safety_step = 0;
-				fail_safety_flag = OFF;
-				fail_safety_1_cycle_flag = OFF;
-				AAFx_ErrorStatus = No_ErrorStatus;
-			}
-			break;
-
-		case 14:
-
-			DRV8899_Wakeup();
-			aaf_action = OPEN;
-			motor_stall_flag = MOTOR_NORMAL;				  // stall reset
-			stall_chk_cnt = 0;								  // stall reset
-			stall_chk_time_1ms = 0;							  // stall reset
-			motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE; // stall reset
-			Motor_Open();									  // dir OPEN
-			DRV_On();										  // drv on
-			motor_start = ON;								  // step start
-			time_1ms_init_chk_flag = 1;						  // test
-			fail_safety_step = 15;
-			break;
-
-		case 15:
-			if ((motor_stall_flag == MOTOR_STALL) || (time_1ms_init_chk >= 4500U))
-			{
-				DRV_Off();
-				motor_start = OFF;
-				stall_chk_cnt = 0;
-				stall_chk_time_1ms = 0; // stall reset
-				fail_safety_step = 16;
-				aaf_action = FLAP_STOP;
-				time_1ms_init_chk_flag = 0;
-				time_1ms_init_chk = 0;
-				softstart_complete = OFF;
-				motor_step_value = STEP_TIME_1000RPM;
-			}
-			break;
-
-		case 16:
-			AAF_Tx_Position = UNKOWN_POSITION;
-			AAFx_Position_Status = Unknown_Status;
-			AAFx_InitStatus = ABNORMAL_FINISHED_INITIALIZATION;
-			motor_fault_chk = 1;
-			break;
-
-		default:
-			break;
-		}
-	}
+    if (fail_safety_flag == ON)
+    {
+        // [Cycle 1] Steps 0 ~ 5
+        if (fail_safety_step <= 5U)
+        {
+            Run_fail_safety_cycle_1();
+        }
+        // [Cycle 2] Steps 6 ~ 11
+        else if (fail_safety_step <= 11U)
+        {
+            Run_fail_safety_cycle_2();
+        }
+        // [Final Cycle] Steps 12 ~ 16
+        else
+        {
+            Run_fail_safety_final();
+        }
+    }
 }
+
 
 static void Initialize_variables(void)
 {
@@ -4393,6 +4421,7 @@ static void Current_limiting_select(void)
 		}
 		else
 		{
+			//invalid
 		}
 	}
 	else if (voltage_status_spi == NORMAL_VOLTAGE)
@@ -4409,6 +4438,7 @@ static void Current_limiting_select(void)
 		}
 		else
 		{
+			//invalid
 		}
 	}
 	else if (voltage_status_spi == HIGH_VOLTAGE_1ST)
@@ -4425,10 +4455,12 @@ static void Current_limiting_select(void)
 		}
 		else
 		{
+			//invalid
 		}
 	}
 	else
 	{
+		//invalid
 	}
 }
 
@@ -4476,7 +4508,9 @@ static void Lin_sleep(void)
 			}
 			else
 			{
+				//invalid
 			}
+
 			lin_sleep_step = 3;
 		}
 		else if (AAF_LINOut == 0x01U)
@@ -4488,6 +4522,7 @@ static void Lin_sleep(void)
 		}
 		else
 		{
+			//invalid
 		}
 		break;
 
@@ -4580,6 +4615,7 @@ static void Lin_sleep(void)
 		}
 		else
 		{
+			//invalid
 		}
 		break;
 	case 5:
