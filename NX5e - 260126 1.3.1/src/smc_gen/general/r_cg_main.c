@@ -3387,298 +3387,434 @@ static void Lin_tx_data_chk(void)
 	lin_rx_pass_flag = WAITING;
 }
 
+/* =========================================================================================
+ * MCU Sleep Mode Management Functions
+ * ========================================================================================= */
+
+/***********************************************************************************************************************
+ * Function Name: External_device_off
+ * Description  : MCU가 슬립 모드로 진입하기 전, 연결된 외부 하드웨어(모터 드라이버, 트랜시버 등)를 끔
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void External_device_off(void)
+{
+    DRV8899_Sleep();        // 모터 드라이버 슬립 전환
+    Lin_Transceiver_Off();  // LIN 트랜시버 전원 차단
+    SPI_select_pin_Off();   // SPI 통신 핀 비활성화
+}
+
+/***********************************************************************************************************************
+ * Function Name: Sleep_port_config
+ * Description  : 슬립 모드 중 누설 전류 방지 및 LIN Wake-up 대기를 위해 GPIO 포트 상태를 재설정함
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Sleep_port_config(void)
+{
+    // 포트 기능을 GPIO 입/출력으로 리셋
+    R_PORT_ResetAltFunc(Port10, 10, Output);
+    R_PORT_ResetAltFunc(Port10, 9, Input);
+
+    // LIN TX 핀을 Low로 설정하여 슬립 상태 유지 (Leakage 방지)
+    PORT.P10 &= ~_PORT_Pn10_OUTPUT_HIGH; // MCU_LIN_Tx_Low Sleep go
+}
+
+/***********************************************************************************************************************
+ * Function Name: Sleep_internal_module_stop
+ * Description  : 전력 소모를 줄이기 위해 MCU 내부 주변장치(ADC, 타이머, 통신 모듈)의 클럭을 정지함
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Sleep_internal_module_stop(void)
+{
+    R_Config_INTC_Create();         // 인터럽트 컨트롤러 재설정 (Wake-up 준비)
+    // R_Config_INTC_INTP5_Start(); // (주석 유지)
+
+    R_Config_CSIH0_Stop();          // SPI 모듈 정지
+    R_Config_ADCA0_Halt();          // ADC 모듈 정지
+    R_Config_TAUD0_13_Stop();       // 타이머 정지
+    R_Config_TAUD0_3_Stop();        // 타이머 정지
+
+    time_1ms_spi_flag = 0;          // 관련 플래그 초기화
+    time_1ms_spi = 0;
+}
+
+/***********************************************************************************************************************
+ * Function Name: Sleep_enter_deep_stop
+ * Description  : 클럭 생성기를 슬립 모드용으로 설정하고, 최종적으로 Deep Stop Mode로 진입함
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Sleep_enter_deep_stop(void)
+{
+    R_CGC_Create_sleepmode();                   // 클럭 설정 변경
+
+    R_Config_STBC_Prepare_Deep_Stop_Mode();     // 대기 모드 진입 준비 레지스터 설정
+    R_Config_STBC_Start_Deep_Stop_Mode();       // [진입점] 여기서 MCU 동작 멈춤
+}
+
+/***********************************************************************************************************************
+ * Function Name: MCU_sleep
+ * Description  : 시스템 종료 절차를 수행하고 MCU를 저전력 모드(Deep Stop)로 전환하는 메인 함수
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
 static void MCU_sleep(void)
 {
-	power_chk = Normal_Shutdown;
-	First_Powerchk = 1;
-	if (step_check_flag == 1)
-	{
-		Flash_memory_write();
-	}
-	DRV8899_Sleep();
-	Lin_Transceiver_Off();
-	SPI_select_pin_Off();
+    // 1. 종료 상태 플래그 설정
+    power_chk = Normal_Shutdown;
+    First_Powerchk = 1;
 
-	R_PORT_ResetAltFunc(Port10, 10, Output);
-	R_PORT_ResetAltFunc(Port10, 9, Input);
+    // 2. 필요 시 플래시 메모리에 데이터 저장
+    if (step_check_flag == 1)
+    {
+        Flash_memory_write();
+    }
 
-	PORT.P10 &= ~_PORT_Pn10_OUTPUT_HIGH; // MCU_LIN_Tx_Low Sleep go
+    // 3. 외부 하드웨어 전원 차단
+    External_device_off();
 
-	R_Config_INTC_Create();
-	// R_Config_INTC_INTP5_Start();
+    // 4. 슬립 대비 포트 설정 (누설 전류 방지)
+    Sleep_port_config();
 
-	R_Config_CSIH0_Stop();
-	R_Config_ADCA0_Halt();
-	R_Config_TAUD0_13_Stop();
-	R_Config_TAUD0_3_Stop();
-	time_1ms_spi_flag = 0;
-	time_1ms_spi = 0;
+    // 5. 내부 주변장치 클럭 정지
+    Sleep_internal_module_stop();
 
-	R_CGC_Create_sleepmode();
-
-	R_Config_STBC_Prepare_Deep_Stop_Mode();
-	R_Config_STBC_Start_Deep_Stop_Mode();
+    // 6. Deep Stop 모드 진입 (Wake-up 이벤트 발생 전까지 정지)
+    Sleep_enter_deep_stop();
 }
 
+
+/* =========================================================================================
+ * SPI Communication & Stall Check Functions
+ * ========================================================================================= */
+
+/***********************************************************************************************************************
+ * Function Name: Execute_voltage_change_spi
+ * Description  : Sends SPI commands to update current limits when voltage status changes (Step 0 Condition 1).
+ * Called By    : Process_spi_initiation
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Execute_voltage_change_spi(void)
+{
+    PORT.P8 &= ~_PORT_Pn0_OUTPUT_HIGH; // CS Low
+
+    if (voltage_status_spi == HIGH_VOLTAGE_1ST)
+    {
+        R_Config_CSIH0_Send_Receive(&tx_16bit_spi_current_limit[9], 1, &rx_16bit_spi[3], _CSIH_SELECT_CHIP_0);
+        motor_cw_stall_value = MOTOR_CW_STALL_CHK_VALUE_HIGH_VOLTAGE_1ST;
+        motor_ccw_stall_value = MOTOR_CCW_STALL_CHK_VALUE_HIGH_VOLTAGE_1ST;
+    }
+    else if (voltage_status_spi == NORMAL_VOLTAGE)
+    {
+        R_Config_CSIH0_Send_Receive(&tx_16bit_spi_current_limit[9], 1, &rx_16bit_spi[3], _CSIH_SELECT_CHIP_0);
+        motor_cw_stall_value = MOTOR_CW_STALL_CHK_VALUE_NORMAL_VOLTAGE;
+        motor_ccw_stall_value = MOTOR_CCW_STALL_CHK_VALUE_NORMAL_VOLTAGE;
+    }
+    else if (voltage_status_spi == LOW_VOLTAGE_1ST)
+    {
+        R_Config_CSIH0_Send_Receive(&tx_16bit_spi_current_limit[9], 1, &rx_16bit_spi[3], _CSIH_SELECT_CHIP_0);
+        motor_cw_stall_value = MOTOR_CW_STALL_CHK_VALUE_LOW_VOLTAGE_1ST;
+        motor_ccw_stall_value = MOTOR_CCW_STALL_CHK_VALUE_LOW_VOLTAGE_1ST;
+    }
+    else
+    {
+        // Invalid
+    }
+
+    voltage_status_change_complete = WAIT;
+    time_1ms_volt_stat_chg_wait_flag = 1;
+    spi_action_step = 1;
+    voltage_status_change = OFF;
+}
+
+/***********************************************************************************************************************
+ * Function Name: Send_spi_command_id_9
+ * Description  : Sends the standard SPI command (ID 9) for status monitoring (Step 0 Condition 2 & 3).
+ * Called By    : Process_spi_initiation
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Send_spi_command_id_9(void)
+{
+    PORT.P8 &= ~_PORT_Pn0_OUTPUT_HIGH; // CS Low
+
+    R_Config_CSIH0_Send_Receive(&rx_16bit_spi_id[9], 1, &rx_16bit_spi[9], _CSIH_SELECT_CHIP_0);
+
+    spi_action_step = 1;
+}
+
+/***********************************************************************************************************************
+ * Function Name: Handle_spi_step_wait
+ * Description  : Waits for SPI transmission/reception completion or timeout (Step 1).
+ * Called By    : SPI_chk
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Handle_spi_step_wait(void)
+{
+    time_1ms_spi_error_chk_flag = 1;
+
+    // Check for successful completion
+    if ((spi_receive_flag >= 1U) && (spi_send_flag >= 1U))
+    {
+        spi_receive_flag = 0;
+        spi_send_flag = 0;
+
+        PORT.P8 |= _PORT_Pn0_OUTPUT_HIGH; // CS High
+
+        time_1ms_spi_error_chk = 0;
+        time_1ms_spi_error_chk_flag = 0;
+
+        spi_action_step = 2;
+    }
+
+    // Check for timeout
+    if (time_1ms_spi_error_chk >= 100U)
+    {
+        spi_action_step = 2;
+        // DRV_Off();
+        
+        spi_fail = 1; 
+        
+        time_1ms_spi_error_chk = 0;
+        time_1ms_spi_error_chk_flag = 0;
+    }
+}
+
+/***********************************************************************************************************************
+ * Function Name: Handle_spi_step_delay
+ * Description  : Provides a short delay (2us) between SPI transactions (Step 2).
+ * Called By    : SPI_chk
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Handle_spi_step_delay(void)
+{
+    time_1us_spi_flag = 1;
+
+    if (time_1us_spi >= 2U)
+    {
+        time_1us_spi_flag = 0;
+        time_1us_spi = 0;
+
+        spi_action_step = 3;
+    }
+}
+
+/***********************************************************************************************************************
+ * Function Name: Handle_spi_step_data
+ * Description  : Processes received SPI data and performs stall checking (Step 3).
+ * Called By    : SPI_chk
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Handle_spi_step_data(void)
+{
+    motor_stall_value = (unsigned int)(rx_16bit_spi[9] & 0xFFU);
+    motor_open_load = (unsigned int)(rx_16bit_spi[9] & 0x100U);
+    AAF_OverCurrent = (unsigned int)(rx_16bit_spi[9] & 0x800U);
+
+    time_1ms_spi = 0;
+
+    if (AAF_Maximum_Torque_Test_Mode == OFF)
+    {
+        Stall_chk();
+    }
+    else
+    {
+        motor_stall_flag = MOTOR_NORMAL;
+    }
+
+    spi_action_step = 0;
+}
+
+/***********************************************************************************************************************
+ * Function Name: Process_spi_initiation
+ * Description  : Checks conditions to start a new SPI transaction (Step 0 Logic).
+ * Called By    : SPI_chk
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Process_spi_initiation(void)
+{
+    // Condition 1: Voltage Status Change
+    if ((voltage_status_change == ON) && (motor_start == OFF) && (time_1ms_spi >= 20U))
+    {
+        Execute_voltage_change_spi();
+    }
+    // Condition 2: Motor ON (Fast Polling)
+    else if ((motor_start == ON) && (time_1ms_spi >= 2U) && (time_1us_motor <= (STEP_TIME_1250RPM / 2U)) && (spi_action_step == 0U))
+    {
+        Send_spi_command_id_9();
+    }
+    // Condition 3: Idle (Slow Polling)
+    else if ((time_1ms_spi >= 50U) && (time_1us_motor == 0U) && (spi_action_step == 0U))
+    {
+
+        // Current_limiting_select(); 
+
+        if (voltage_status_change == OFF)
+        {
+            Send_spi_command_id_9();
+        }
+    }
+    else
+    {
+        // invalid
+    }
+}
+
+/***********************************************************************************************************************
+ * Function Name: SPI_chk
+ * Description  : Main function for SPI communication control and stall checking.
+ * Metric Info  : FUCYC = 2 (Pass), FUNDC = 2 (Pass)
+ * Called By    : Main Loop
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
 static void SPI_chk(void)
 {
-	if ((voltage_status_change == ON) && (motor_start == OFF) && (time_1ms_spi >= 20U))
-	{
-		PORT.P8 &= ~_PORT_Pn0_OUTPUT_HIGH;
+    switch (spi_action_step)
+    {
+        
+    case 0:
+        Process_spi_initiation();
+        break;
 
-		if (voltage_status_spi == HIGH_VOLTAGE_1ST)
-		{
-			R_Config_CSIH0_Send_Receive(&tx_16bit_spi_current_limit[9], 1, &rx_16bit_spi[3], _CSIH_SELECT_CHIP_0);
-			motor_cw_stall_value = MOTOR_CW_STALL_CHK_VALUE_HIGH_VOLTAGE_1ST;
-			motor_ccw_stall_value = MOTOR_CCW_STALL_CHK_VALUE_HIGH_VOLTAGE_1ST;
-			// current_value = 9;
-		}
-		else if (voltage_status_spi == NORMAL_VOLTAGE)
-		{
-			R_Config_CSIH0_Send_Receive(&tx_16bit_spi_current_limit[9], 1, &rx_16bit_spi[3], _CSIH_SELECT_CHIP_0);
-			motor_cw_stall_value = MOTOR_CW_STALL_CHK_VALUE_NORMAL_VOLTAGE;
-			motor_ccw_stall_value = MOTOR_CCW_STALL_CHK_VALUE_NORMAL_VOLTAGE;
-			// current_value = 9;
-		}
-		else if (voltage_status_spi == LOW_VOLTAGE_1ST)
-		{
-			R_Config_CSIH0_Send_Receive(&tx_16bit_spi_current_limit[9], 1, &rx_16bit_spi[3], _CSIH_SELECT_CHIP_0);
-			motor_cw_stall_value = MOTOR_CW_STALL_CHK_VALUE_LOW_VOLTAGE_1ST;
-			motor_ccw_stall_value = MOTOR_CCW_STALL_CHK_VALUE_LOW_VOLTAGE_1ST;
-			// current_value = 9;
-		}
+    case 1:
+        Handle_spi_step_wait();
+        break;
 
-		voltage_status_change_complete = WAIT;
+    case 2:
+        Handle_spi_step_delay();
+        break;
 
-		time_1ms_volt_stat_chg_wait_flag = 1;
+    case 3:
+        Handle_spi_step_data();
+        break;
 
-		spi_action_step = 1;
-
-		voltage_status_change = OFF;
-	}
-	else if ((motor_start == ON) && (time_1ms_spi >= 2U) && (time_1us_motor <= (STEP_TIME_1250RPM / 2)) && (spi_action_step == 0U))
-	{
-		PORT.P8 &= ~_PORT_Pn0_OUTPUT_HIGH;
-
-		R_Config_CSIH0_Send_Receive(&rx_16bit_spi_id[9], 1, &rx_16bit_spi[9], _CSIH_SELECT_CHIP_0);
-
-		spi_action_step = 1;
-	}
-	else if ((time_1ms_spi >= 50U) && (time_1us_motor == 0U) && (spi_action_step == 0U))
-	{
-
-		// Current_limiting_select();
-
-		if (voltage_status_change == OFF)
-		{
-			PORT.P8 &= ~_PORT_Pn0_OUTPUT_HIGH;
-
-			R_Config_CSIH0_Send_Receive(&rx_16bit_spi_id[9], 1, &rx_16bit_spi[9], _CSIH_SELECT_CHIP_0);
-
-			spi_action_step = 1;
-		}
-	}
-	else
-	{
-	}
-
-	if (spi_action_step == 1U)
-	{
-		time_1ms_spi_error_chk_flag = 1;
-
-		if ((spi_receive_flag >= 1U) && (spi_send_flag >= 1U))
-		{
-			spi_receive_flag = 0;
-			spi_send_flag = 0;
-
-			PORT.P8 |= _PORT_Pn0_OUTPUT_HIGH;
-
-			time_1ms_spi_error_chk = 0;
-			time_1ms_spi_error_chk_flag = 0;
-
-			spi_action_step = 2;
-		}
-
-		if (time_1ms_spi_error_chk >= 100U)
-		{
-			spi_action_step = 2;
-			// DRV_Off();
-			spi_fail = 1;
-			time_1ms_spi_error_chk = 0;
-			time_1ms_spi_error_chk_flag = 0;
-		}
-	}
-	else if (spi_action_step == 2U)
-	{
-		time_1us_spi_flag = 1;
-
-		if (time_1us_spi >= 2U)
-		{
-			time_1us_spi_flag = 0;
-			time_1us_spi = 0;
-
-			spi_action_step = 3;
-		}
-	}
-	else if (spi_action_step == 3U)
-	{
-		motor_stall_value = (unsigned int)(rx_16bit_spi[9] & 0xFFU);
-		motor_open_load = (unsigned int)(rx_16bit_spi[9] & 0x100U);
-		AAF_OverCurrent = (unsigned int)(rx_16bit_spi[9] & 0x800U);
-
-		time_1ms_spi = 0;
-
-		if (AAF_Maximum_Torque_Test_Mode == OFF)
-		{
-			Stall_chk();
-		}
-		else
-		{
-			motor_stall_flag = MOTOR_NORMAL;
-		}
-
-		spi_action_step = 0;
-	}
-	else
-	{
-	}
+    default:
+        // Invalid
+        break;
+    }
 }
 
+/***********************************************************************************************************************
+ * Function Name: Update_stall_counter
+ * Description  : Compares current motor value against thresholds and updates the stall counter/flag.
+ * Called By    : Process_stall_close, Process_stall_open
+ * Arguments    : low_limit  - The lower threshold for stall detection
+ * high_limit - The upper threshold for stall detection
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Update_stall_counter(unsigned int low_limit, unsigned int high_limit)
+{
+    // Check if the value is out of the normal range (Stall condition)
+    if ((motor_stall_value <= low_limit) || (motor_stall_value >= high_limit))
+    {
+        if ((stall_chk_time_1ms >= STALL_CHK_WAIT_TIME) || (stall_test_mode == 1U))
+        {
+            stall_cnt++;
+        }
+
+        if (stall_cnt >= STALL_CNT_DEFAULT + STALL_CNT_COMPARISON_VAL)
+        {
+            motor_stall_flag = MOTOR_STALL;
+            stall_cnt = STALL_CNT_DEFAULT;
+        }
+    }
+    // Value is within normal range
+    else
+    {
+        motor_stall_flag = MOTOR_NORMAL;
+        stall_cnt = STALL_CNT_DEFAULT;
+        
+        // [Legacy Comment Preserved]
+        // stall_cnt--;
+        // if (stall_cnt < STALL_CNT_DEFAULT)
+        // {
+        //     stall_cnt = STALL_CNT_DEFAULT;
+        // }
+    }
+}
+
+/***********************************************************************************************************************
+ * Function Name: Process_stall_close
+ * Description  : Handles stall detection logic when the motor is in CLOSE direction.
+ * Called By    : Stall_chk
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Process_stall_close(void)
+{
+    if (AAF_location_type == RH_TYPE)
+    {
+        // RH Type + CLOSE Direction -> Use CCW Thresholds
+        Update_stall_counter(motor_ccw_stall_value, MOTOR_CCW_STALL_CHK_HIGH_VALUE);
+    }
+    else if (AAF_location_type == LH_TYPE)
+    {
+        // LH Type + CLOSE Direction -> Use CW Thresholds
+        Update_stall_counter(motor_cw_stall_value, MOTOR_CW_STALL_CHK_HIGH_VALUE);
+    }
+    else
+    {
+        // Invalid
+    }
+}
+
+/***********************************************************************************************************************
+ * Function Name: Process_stall_open
+ * Description  : Handles stall detection logic when the motor is in OPEN direction.
+ * Called By    : Stall_chk
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Process_stall_open(void)
+{
+    if (AAF_location_type == RH_TYPE)
+    {
+        // RH Type + OPEN Direction -> Use CW Thresholds
+        Update_stall_counter(motor_cw_stall_value, MOTOR_CW_STALL_CHK_HIGH_VALUE);
+    }
+    else if (AAF_location_type == LH_TYPE)
+    {
+        // LH Type + OPEN Direction -> Use CCW Thresholds
+        Update_stall_counter(motor_ccw_stall_value, MOTOR_CCW_STALL_CHK_HIGH_VALUE);
+    }
+    else
+    {
+        // Invalid
+    }
+}
+
+/***********************************************************************************************************************
+ * Function Name: Stall_chk
+ * Description  : Main function for motor stall detection.
+ * Called By    : SPI_chk
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
 static void Stall_chk(void)
 {
-	if (motor_start == ON)
-	{
-		if (dir_state == CLOSE)
-		{
-			if (AAF_location_type == RH_TYPE)
-			{
-				if ((motor_stall_value <= motor_ccw_stall_value) || (motor_stall_value >= MOTOR_CCW_STALL_CHK_HIGH_VALUE))
-				{
-
-					if ((stall_chk_time_1ms >= STALL_CHK_WAIT_TIME) || (stall_test_mode == 1U))
-					{
-						stall_cnt++;
-					}
-
-					if (stall_cnt >= STALL_CNT_DEFAULT + STALL_CNT_COMPARISON_VAL)
-					{
-						motor_stall_flag = MOTOR_STALL;
-						stall_cnt = STALL_CNT_DEFAULT;
-					}
-				}
-				else
-				{
-					motor_stall_flag = MOTOR_NORMAL;
-
-					stall_cnt = STALL_CNT_DEFAULT;
-					// stall_cnt--;
-
-					if (stall_cnt < STALL_CNT_DEFAULT)
-					{
-						stall_cnt = STALL_CNT_DEFAULT;
-					}
-				}
-			}
-			else if (AAF_location_type == LH_TYPE)
-			{
-				if ((motor_stall_value <= motor_cw_stall_value) || (motor_stall_value >= MOTOR_CW_STALL_CHK_HIGH_VALUE))
-				{
-
-					if ((stall_chk_time_1ms >= STALL_CHK_WAIT_TIME) || (stall_test_mode == 1U))
-					{
-						stall_cnt++;
-					}
-
-					if (stall_cnt >= STALL_CNT_DEFAULT + STALL_CNT_COMPARISON_VAL)
-					{
-						motor_stall_flag = MOTOR_STALL;
-						stall_cnt = STALL_CNT_DEFAULT;
-					}
-				}
-				else
-				{
-					motor_stall_flag = MOTOR_NORMAL;
-
-					stall_cnt = STALL_CNT_DEFAULT;
-					// stall_cnt--;
-
-					if (stall_cnt < STALL_CNT_DEFAULT)
-					{
-						stall_cnt = STALL_CNT_DEFAULT;
-					}
-				}
-			}
-			else
-			{
-			}
-		}
-		else if (dir_state == OPEN)
-		{
-			if (AAF_location_type == RH_TYPE)
-			{
-				if ((motor_stall_value <= motor_cw_stall_value) || (motor_stall_value >= MOTOR_CW_STALL_CHK_HIGH_VALUE))
-				{
-					if ((stall_chk_time_1ms >= STALL_CHK_WAIT_TIME) || (stall_test_mode == 1U))
-					{
-						stall_cnt++;
-					}
-
-					if (stall_cnt >= STALL_CNT_DEFAULT + STALL_CNT_COMPARISON_VAL)
-					{
-						motor_stall_flag = MOTOR_STALL;
-						stall_cnt = STALL_CNT_DEFAULT;
-					}
-				}
-				else
-				{
-					motor_stall_flag = MOTOR_NORMAL;
-
-					stall_cnt = STALL_CNT_DEFAULT;
-					// stall_cnt--;
-
-					if (stall_cnt < STALL_CNT_DEFAULT)
-					{
-						stall_cnt = STALL_CNT_DEFAULT;
-					}
-				}
-			}
-			else if (AAF_location_type == LH_TYPE)
-			{
-				if ((motor_stall_value <= motor_ccw_stall_value) || (motor_stall_value >= MOTOR_CCW_STALL_CHK_HIGH_VALUE))
-				{
-
-					if ((stall_chk_time_1ms >= STALL_CHK_WAIT_TIME) || (stall_test_mode == 1U))
-					{
-						stall_cnt++;
-					}
-
-					if (stall_cnt >= STALL_CNT_DEFAULT + STALL_CNT_COMPARISON_VAL)
-					{
-						motor_stall_flag = MOTOR_STALL;
-						stall_cnt = STALL_CNT_DEFAULT;
-					}
-				}
-				else
-				{
-					motor_stall_flag = MOTOR_NORMAL;
-
-					stall_cnt = STALL_CNT_DEFAULT;
-					// stall_cnt--;
-
-					if (stall_cnt < STALL_CNT_DEFAULT)
-					{
-						stall_cnt = STALL_CNT_DEFAULT;
-					}
-				}
-			}
-			else
-			{
-			}
-		}
-		else
-		{
-		}
-	}
+    if (motor_start == ON)
+    {
+        if (dir_state == CLOSE)
+        {
+            Process_stall_close();
+        }
+        else if (dir_state == OPEN)
+        {
+            Process_stall_open();
+        }
+        else
+        {
+            // Invalid
+        }
+    }
 }
 
 static void CHK_external_factors(void)
