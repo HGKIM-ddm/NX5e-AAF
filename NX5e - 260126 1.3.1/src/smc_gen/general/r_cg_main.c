@@ -2862,9 +2862,329 @@ static void Operating_mode(void)
 	}
 }
 
+/***********************************************************************************************************************
+ * Function Name: Update_lin_command
+ * Description  : 파싱된 타겟 위치(target_select)에 따라 글로벌 제어 명령(lin_aaf_command)을 업데이트함
+ * Arguments    : target_select - 결정된 목표 위치 또는 모드
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Update_lin_command(unsigned int target_select)
+{
+    switch (target_select)
+    {
+    case CLOSE:
+        lin_aaf_command = CLOSE;
+        break;
+    case OPEN_1ST:
+        lin_aaf_command = OPEN_1ST;
+        break;
+    case OPEN_2ND:
+        lin_aaf_command = OPEN_2ND;
+        break;
+    case OPEN:
+        lin_aaf_command = OPEN;
+        break;
+    case DIAG_MODE_OPEN:
+        lin_aaf_command = DIAG_MODE_OPEN;
+        break;
+    case DIAG_MODE_CLOSE:
+        lin_aaf_command = DIAG_MODE_CLOSE;
+        break;
+    case DIAG_MODE_AUTO:
+        lin_aaf_command = DIAG_MODE_AUTO;
+        break;
+    case UNKOWN_POSITION:
+        lin_aaf_command = UNKOWN_POSITION;
+        break;
+    default:
+        break;
+    }
+}
+
+/***********************************************************************************************************************
+ * Function Name: Translate_rxdata
+ * Description  : 수신된 LIN 데이터(Slave_RxData1)를 내부 검증용 버퍼(ID_chk_rxdata)로 복사함
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Translate_rxdata(void)
+{
+    if (lin_rx_chk_flag == ON)
+    {
+        for (int i = 0; i < 8; i++)
+        {
+            ID_chk_rxdata[i] = Slave_RxData1[i];
+        }
+        lin_rx_chk_flag = OFF;
+        lin_rx_pass_flag = PASS;
+    }
+}
+
+/***********************************************************************************************************************
+ * Function Name: AAF1_lin_rx_data_chk
+ * Description  : AAF 1번 유닛에 대한 진단 모드 및 타겟 위치를 파싱하고 명령을 설정함
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void AAF1_lin_rx_data_chk(void){
+	
+	if (ReqAAF1DiagMode == 0x00)
+	{
+		if (AAF1_TargetPosition == 0x00)
+		{
+			AAF1_TargetPosition_select = OPEN;
+		}
+		else if (AAF1_TargetPosition == 0x64)
+		{
+			AAF1_TargetPosition_select = CLOSE;
+		}
+		else if (AAF1_TargetPosition == 0x7F)
+		{
+			AAF1_TargetPosition_select = UNKOWN_POSITION;
+		}
+		else
+		{
+			//invalid
+		}
+	}
+	else if (ReqAAF1DiagMode == 0x01)
+	{
+		AAF1_TargetPosition_select = DIAG_MODE_AUTO;
+	}
+	else if (ReqAAF1DiagMode == 0x02)
+	{
+		AAF1_TargetPosition_select = DIAG_MODE_OPEN;
+	}
+	else if (ReqAAF1DiagMode == 0x03)
+	{
+		AAF1_TargetPosition_select = DIAG_MODE_CLOSE;
+	}
+	else
+	{
+		//invalid
+	}
+
+	if (aaf_action_complete_chk == FLAP_STOP)
+	{
+		if ((AAF1_TargetPosition_select != AAF_Tx_Position) && (AAF_Tx_Position != UNKOWN_POSITION) && (AAF1_TargetPosition_select != UNKOWN_POSITION))
+		{
+			step_start_flag = ON;
+		}
+	}
+	else if (aaf_action == DIAG_MODE_AUTO)
+	{
+		if (AAF1_TargetPosition_select != aaf_action)
+		{
+			step_start_flag = ON;
+		}
+	}
+	else
+	{
+		//invalid
+	}
+
+	Update_lin_command(AAF1_TargetPosition_select);
+
+}
+
+/***********************************************************************************************************************
+ * Function Name: AAF2_lin_rx_data_chk
+ * Description  : AAF 2번 유닛에 대한 진단 모드 및 타겟 위치를 파싱하고 명령을 설정함
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void AAF2_lin_rx_data_chk(void){
+	if (ReqAAF2DiagMode == 0x00)
+	{
+		if (AAF2_TargetPosition == 0x00)
+		{
+			AAF2_TargetPosition_select = OPEN;
+		}
+		else if (AAF2_TargetPosition == 0x64)
+		{
+			AAF2_TargetPosition_select = CLOSE;
+		}
+		else if (AAF2_TargetPosition == 0x7F)
+		{
+			AAF2_TargetPosition_select = UNKOWN_POSITION;
+		}
+		else
+		{
+			//invalid
+		}
+	}
+	else if (ReqAAF2DiagMode == 0x01)
+	{
+		AAF2_TargetPosition_select = DIAG_MODE_AUTO;
+	}
+	else if (ReqAAF2DiagMode == 0x02)
+	{
+		AAF2_TargetPosition_select = DIAG_MODE_OPEN;
+	}
+	else
+	{
+		AAF2_TargetPosition_select = DIAG_MODE_CLOSE;
+	}
+
+	if (aaf_action_complete_chk == FLAP_STOP)
+	{
+		if ((AAF2_TargetPosition_select != AAF_Tx_Position) && (AAF_Tx_Position != UNKOWN_POSITION) && (AAF2_TargetPosition_select != UNKOWN_POSITION))
+		{
+			step_start_flag = ON;
+		}
+	}
+	else if (aaf_action == DIAG_MODE_AUTO)
+	{
+		if (AAF2_TargetPosition_select != aaf_action)
+		{
+			step_start_flag = ON;
+		}
+	}
+	else
+	{
+		//invalid
+	}
+
+	Update_lin_command(AAF2_TargetPosition_select);
+}
+
+/***********************************************************************************************************************
+ * Function Name: AAF3_lin_rx_data_chk
+ * Description  : AAF 3번 유닛에 대한 진단 모드 및 타겟 위치를 파싱하고 명령을 설정함
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void AAF3_lin_rx_data_chk(void){
+	if (ReqAAF3DiagMode == 0x00)
+	{
+		if (AAF3_TargetPosition == 0x00)
+		{
+			AAF3_TargetPosition_select = OPEN;
+		}
+		else if (AAF3_TargetPosition == 0x64)
+		{
+			AAF3_TargetPosition_select = CLOSE;
+		}
+		else if (AAF3_TargetPosition == 0x7F)
+		{
+			AAF3_TargetPosition_select = UNKOWN_POSITION;
+		}
+		else 
+		{
+			//invalid
+		}
+	}
+	else if (ReqAAF3DiagMode == 0x01)
+	{
+		AAF3_TargetPosition_select = DIAG_MODE_AUTO;
+	}
+	else if (ReqAAF3DiagMode == 0x02)
+	{
+		AAF3_TargetPosition_select = DIAG_MODE_OPEN;
+	}
+	else
+	{
+		AAF3_TargetPosition_select = DIAG_MODE_CLOSE;
+	}
+
+	if (aaf_action_complete_chk == FLAP_STOP)
+	{
+		if ((AAF3_TargetPosition_select != AAF_Tx_Position) && (AAF_Tx_Position != UNKOWN_POSITION) && (AAF3_TargetPosition_select != UNKOWN_POSITION))
+		{
+			step_start_flag = ON;
+		}
+	}
+	else if (aaf_action == DIAG_MODE_AUTO)
+	{
+		if (AAF3_TargetPosition_select != aaf_action)
+		{
+			step_start_flag = ON;
+		}
+	}
+	else
+	{
+		//invalid
+	}
+
+	Update_lin_command(AAF3_TargetPosition_select);
+}	
+
+/***********************************************************************************************************************
+ * Function Name: Protection_function_off_mode
+ * Description  : 보호 기능이 꺼져 있을 때의 일반적인 데이터 파싱 및 AAF별 로직 분기를 수행함
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Protection_function_off_mode(void){
+	
+	Translate_rxdata();
+
+	if (lin_rx_pass_flag == PASS)
+	{
+		if (AAFx_InitStatus != DURING_INITIALIZATION)
+		{
+			ReqAAF3DiagMode = (unsigned int)((ID_chk_rxdata[0] & 0x30U) >> 4U);
+			ReqAAF2DiagMode = (unsigned int)((ID_chk_rxdata[0] & 0x0CU) >> 2U);
+			ReqAAF1DiagMode = (unsigned int)(ID_chk_rxdata[0] & 0x03U);
+			AAF1_TargetPosition = (unsigned int)(ID_chk_rxdata[1] & 0x7FU);
+			AAF2_TargetPosition = (unsigned int)(ID_chk_rxdata[2] & 0x7FU);
+			AAF3_TargetPosition = (unsigned int)(ID_chk_rxdata[3] & 0x7FU);
+			EngRunSta = (unsigned int)((ID_chk_rxdata[4] & 0x30U) >> 4U);
+			HevRdy = (unsigned int)((ID_chk_rxdata[4] & 0x0CU) >> 2U);
+			AAF_LINOut = (unsigned int)(ID_chk_rxdata[4] & 0x03U);
+
+			if (AAFx_Index == AAF_1)
+			{
+				AAF1_lin_rx_data_chk();
+			}
+			else if (AAFx_Index == AAF_2)
+			{
+				AAF2_lin_rx_data_chk();
+			}
+			else if (AAFx_Index == AAF_3)
+			{
+				AAF3_lin_rx_data_chk();
+			}
+			else
+			{
+				//invalid
+			}	
+		}
+		else 
+		{
+			ReqRespAAFID = (unsigned int)((ID_chk_rxdata[0] & 0xC0U) >> 6U);
+			EngRunSta = (unsigned int)((ID_chk_rxdata[4] & 0x30U) >> 4U);
+			HevRdy = (unsigned int)((ID_chk_rxdata[4] & 0x0CU) >> 2U);
+			AAF_LINOut = (unsigned int)(ID_chk_rxdata[4] & 0x03U);
+		}
+	}
+}
+
+/***********************************************************************************************************************
+ * Function Name: Protection_function_on_mode
+ * Description  : 보호 기능이 켜져 있을 때 보호 모드 해제 요청 비트만 모니터링함
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Protection_function_on_mode(void){
+	Translate_rxdata();
+
+	if (lin_rx_pass_flag == PASS)
+	{
+		AAF_ProtectionMode_Rx = (unsigned int)((ID_chk_rxdata[7] & 0x40U) >> 6U);
+	}
+}
+
+/***********************************************************************************************************************
+ * Function Name: Lin_rx_data_chk
+ * Description  : LIN 수신 데이터를 검증하고 보호 기능 상태(ON/OFF)에 따라 처리 루틴을 호출하는 메인 함수
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
 static void Lin_rx_data_chk(void)
 {
 	LIN_Diag_Rx();
+
 	ReqRespAAFID = (unsigned int)((Slave_RxData1[0] & 0xC0U) >> 6U);
 	if (AAF_LIN_ChkSum_CHK == PASS)
 	{
@@ -2872,375 +3192,15 @@ static void Lin_rx_data_chk(void)
 
 		if (protection_function == OFF) //
 		{
-			if (lin_rx_chk_flag == ON)
-			{
-				for (int i = 0; i < 8; i++)
-				{
-					ID_chk_rxdata[i] = Slave_RxData1[i];
-				}
-
-				lin_rx_chk_flag = OFF;
-				lin_rx_pass_flag = PASS;
-			}
-
-			if (lin_rx_pass_flag == PASS)
-			{
-				if (AAFx_InitStatus != DURING_INITIALIZATION)
-				{
-					ReqAAF3DiagMode = (unsigned int)((ID_chk_rxdata[0] & 0x30U) >> 4U);
-					ReqAAF2DiagMode = (unsigned int)((ID_chk_rxdata[0] & 0x0CU) >> 2U);
-					ReqAAF1DiagMode = (unsigned int)(ID_chk_rxdata[0] & 0x03U);
-					AAF1_TargetPosition = (unsigned int)(ID_chk_rxdata[1] & 0x7FU);
-					AAF2_TargetPosition = (unsigned int)(ID_chk_rxdata[2] & 0x7FU);
-					AAF3_TargetPosition = (unsigned int)(ID_chk_rxdata[3] & 0x7FU);
-					EngRunSta = (unsigned int)((ID_chk_rxdata[4] & 0x30U) >> 4U);
-					HevRdy = (unsigned int)((ID_chk_rxdata[4] & 0x0CU) >> 2U);
-					AAF_LINOut = (unsigned int)(ID_chk_rxdata[4] & 0x03U);
-
-					//-----------------------------------------development START----------------------------------------
-					// AAF_Init_Flag = (unsigned int)((ID_chk_rxdata[1] & 0x80U) >> 7U);
-					// AAF_Flap_Fixation_Test_Mode = (unsigned int)((ID_chk_rxdata[2] & 0x80U) >> 7U);
-					// AAF_Maximum_Torque_Test_Mode = (unsigned int)((ID_chk_rxdata[3] & 0x80U) >> 7U);
-					// Re_Init_check= (unsigned int)((ID_chk_rxdata[4] & 0x80U) >> 7U);
-					// AAF_Init_Flag = 0;
-					// AAF_Flap_Fixation_Test_Mode = 0;
-					// AAF_Maximum_Torque_Test_Mode = 0;
-					/*if (Re_Init_check == 0x01)
-					{
-						Re_Init_check_flag = 1;
-					}
-					else
-					{
-						Re_Init_check_flag = 0;
-					}
-					if ((Re_Init_check_flag == 1)&&(aaf_step == AAF_WAITING)&&(Re_Init_check_prev==0))
-					{
-						Re_Init();
-					}
-					Re_Init_check_prev = Re_Init_check;*/
-
-					//-----------------------------------------development END----------------------------------------
-					//-----------------------------------------DIAG development START----------------------------------------
-					if (AAFx_Index == AAF_1)
-					{
-						if (ReqAAF1DiagMode == 0x00)
-						{
-							if (AAF1_TargetPosition == 0x00)
-							{
-								AAF1_TargetPosition_select = OPEN;
-							}
-							else if (AAF1_TargetPosition == 0x64)
-							{
-								AAF1_TargetPosition_select = CLOSE;
-							}
-							else if (AAF1_TargetPosition == 0x7F)
-							{
-								AAF1_TargetPosition_select = UNKOWN_POSITION;
-							}
-						}
-						else if (ReqAAF1DiagMode == 0x01)
-						{
-							AAF1_TargetPosition_select = DIAG_MODE_AUTO;
-						}
-						else if (ReqAAF1DiagMode == 0x02)
-						{
-							AAF1_TargetPosition_select = DIAG_MODE_OPEN;
-						}
-						else if (ReqAAF1DiagMode == 0x03)
-						{
-							AAF1_TargetPosition_select = DIAG_MODE_CLOSE;
-						}
-						else
-						{
-						}
-
-						if (aaf_action_complete_chk == FLAP_STOP)
-						{
-							if ((AAF1_TargetPosition_select != AAF_Tx_Position) && (AAF_Tx_Position != UNKOWN_POSITION) && (AAF1_TargetPosition_select != UNKOWN_POSITION))
-							{
-								step_start_flag = ON;
-							}
-						}
-						else if (aaf_action == DIAG_MODE_AUTO)
-						{
-							if (AAF1_TargetPosition_select != aaf_action)
-							{
-								step_start_flag = ON;
-							}
-						}
-						else
-						{
-						}
-
-						switch (AAF1_TargetPosition_select)
-						{
-						case CLOSE:
-							lin_aaf_command = CLOSE;
-							break;
-						case OPEN_1ST:
-							lin_aaf_command = OPEN_1ST;
-							break;
-						case OPEN_2ND:
-							lin_aaf_command = OPEN_2ND;
-							break;
-						case OPEN:
-							lin_aaf_command = OPEN;
-							break;
-						case DIAG_MODE_OPEN:
-							lin_aaf_command = DIAG_MODE_OPEN;
-							break;
-						case DIAG_MODE_CLOSE:
-							lin_aaf_command = DIAG_MODE_CLOSE;
-							break;
-						case DIAG_MODE_AUTO:
-							lin_aaf_command = DIAG_MODE_AUTO;
-							break;
-						case UNKOWN_POSITION:
-							lin_aaf_command = UNKOWN_POSITION;
-							break;
-						default:
-							break;
-						}
-					}
-					else if (AAFx_Index == AAF_2)
-					{
-						if (ReqAAF2DiagMode == 0x00)
-						{
-							if (AAF2_TargetPosition == 0x00)
-							{
-								AAF2_TargetPosition_select = OPEN;
-							}
-							else if (AAF2_TargetPosition == 0x64)
-							{
-								AAF2_TargetPosition_select = CLOSE;
-							}
-							else if (AAF2_TargetPosition == 0x7F)
-							{
-								AAF2_TargetPosition_select = UNKOWN_POSITION;
-							}
-						}
-						else if (ReqAAF2DiagMode == 0x01)
-						{
-							AAF2_TargetPosition_select = DIAG_MODE_AUTO;
-						}
-						else if (ReqAAF2DiagMode == 0x02)
-						{
-							AAF2_TargetPosition_select = DIAG_MODE_OPEN;
-						}
-						else
-						{
-							AAF2_TargetPosition_select = DIAG_MODE_CLOSE;
-						}
-
-						if (aaf_action_complete_chk == FLAP_STOP)
-						{
-							if ((AAF2_TargetPosition_select != AAF_Tx_Position) && (AAF_Tx_Position != UNKOWN_POSITION) && (AAF2_TargetPosition_select != UNKOWN_POSITION))
-							{
-								step_start_flag = ON;
-							}
-						}
-						else if (aaf_action == DIAG_MODE_AUTO)
-						{
-							if (AAF2_TargetPosition_select != aaf_action)
-							{
-								step_start_flag = ON;
-							}
-						}
-						else
-						{
-						}
-
-						switch (AAF2_TargetPosition_select)
-						{
-						case CLOSE:
-							lin_aaf_command = CLOSE;
-							break;
-						case OPEN_1ST:
-							lin_aaf_command = OPEN_1ST;
-							break;
-						case OPEN_2ND:
-							lin_aaf_command = OPEN_2ND;
-							break;
-						case OPEN:
-							lin_aaf_command = OPEN;
-							break;
-						case DIAG_MODE_OPEN:
-							lin_aaf_command = DIAG_MODE_OPEN;
-							break;
-						case DIAG_MODE_CLOSE:
-							lin_aaf_command = DIAG_MODE_CLOSE;
-							break;
-						case DIAG_MODE_AUTO:
-							lin_aaf_command = DIAG_MODE_AUTO;
-							break;
-						case UNKOWN_POSITION:
-							lin_aaf_command = UNKOWN_POSITION;
-							break;
-						default:
-							break;
-						}
-					}
-					else if (AAFx_Index == AAF_3)
-					{
-						if (ReqAAF3DiagMode == 0x00)
-						{
-							if (AAF3_TargetPosition == 0x00)
-							{
-								AAF3_TargetPosition_select = OPEN;
-							}
-							else if (AAF3_TargetPosition == 0x64)
-							{
-								AAF3_TargetPosition_select = CLOSE;
-							}
-							else if (AAF3_TargetPosition == 0x7F)
-							{
-								AAF3_TargetPosition_select = UNKOWN_POSITION;
-							}
-						}
-						else if (ReqAAF3DiagMode == 0x01)
-						{
-							AAF3_TargetPosition_select = DIAG_MODE_AUTO;
-						}
-						else if (ReqAAF3DiagMode == 0x02)
-						{
-							AAF3_TargetPosition_select = DIAG_MODE_OPEN;
-						}
-						else
-						{
-							AAF3_TargetPosition_select = DIAG_MODE_CLOSE;
-						}
-
-						if (aaf_action_complete_chk == FLAP_STOP)
-						{
-							if ((AAF3_TargetPosition_select != AAF_Tx_Position) && (AAF_Tx_Position != UNKOWN_POSITION) && (AAF3_TargetPosition_select != UNKOWN_POSITION))
-							{
-								step_start_flag = ON;
-							}
-						}
-						else if (aaf_action == DIAG_MODE_AUTO)
-						{
-							if (AAF3_TargetPosition_select != aaf_action)
-							{
-								step_start_flag = ON;
-							}
-						}
-						else
-						{
-						}
-
-						switch (AAF3_TargetPosition_select)
-						{
-						case CLOSE:
-							lin_aaf_command = CLOSE;
-							break;
-						case OPEN_1ST:
-							lin_aaf_command = OPEN_1ST;
-							break;
-						case OPEN_2ND:
-							lin_aaf_command = OPEN_2ND;
-							break;
-						case OPEN:
-							lin_aaf_command = OPEN;
-							break;
-						case DIAG_MODE_OPEN:
-							lin_aaf_command = DIAG_MODE_OPEN;
-							break;
-						case DIAG_MODE_CLOSE:
-							lin_aaf_command = DIAG_MODE_CLOSE;
-							break;
-						case DIAG_MODE_AUTO:
-							lin_aaf_command = DIAG_MODE_AUTO;
-							break;
-						case UNKOWN_POSITION:
-							lin_aaf_command = UNKOWN_POSITION;
-							break;
-						default:
-							break;
-						}
-					}
-					//-----------------------------------------DIAG development END----------------------------------------
-					//-----------------------------------------development START----------------------------------------
-					/*if ((AAF_Init_Flag_tog == OFF) && (AAF_Init_Flag == ON))
-					{
-						if ((AAF1_TargetPosition == 0x7F) || (AAF2_TargetPosition == 0x7F) || (AAF3_TargetPosition == 0x7F))
-						{
-							wake_up_motor_range_init_chk = 0;
-							evrdy_on_flag = OFF;
-							Re_Init();
-						}
-						AAF_Init_Flag_tog = ON;
-					}
-					else if ((AAF_Init_Flag_tog == ON) && (AAF_Init_Flag == OFF))
-					{
-						AAF_Init_Flag_tog = OFF;
-					}
-					else
-					{
-					}
-
-					if ((AAF_Flap_Fixation_Test_Mode_tog == OFF) && (AAF_Flap_Fixation_Test_Mode == ON))
-					{
-						AAF_Flap_Fixation_Test_Mode_tog = ON;
-					}
-					else if ((AAF_Flap_Fixation_Test_Mode_tog == ON) && (AAF_Flap_Fixation_Test_Mode == OFF))
-					{
-						wake_up_motor_range_init_chk = 0;
-						evrdy_on_flag = OFF;
-						Re_Init();
-						AAF_Flap_Fixation_Test_Mode_tog = OFF;
-					}
-					else
-					{
-					}
-
-					if ((AAF_Maximum_Torque_Test_Mode_tog == OFF) && (AAF_Maximum_Torque_Test_Mode == ON))
-					{
-						AAF_Maximum_Torque_Test_Mode_tog = ON;
-					}
-					else if ((AAF_Maximum_Torque_Test_Mode_tog == ON) && (AAF_Maximum_Torque_Test_Mode == OFF))
-					{
-						wake_up_motor_range_init_chk = 0;
-						evrdy_on_flag = OFF;
-						Re_Init();
-						AAF_Maximum_Torque_Test_Mode_tog = OFF;
-					}
-					else
-					{
-					}*/
-					//-----------------------------------------development END----------------------------------------
-				}
-				else if (AAFx_InitStatus == DURING_INITIALIZATION)
-				{
-					ReqRespAAFID = (unsigned int)((ID_chk_rxdata[0] & 0xC0U) >> 6U);
-					EngRunSta = (unsigned int)((ID_chk_rxdata[4] & 0x30U) >> 4U);
-					HevRdy = (unsigned int)((ID_chk_rxdata[4] & 0x0CU) >> 2U);
-					AAF_LINOut = (unsigned int)(ID_chk_rxdata[4] & 0x03U);
-				}
-				else
-				{
-				}
-			}
+			Protection_function_off_mode();
 		}
 		else if (protection_function == ON)
 		{
-			if (lin_rx_chk_flag == ON)
-			{
-				for (int i = 0; i < 8; i++)
-				{
-					ID_chk_rxdata[i] = Slave_RxData1[i];
-				}
-
-				lin_rx_chk_flag = OFF;
-				lin_rx_pass_flag = PASS;
-			}
-
-			if (lin_rx_pass_flag == PASS)
-			{
-				AAF_ProtectionMode_Rx = (unsigned int)((ID_chk_rxdata[7] & 0x40U) >> 6U);
-			}
+			Protection_function_on_mode();
 		}
 		else
 		{
+			//invalid
 		}
 	}
 }
