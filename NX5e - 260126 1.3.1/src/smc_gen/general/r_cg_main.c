@@ -5300,7 +5300,7 @@ static void Antipinch_prev_close(void)
 
             antipinch_step = 7;
 
-            fail_safety_flag = ON;
+            // fail_safety_flag = ON;
             antipinch_action_on = OFF;
 
             antipinch_previous_action = INITIALIZATION;
