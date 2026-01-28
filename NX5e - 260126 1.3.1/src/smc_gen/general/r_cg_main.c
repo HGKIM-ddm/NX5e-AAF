@@ -364,14 +364,14 @@ unsigned int time_1ms_IGN_chk_flag = 0U;
 
 //development
 static unsigned int SW_Chk = 0U;
-static unsigned int Open_Min_Limit = 0U;
-static unsigned int Open_Max_Limit = 0U;
-static unsigned int Close_Min_Limit = 0U;
-static unsigned int Close_Max_Limit = 0U;
-static unsigned int test = 0U;
+// static unsigned int Open_Min_Limit = 0U;
+// static unsigned int Open_Max_Limit = 0U;
+// static unsigned int Close_Min_Limit = 0U;
+// static unsigned int Close_Max_Limit = 0U;
+// static unsigned int test = 0U;
 static uint8_t Slave_RxSwData1[8];      /*  */
-static unsigned int wakeup_chk = 1;      /*  */
-static unsigned int spi_fail = 0;        /*  */
+// static unsigned int wakeup_chk = 1;      /*  */
+// static unsigned int spi_fail = 0;        /*  */
 static unsigned int LIN_Short_Ok = 0U;   /*  */
 
 /***********************************************************************************************************************
@@ -422,7 +422,7 @@ static void CHK_external_factors(void);
 static void Fail_safety_mode(void);
 static void Protection_Mode(void);
 static void Voltage_chk_current_limit_init(void);
-static void Current_limiting_select(void);
+// static void Current_limiting_select(void);
 static void Antipinch_move(void); // V
 static void Torque_Test_Mode(void);
 static void LIMP_HOME(void);          // V
@@ -437,7 +437,6 @@ static void Tx_position_complete_chk(void);
 /* 3.4 AAF Application Functions */
 static void AAF_Init(void);
 static void AAF_communicate_chk(void);
-static void AAF_mode_chk(void);
 static void AAF_App(void);
 
 /* 3.5 Interrupt Service Routines */
@@ -468,159 +467,11 @@ int main(void)
 	R_Config_WDT0_Create();
 	R_Config_WDT0_Restart();
 
-	protected_write(WPROTR.PROTCMD0, WPROTR.PROTS0, STBC_IOHOLD.IOHOLD, 0x00u);
-	while (STBC_IOHOLD.IOHOLD != 0x00u)
-	{
-	}
-
-	// flash memory setup
-
-	FDL_Open();
-	ret = function_FDL_init();
-
-	time_1ms_fdl_error_chk_flag = 1;
-	if (ret < 0) // error
-	{
-		while (1)
-		{
-			if (time_1ms_fdl_error_chk >= 100U)
-			{
-				fdl_fail += 1;
-				break;
-			}
-		}
-	}
-
-	time_1ms_fdl_error_chk_flag = 0;
-	time_1ms_fdl_error_chk = 0;
-
-	Lin_Transceiver_On();
-	DRV8899_Init();
-
-	AAFx_Type = EXTERNAL_TYPE; // NX5e AAF1, 2 EXTERNAL_TYPE
-
-	// AAFx_Type = INTERNAL_TYPE; //  NX5e AAF3 INTERNAL_TYPE(LOWER)
-
-	// AAFx_Index = AAF_1;			 //
-	// AAF_location_type = LH_TYPE; // CW
-
-	AAFx_Index = AAF_2;			 //
-	AAF_location_type = RH_TYPE; // CCW
-
-	// AAFx_Index = AAF_3;			 //
-	// AAF_location_type = LH_TYPE; // CW
-
-	TotalNumOfAAF = AAFx3; // aaf 3 ea
-
-	TotalNumOfAAFSensor = 0;
-
-	aaf_step = AAF_INITIALIZATION;
-	aaf_init_step = WAIT_INITIALIZATION;
-	AAF_Tx_Position = UNKOWN_POSITION;
-	AAFx_Position_Status = Unknown_Status;
-	AAFx_InitStatus = DURING_INITIALIZATION;
-	time_1ms_spi_flag = 1; // spi timer on
-	while (1)			   // 1ms wait (spi error prevention)
-	{
-		if (time_1ms_spi >= 1U)
-		{
-			break;
-		}
-	}
-	Motor_SPI_Init();
-
-	motor_stall_value = (unsigned int)(rx_16bit_spi[9] & 0xFFU);
-	time_1ms_volt_chk_dly_flag = 1; // POWER ON AFTER 500ms
-
-	motor_cw_stall_value = MOTOR_CW_STALL_CHK_VALUE_NORMAL_VOLTAGE;
-	motor_ccw_stall_value = MOTOR_CCW_STALL_CHK_VALUE_NORMAL_VOLTAGE;
-
-	diag_mode_auto_dir = OPEN;
-	time_1ms_protection_chk_flag = 1;
-
-	voltage_status_change_complete = COMPLETE;
+	AAF_Init();
 
 	while (1)
 	{
-		if (time_1ms_protection_chk >= 550) // POWER ON AFTER 550ms NOT OP
-		{
-			time_1ms_protection_chk_flag = 0;
-			time_1ms_protection_chk = 550;
-		}
-		// -------------- stop mode
-		if (time_1ms_protection_chk >= 50)
-		{
-			Motor_Action();
-		}
-		if (((EngRunSta == 0x01) || (HevRdy == 0x01)) && (time_1ms_IGN_chk <= 500))
-		{
-			time_1ms_IGN_chk_flag = 1;
-			if (time_1ms_IGN_chk >= 500)
-			{
-				time_1ms_IGN_chk_flag = 0;
-				time_1ms_IGN_chk = 500;
-				ERROR_chk();
-			}
-		}
-
-		VDC_adc();
-
-		if ((protection_function == OFF) && (lin_bus_inactive_flag == OFF) && (AAF_Maximum_Torque_Test_Mode == OFF) && (time_1ms_protection_chk == 550))
-		{
-			Operating_mode();
-		}
-		else if (AAF_Maximum_Torque_Test_Mode == ON) //-----------------------------------------development----------------------------------------
-		{
-			Torque_Test_Mode();
-		}
-		else if (lin_bus_inactive_flag == ON)
-		{
-			Lin_sleep();
-		}
-		else
-		{
-		}
-		Lin_rx_data_chk();
-		Lin_tx_data_chk();
-		SPI_chk();
-		CHK_external_factors();
-
-		if ((protection_function == OFF) && (lin_bus_inactive_flag == OFF) && (AAF_Maximum_Torque_Test_Mode == OFF))
-		{
-			Fail_safety_mode();
-		}
-
-		if ((antipinch_previous_action == OPEN) || (antipinch_previous_action == CLOSE))
-		{
-			Antipinch_move();
-		}
-
-		Lin_bus_chk();
-
-		if ((protection_function == ON) && (lin_bus_inactive_flag == OFF) && (AAF_Maximum_Torque_Test_Mode == OFF))
-		{
-			Protection_Mode();
-		}
-		if ((step_check_flag == 0) && ((EngRunSta == 0x01) || (HevRdy == 0x01))) // IGN > POSITION CHECK
-		{
-			Flash_memory_read();
-			IGN_On_Memory_read();
-
-			time_1ms_step_chk_flag = 1;
-			if ((time_1ms_step_chk >= 50))
-			{
-				step_check();
-				time_1ms_step_chk_flag = 0;
-				time_1ms_step_chk = 50;
-				step_check_flag = 1;
-			}
-			if ((step_check_flag == 1))
-			{
-				power_chk = Shutdown_Check;
-				Flash_memory_write();
-			}
-		}
-		R_Config_WDT0_Restart(); // wdt0 feed
+		AAF_App();
 	}
 
 	/* End user code. Do not edit comment generated here */
@@ -824,7 +675,7 @@ void RLIN3_slave_init(void)
  * Arguments    : uint8_t Data_length : receive data length.
  * Return Value : None
  ***********************************************************************************************************************/
-static void RLIN_Slave_NoResponse(void)
+void RLIN_Slave_NoResponse(void)
 {
 	RLN30.LTRC = 0x04; /* setting LNRR=1, No response request*/
 }
@@ -850,6 +701,280 @@ void RLIN30_interrupt(void)
 void RLIN30_transmit_interrupt(void)
 {
 	RLN30.LST &= 0xFE;
+}
+
+/***********************************************************************************************************************
+ * Function Name: AAF_Init
+ * Description  : This function is main user init
+ * Arguments    : None
+ * Return Value : None
+ ***********************************************************************************************************************/
+static void AAF_Init(void) 
+{
+
+	protected_write(WPROTR.PROTCMD0, WPROTR.PROTS0, STBC_IOHOLD.IOHOLD, 0x00u);
+
+	// flash memory setup
+
+	FDL_Open();
+	ret = function_FDL_init();
+
+	time_1ms_fdl_error_chk_flag = 1;
+	if (ret < 0) // error
+	{
+		while (1)
+		{
+			if (time_1ms_fdl_error_chk >= 100U)
+			{
+				fdl_fail += 1;
+				break;
+			}
+		}
+	}
+
+	time_1ms_fdl_error_chk_flag = 0;
+	time_1ms_fdl_error_chk = 0;
+
+	Lin_Transceiver_On();
+	DRV8899_Init();
+
+	AAFx_Type = EXTERNAL_TYPE; // NX5e AAF1, 2 EXTERNAL_TYPE
+
+	// AAFx_Type = INTERNAL_TYPE; //  NX5e AAF3 INTERNAL_TYPE(LOWER)
+
+	// AAFx_Index = AAF_1;			 //
+	// AAF_location_type = LH_TYPE; // CW
+
+	AAFx_Index = AAF_2;			 //
+	AAF_location_type = RH_TYPE; // CCW
+
+	// AAFx_Index = AAF_3;			 //
+	// AAF_location_type = LH_TYPE; // CW
+
+	TotalNumOfAAF = AAFx3; // aaf 3 ea
+
+	TotalNumOfAAFSensor = 0;
+
+	aaf_step = AAF_INITIALIZATION;
+	aaf_init_step = WAIT_INITIALIZATION;
+	AAF_Tx_Position = UNKOWN_POSITION;
+	AAFx_Position_Status = Unknown_Status;
+	AAFx_InitStatus = DURING_INITIALIZATION;
+	time_1ms_spi_flag = 1; // spi timer on
+	while (1)			   // 1ms wait (spi error prevention)
+	{
+		if (time_1ms_spi >= 1U)
+		{
+			break;
+		}
+	}
+	Motor_SPI_Init();
+
+	motor_stall_value = (unsigned int)(rx_16bit_spi[9] & 0xFFU);
+	time_1ms_volt_chk_dly_flag = 1; // POWER ON AFTER 500ms
+
+	motor_cw_stall_value = MOTOR_CW_STALL_CHK_VALUE_NORMAL_VOLTAGE;
+	motor_ccw_stall_value = MOTOR_CCW_STALL_CHK_VALUE_NORMAL_VOLTAGE;
+
+	diag_mode_auto_dir = OPEN;
+	time_1ms_protection_chk_flag = 1;
+
+	voltage_status_change_complete = COMPLETE;
+}
+
+/* =========================================================================================
+ * Application Logic Functions (Main Loop Logic)
+ * ========================================================================================= */
+
+/***********************************************************************************************************************
+ * Function Name: Process_motor_action
+ * Description  : Handles protection timer and executes motor movement (Action Logic).
+ * Called By    : AAF_App
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Process_motor_action(void)
+{
+    // 1. Protection Timer Clamp (Max 550ms)
+    if (time_1ms_protection_chk >= 550) 
+    {
+        time_1ms_protection_chk_flag = 0;
+        time_1ms_protection_chk = 550;
+    }
+
+    // 2. Motor Execution (Start after 50ms)
+    if (time_1ms_protection_chk >= 50)
+    {
+        Motor_Action();
+    }
+}
+
+/***********************************************************************************************************************
+ * Function Name: Process_IGN_Error_Check
+ * Description  : IGN/HEV 신호를 모니터링하고 에러 체크 루틴을 수행함 
+ ***********************************************************************************************************************/
+static void Process_IGN_Error_Check(void)
+{
+    if (((EngRunSta == 0x01) || (HevRdy == 0x01)) && (time_1ms_IGN_chk <= 500))
+    {
+        time_1ms_IGN_chk_flag = 1;
+        if (time_1ms_IGN_chk >= 500)
+        {
+            time_1ms_IGN_chk_flag = 0;
+            time_1ms_IGN_chk = 500;
+            ERROR_chk();
+        }
+    }
+}
+
+static void Process_monitoring_hw_signal(void)
+{
+    Process_IGN_Error_Check();
+
+    VDC_adc();
+}
+
+/***********************************************************************************************************************
+ * Function Name: Main_mode_chk
+ * Description  : Checks and executes the primary operation modes (Normal, Test, Sleep).
+ * Called By    : Process_monitoring_sw_logic
+ ***********************************************************************************************************************/
+static void Main_mode_chk(void)
+{
+    if ((protection_function == OFF) && (lin_bus_inactive_flag == OFF) && (AAF_Maximum_Torque_Test_Mode == OFF) && (time_1ms_protection_chk == 550))
+    {
+        Operating_mode();
+    }
+    else if (AAF_Maximum_Torque_Test_Mode == ON) 
+    {
+        Torque_Test_Mode();
+    }
+    else if (lin_bus_inactive_flag == ON)
+    {
+        Lin_sleep();
+    }
+    else
+    {
+        // invalid
+    }
+}
+
+
+/***********************************************************************************************************************
+ * Function Name: AAF_communicate_chk
+ * Description  : Handles all communication related checks (LIN Rx/Tx, SPI).
+ * Called By    : Process_monitoring_sw_logic
+ ***********************************************************************************************************************/
+static void AAF_communicate_chk(void)
+{
+    Lin_rx_data_chk();
+    Lin_tx_data_chk();
+    SPI_chk();
+}
+
+/***********************************************************************************************************************
+ * Function Name: Safety_protect_chk
+ * Description  : Checks and executes safety (Fail-safe, Antipinch) and protection modes.
+ * Called By    : Process_monitoring_sw_logic
+ ***********************************************************************************************************************/
+static void Safety_protect_chk(void)
+{
+    // 1. Fail Safety Mode
+    if ((protection_function == OFF) && (lin_bus_inactive_flag == OFF) && (AAF_Maximum_Torque_Test_Mode == OFF))
+    {
+        Fail_safety_mode();
+    }
+
+    // 2. Anti-Pinch Logic
+    if ((antipinch_previous_action == OPEN) || (antipinch_previous_action == CLOSE))
+    {
+        Antipinch_move();
+    }
+
+    // 3. LIN Bus Check 
+    Lin_bus_chk();
+
+    // 4. Protection Mode
+    if ((protection_function == ON) && (lin_bus_inactive_flag == OFF) && (AAF_Maximum_Torque_Test_Mode == OFF))
+    {
+        Protection_Mode();
+    }
+}
+
+/***********************************************************************************************************************
+ * Function Name: Step_init_chk
+ * Description  : Handles step position initialization and flash memory sync upon Ignition ON.
+ * Called By    : Process_monitoring_sw_logic
+ ***********************************************************************************************************************/
+static void Step_init_chk(void)
+{
+    if ((step_check_flag == 0) && ((EngRunSta == 0x01) || (HevRdy == 0x01)))
+    {
+        Flash_memory_read();
+        IGN_On_Memory_read();
+
+        time_1ms_step_chk_flag = 1;
+
+        if ((time_1ms_step_chk >= 50))
+        {
+            step_check();
+            time_1ms_step_chk_flag = 0;
+            time_1ms_step_chk = 50;
+            step_check_flag = 1;
+        }
+        if ((step_check_flag == 1))
+        {
+            power_chk = Shutdown_Check;
+            Flash_memory_write();
+        }
+    }
+}
+
+/***********************************************************************************************************************
+ * Function Name: Process_monitoring_sw_logic
+ * Description  : Monitors software-level states executing logic in the EXACT order of the original loop.
+ * Called By    : AAF_App
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Process_monitoring_sw_logic(void)
+{
+    // [Sequence 1] Main Operation Mode Check
+    Main_mode_chk();
+
+    // [Sequence 2] Communication Check
+    AAF_communicate_chk();
+
+    // [Sequence 3] External Factors Check
+    CHK_external_factors();
+
+    // [Sequence 4] Safety & Protection Logic (Fail-safe, Antipinch, LIN Bus, Protection)
+    Safety_protect_chk();
+
+    // [Sequence 5] Step Initialization Check
+    Step_init_chk();
+}
+
+/***********************************************************************************************************************
+ * Function Name: AAF_App
+ * Description  : Application Main Loop Function.
+ * Called By    : Main Loop (while(1))
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void AAF_App(void) 
+{
+    // 1. Motor Action & Timer
+    Process_motor_action();
+
+    // 2. Hardware Signal Monitoring (IGN, ADC)
+    Process_monitoring_hw_signal();
+
+    // 3. Software Logic Execution (Modes, Comms, Safety)
+    Process_monitoring_sw_logic();
+    
+    // 4. Watchdog Refresh
+    R_Config_WDT0_Restart(); 
 }
 
 /***********************************************************************************************************************
@@ -1738,7 +1863,7 @@ static void VDC_adc(void)
 	{
 		INTC1.ICADCA0I0.BIT.RFADCA0I0 = 0;
 		// R_Config_ADCA0_ScanGroup1_GetResult(&bat_adc, 8);
-		R_Config_ADCA0_ScanGroup1_GetResult(&scan_results, 1);
+		R_Config_ADCA0_ScanGroup1_GetResult(scan_results, 1);
 		bat_adc = scan_results[0];
 		adc_sum = 0;
 
@@ -1965,6 +2090,13 @@ static void Check_short_error(void)
             Flash_memory_write();
         }
     }
+	else
+	{
+		//invalid
+	}
+
+	LIN_Short_Chk();
+
 }
 
 /***********************************************************************************************************************
@@ -3581,7 +3713,7 @@ static void Handle_spi_step_wait(void)
         spi_action_step = 2;
         // DRV_Off();
         
-        spi_fail = 1; 
+        // spi_fail = 1; 
         
         time_1ms_spi_error_chk = 0;
         time_1ms_spi_error_chk_flag = 0;
@@ -4230,55 +4362,55 @@ static void Fail_safety_mode(void)
 }
 
 
-static void Initialize_variables(void)
-{
-	motor_start = OFF;
-	time_1us_motor_flag = 0;
-	time_1us_motor = 0;
+// static void Initialize_variables(void)
+// {
+// 	motor_start = OFF;
+// 	time_1us_motor_flag = 0;
+// 	time_1us_motor = 0;
 
-	motor_stall_flag = MOTOR_NORMAL;
-	motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE;
-	time_1ms_spi = 0;
-	time_1ms_init_chk_flag = 0;
-	time_1ms_init_chk = 0;
-	init_move_step = 0;
-	time_1ms_init_move_flag = 0;
-	time_1ms_init_move = 0;
+// 	motor_stall_flag = MOTOR_NORMAL;
+// 	motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE;
+// 	time_1ms_spi = 0;
+// 	time_1ms_init_chk_flag = 0;
+// 	time_1ms_init_chk = 0;
+// 	init_move_step = 0;
+// 	time_1ms_init_move_flag = 0;
+// 	time_1ms_init_move = 0;
 
-	fail_safety_1_cycle_flag = OFF;
-	time_1ms_external_10s_chk_flag = OFF;
-	time_1ms_external_10s_chk = 0;
+// 	fail_safety_1_cycle_flag = OFF;
+// 	time_1ms_external_10s_chk_flag = OFF;
+// 	time_1ms_external_10s_chk = 0;
 
-	step_start_flag = OFF;
-	time_1ms_stall_chk_flag = OFF;
+// 	step_start_flag = OFF;
+// 	time_1ms_stall_chk_flag = OFF;
 
-	spi_action_step = 0;
-	adc_chk_ok_flag = 0;
+// 	spi_action_step = 0;
+// 	adc_chk_ok_flag = 0;
 
-	spi_receive_flag = 0;
-	spi_send_flag = 0;
+// 	spi_receive_flag = 0;
+// 	spi_send_flag = 0;
 
-	time_1us_spi_flag = 0;
-	time_1us_spi = 0;
+// 	time_1us_spi_flag = 0;
+// 	time_1us_spi = 0;
 
-	stall_chk_cnt = 0;
-	stall_chk_time_1ms = 0; // stall reset
-	fail_safety_1_cycle_flag = OFF;
-	fail_safety_flag = OFF;
-	fail_safety_step = 0;
+// 	stall_chk_cnt = 0;
+// 	stall_chk_time_1ms = 0; // stall reset
+// 	fail_safety_1_cycle_flag = OFF;
+// 	fail_safety_flag = OFF;
+// 	fail_safety_step = 0;
 
-	time_1ms_3minute_flag = 0;
-	time_1s_3minute = 0;
-	time_1ms_3minute = 0;
+// 	time_1ms_3minute_flag = 0;
+// 	time_1s_3minute = 0;
+// 	time_1ms_3minute = 0;
 
-	timer_1ms_lin_bus_inactive = 0;
+// 	timer_1ms_lin_bus_inactive = 0;
 
-	lin_bus_inactive_flag = OFF;
+// 	lin_bus_inactive_flag = OFF;
 
-	// wake_up_flag = 1;
+// 	// wake_up_flag = 1;
 
-	lin_rx_chk_flag = OFF;
-}
+// 	lin_rx_chk_flag = OFF;
+// }
 
 static void Lin_bus_chk(void)
 {
@@ -4306,82 +4438,169 @@ static void Lin_bus_chk(void)
 	}
 }
 
+/***********************************************************************************************************************
+ * Function Name: Reset_protection_mode_start
+ * Description  : Protection Mode 진입 시 초기화 수행 (Case 0)
+ * Called By    : Process_protection_mode_prep
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Reset_protection_mode_start(void)
+{
+    DRV_Off();
+    motor_start = OFF;
+    stall_chk_cnt = 0;
+    stall_chk_time_1ms = 0; // stall reset
+    protection_Mode_step = 1;
+    time_1ms_protection_mode_flag = 1;
+    aaf_action = FLAP_STOP;
+    softstart_complete = OFF;
+}
+
+/***********************************************************************************************************************
+ * Function Name: Wait_protection_mode_delay
+ * Description  : 100ms 대기 후 다음 단계로 이동 (Case 1)
+ * Called By    : Process_protection_mode_prep
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Wait_protection_mode_delay(void)
+{
+    if (time_1ms_protection_mode >= 100U)
+    {
+        time_1ms_protection_mode_flag = 0;
+        time_1ms_protection_mode = 0;
+        protection_Mode_step = 2;
+    }
+}
+
+/***********************************************************************************************************************
+ * Function Name: Start_protection_mode_move
+ * Description  : 조건 확인 후 모터 Open 구동 시작 (Case 2)
+ * Called By    : Process_protection_mode_action
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Start_protection_mode_move(void)
+{
+    // if(((adc_avr >= ADC_UNDER_VOLTAGE_7V) && (adc_avr <= ADC_UNDER_VOLTAGE_9V)) || ((adc_avr >= ADC_OVER_VOLTAGE_16V) && (adc_avr <= ADC_OVER_VOLTAGE_18V)) || (AAF_ProtectionMode_Rx == ON))
+    // if(((adc_avr >= ADC_OVER_VOLTAGE_16V) && (adc_avr <= ADC_OVER_VOLTAGE_18V)) || (AAF_ProtectionMode_Rx == ON) && (AAF_Tx_Position != OPEN))   
+    if ((AAF_Tx_Position != OPEN))
+	{
+        Motor_dir_open();                    // dir OPEN
+       	DRV8899_On();                        // drv on
+        motor_start = ON;                // step start
+        time_1ms_stall_chk_flag = ON;    // test
+        motor_stall_flag = MOTOR_NORMAL; // stall reset
+        stall_chk_time_1ms = 0;          // stall reset
+        protection_Mode_step = 3;
+        time_1ms_init_chk_flag = 1; // test
+    }
+    else
+    {
+        time_1ms_init_chk_flag = 0;
+        protection_Mode_step = 4;
+    }
+}
+
+/***********************************************************************************************************************
+ * Function Name: Check_protection_mode_stop
+ * Description  : 목표 위치 도달 또는 스톨 발생 시 정지 (Case 3)
+ * Called By    : Process_protection_mode_action
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Check_protection_mode_stop(void)
+{
+    // if ((motor_stall_flag == MOTOR_STALL) || (time_1ms_init_chk >= 4500U))
+    if ((step_position <= (step_position_open + limit_step_position)) || (motor_stall_flag == MOTOR_STALL))
+    {
+        DRV_Off();
+        motor_start = OFF;
+        stall_chk_cnt = 0;
+        stall_chk_time_1ms = 0; // stall reset
+        time_1ms_init_chk_flag = 0;
+        time_1ms_init_chk = 0;
+        AAF_Tx_Position = UNKOWN_POSITION;
+        AAFx_InitStatus = DURING_INITIALIZATION;
+        AAFx_Position_Status = Unknown_Status;
+        softstart_complete = OFF;
+        motor_step_value = STEP_TIME_1000RPM;
+        protection_Mode_step = 4;
+    }
+}
+
+/***********************************************************************************************************************
+ * Function Name: Finalize_protection_mode
+ * Description  : Protection Mode 최종 상태 업데이트 (Case 4)
+ * Called By    : Process_protection_mode_action
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Finalize_protection_mode(void)
+{
+    AAF_Tx_Position = UNKOWN_POSITION;
+    AAFx_InitStatus = DURING_INITIALIZATION;
+    AAFx_Position_Status = Unknown_Status;
+    // Flash_memory_write();
+}
+
+static void Process_protection_mode_prep(void)
+{
+    switch (protection_Mode_step)
+    {
+    case 0:
+        Reset_protection_mode_start();
+        break;
+    case 1:
+        Wait_protection_mode_delay();
+        break;
+    default:
+        break;
+    }
+}
+
+static void Process_protection_mode_action(void)
+{
+    switch (protection_Mode_step)
+    {
+    case 2:
+        Start_protection_mode_move();
+        break;
+    case 3:
+        Check_protection_mode_stop();
+        break;
+    case 4:
+        Finalize_protection_mode();
+        break;
+    default:
+        break;
+    }
+}
+
+/***********************************************************************************************************************
+ * Function Name: Protection_Mode
+ * Description  : Protection Mode 동작 시퀀스 제어
+ * Metric Info  : FUCYC = 3 (Pass), FUNDC = 2 (Pass)
+ * Called By    : Main Loop
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
 static void Protection_Mode(void)
 {
-	if (stall_test_mode == 0U)
-	{
-		switch (protection_Mode_step)
-		{
-		case 0:
-			DRV_Off();
-			motor_start = OFF;
-			stall_chk_cnt = 0;
-			stall_chk_time_1ms = 0; // stall reset
-			protection_Mode_step = 1;
-			time_1ms_protection_mode_flag = 1;
-			aaf_action = FLAP_STOP;
-			softstart_complete = OFF;
-			break;
-
-		case 1:
-			if (time_1ms_protection_mode >= 100U)
-			{
-				time_1ms_protection_mode_flag = 0;
-				time_1ms_protection_mode = 0;
-				protection_Mode_step = 2;
-			}
-			break;
-
-		case 2:
-			// if(((adc_avr >= ADC_UNDER_VOLTAGE_7V) && (adc_avr <= ADC_UNDER_VOLTAGE_9V)) || ((adc_avr >= ADC_OVER_VOLTAGE_16V) && (adc_avr <= ADC_OVER_VOLTAGE_18V)) || (AAF_ProtectionMode_Rx == ON))
-			// if(((adc_avr >= ADC_OVER_VOLTAGE_16V) && (adc_avr <= ADC_OVER_VOLTAGE_18V)) || (AAF_ProtectionMode_Rx == ON) && (AAF_Tx_Position != OPEN))	// ???  ?   ?  ?   紐⑦꽣 ?  ?   紐삵븿
-			if ((AAF_Tx_Position != OPEN))
-			{
-				Motor_Open();					 // dir OPEN
-				DRV_On();						 // drv on
-				motor_start = ON;				 // step start
-				time_1ms_stall_chk_flag = ON;	 // test
-				motor_stall_flag = MOTOR_NORMAL; // stall reset
-				stall_chk_time_1ms = 0;			 // stall reset
-				protection_Mode_step = 3;
-				time_1ms_init_chk_flag = 1; // test
-			}
-			else
-			{
-				time_1ms_init_chk_flag = 0;
-				protection_Mode_step = 4;
-			}
-			break;
-
-		case 3:
-			// if ((motor_stall_flag == MOTOR_STALL) || (time_1ms_init_chk >= 4500U))
-			if ((step_position <= step_position_open + limit_step_position) || (motor_stall_flag == MOTOR_STALL))
-			{
-				DRV_Off();
-				motor_start = OFF;
-				stall_chk_cnt = 0;
-				stall_chk_time_1ms = 0; // stall reset
-				time_1ms_init_chk_flag = 0;
-				time_1ms_init_chk = 0;
-				AAF_Tx_Position = UNKOWN_POSITION;
-				AAFx_InitStatus = DURING_INITIALIZATION;
-				AAFx_Position_Status = Unknown_Status;
-				softstart_complete = OFF;
-				motor_step_value = STEP_TIME_1000RPM;
-				protection_Mode_step = 4;
-			}
-			break;
-
-		case 4:
-			AAF_Tx_Position = UNKOWN_POSITION;
-			AAFx_InitStatus = DURING_INITIALIZATION;
-			AAFx_Position_Status = Unknown_Status;
-			break;
-
-		default:
-			break;
-		}
-	}
+    if (stall_test_mode == 0U)
+    {
+        // Step 0 ~ 1: 준비 및 대기
+        if (protection_Mode_step <= 1)
+        {
+            Process_protection_mode_prep();
+        }
+        // Step 2 ~ 4: 동작 및 완료
+        else
+        {
+            Process_protection_mode_action();
+        }
+    }
 }
 
 static void Voltage_chk_current_limit_init(void)
@@ -4405,605 +4624,748 @@ static void Voltage_chk_current_limit_init(void)
 	}
 }
 
-static void Current_limiting_select(void)
+// static void Current_limiting_select(void)
+// {
+// 	if (voltage_status_spi == LOW_VOLTAGE_1ST)
+// 	{
+// 		if (adc_avr >= ADC_VOLTAGE_15V)
+// 		{
+// 			voltage_status_spi = HIGH_VOLTAGE_1ST;
+// 			voltage_status_change = ON;
+// 		}
+// 		else if (adc_avr >= ADC_VOLTAGE_13_7V)
+// 		{
+// 			voltage_status_spi = NORMAL_VOLTAGE;
+// 			voltage_status_change = ON;
+// 		}
+// 		else
+// 		{
+// 			//invalid
+// 		}
+// 	}
+// 	else if (voltage_status_spi == NORMAL_VOLTAGE)
+// 	{
+// 		if (adc_avr <= ADC_VOLTAGE_13_5V)
+// 		{
+// 			voltage_status_spi = LOW_VOLTAGE_1ST;
+// 			voltage_status_change = ON;
+// 		}
+// 		else if (adc_avr >= ADC_VOLTAGE_15V)
+// 		{
+// 			voltage_status_spi = HIGH_VOLTAGE_1ST;
+// 			voltage_status_change = ON;
+// 		}
+// 		else
+// 		{
+// 			//invalid
+// 		}
+// 	}
+// 	else if (voltage_status_spi == HIGH_VOLTAGE_1ST)
+// 	{
+// 		if (adc_avr <= ADC_VOLTAGE_13_7V)
+// 		{
+// 			voltage_status_spi = LOW_VOLTAGE_1ST;
+// 			voltage_status_change = ON;
+// 		}
+// 		else if (adc_avr <= ADC_VOLTAGE_14_8V)
+// 		{
+// 			voltage_status_spi = NORMAL_VOLTAGE;
+// 			voltage_status_change = ON;
+// 		}
+// 		else
+// 		{
+// 			//invalid
+// 		}
+// 	}
+// 	else
+// 	{
+// 		//invalid
+// 	}
+// }
+
+/* =========================================================================================
+ * LIN Sleep Mode 
+ * ========================================================================================= */
+
+/***********************************************************************************************************************
+ * Function Name: Stop_motor_and_reset
+ * Description  : 모터 구동 정지 및 제어 변수 리셋 (Case 0, 4 공통)
+ * Called By    : Reset_lin_sleep_start, Check_lin_motor_completion
+ ***********************************************************************************************************************/
+static void Stop_motor_and_reset(void)
 {
-	if (voltage_status_spi == LOW_VOLTAGE_1ST)
-	{
-		if (adc_avr >= ADC_VOLTAGE_15V)
-		{
-			voltage_status_spi = HIGH_VOLTAGE_1ST;
-			voltage_status_change = ON;
-		}
-		else if (adc_avr >= ADC_VOLTAGE_13_7V)
-		{
-			voltage_status_spi = NORMAL_VOLTAGE;
-			voltage_status_change = ON;
-		}
-		else
-		{
-			//invalid
-		}
-	}
-	else if (voltage_status_spi == NORMAL_VOLTAGE)
-	{
-		if (adc_avr <= ADC_VOLTAGE_13_5V)
-		{
-			voltage_status_spi = LOW_VOLTAGE_1ST;
-			voltage_status_change = ON;
-		}
-		else if (adc_avr >= ADC_VOLTAGE_15V)
-		{
-			voltage_status_spi = HIGH_VOLTAGE_1ST;
-			voltage_status_change = ON;
-		}
-		else
-		{
-			//invalid
-		}
-	}
-	else if (voltage_status_spi == HIGH_VOLTAGE_1ST)
-	{
-		if (adc_avr <= ADC_VOLTAGE_13_7V)
-		{
-			voltage_status_spi = LOW_VOLTAGE_1ST;
-			voltage_status_change = ON;
-		}
-		else if (adc_avr <= ADC_VOLTAGE_14_8V)
-		{
-			voltage_status_spi = NORMAL_VOLTAGE;
-			voltage_status_change = ON;
-		}
-		else
-		{
-			//invalid
-		}
-	}
-	else
-	{
-		//invalid
-	}
+    DRV_Off();
+    motor_start = OFF;
+    stall_chk_cnt = 0;
+    stall_chk_time_1ms = 0;
+    softstart_complete = OFF;
+    motor_step_value = STEP_TIME_1000RPM;
 }
 
+/***********************************************************************************************************************
+ * Function Name: Reset_lin_sleep_start
+ * Description  : Lin Sleep 모드 초기 진입 시 변수 초기화 수행 (Case 0)
+ * Called By    : Process_lin_sleep_prep
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Reset_lin_sleep_start(void)
+{
+    Stop_motor_and_reset(); 
+    
+    // Case 0에만 있는 추가 초기화
+    timer_1ms_init_fail_chk_flag = 0;
+    timer_1ms_init_fail_chk = 0;
+
+    lin_sleep_step = 1;
+}
+
+/***********************************************************************************************************************
+ * Function Name: Wait_lin_sleep_delay
+ * Description  : 50ms 동안 대기 후 다음 단계로 이동 (Case 1)
+ * Called By    : Process_lin_sleep_prep
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Wait_lin_sleep_delay(void)
+{
+    timer_1ms_lin_sleep_flag = 1;
+
+    if (timer_1ms_lin_sleep >= 50U)
+    {
+        timer_1ms_lin_sleep_flag = 0;
+        timer_1ms_lin_sleep = 0;
+        lin_sleep_step = 2;
+    }
+}
+
+/***********************************************************************************************************************
+ * Function Name: Parse_lin_wakeup_command
+ * Description  : LIN 통신으로 수신된 Wakeup 명령을 해석하여 동작(Open/Close)을 결정함 (Case 2)
+ * Called By    : Process_lin_sleep_prep
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Parse_lin_wakeup_command(void)
+{
+    if (AAF_LINOut == 0x00U)
+    {
+        if (lin_aaf_command == OPEN)
+        {
+            DRV8899_Wakeup();
+            aaf_action = OPEN;
+        }
+        else if (lin_aaf_command == CLOSE)
+        {
+            DRV8899_Wakeup();
+            aaf_action = CLOSE;
+        }
+        else 
+        { 
+            //invalid 
+        }
+        
+        lin_sleep_step = 3;
+    }
+    else if (AAF_LINOut == 0x01U)
+    {
+        DRV8899_Wakeup();
+        aaf_action = OPEN;
+        lin_sleep_step = 3;
+    }
+    else 
+    { 
+        //invalid 
+    }
+}
+
+/***********************************************************************************************************************
+ * Function Name: Process_lin_sleep_prep
+ * Description  : LIN Sleep 전반부(준비) 단계 처리 (초기화 -> 대기 -> 명령 해석)
+ * Called By    : Lin_sleep (Step 0 ~ 2)
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Process_lin_sleep_prep(void)
+{
+    switch (lin_sleep_step)
+    {
+    case 0: 
+        Reset_lin_sleep_start();  
+        break;
+    case 1: 
+        Wait_lin_sleep_delay();   
+        break;
+    case 2: 
+        Parse_lin_wakeup_command(); 
+        break;
+    default: 
+        break;
+    }
+}
+
+/***********************************************************************************************************************
+ * Function Name: Start_lin_motor_move
+ * Description  : 결정된 Action(OPEN/CLOSE)에 따라 모터 구동을 시작함 (Case 3)
+ * Called By    : Process_lin_sleep_move
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Start_lin_motor_move(void)
+{
+    if (aaf_action == OPEN)
+    {
+        Motor_dir_open();
+        DRV_On(); 
+        motor_start = ON;
+        motor_stall_flag = MOTOR_NORMAL;
+        stall_chk_time_1ms = 0;
+        motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE;
+        time_1ms_spi = 0;
+        
+        lin_sleep_step = 4;
+    }
+    else if (aaf_action == CLOSE)
+    {
+        Motor_dir_close();
+        DRV_On(); 
+        motor_start = ON;
+        motor_stall_flag = MOTOR_NORMAL;
+        stall_chk_time_1ms = 0;
+        motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE;
+        time_1ms_spi = 0;
+        
+        lin_sleep_step = 4;
+    }
+    else
+    {
+        lin_sleep_step = 5;
+    }
+}
+
+/***********************************************************************************************************************
+ * Function Name: Check_lin_motor_completion
+ * Description  : 모터 구동 중 목표 위치 도달 또는 스톨 발생 여부를 확인하고 정지함 (Case 4)
+ * Called By    : Process_lin_sleep_move
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Check_lin_motor_completion(void)
+{
+    // 조건 1: OPEN 방향 목표 위치 도착
+    if ((aaf_action == OPEN) && (step_position <= (step_position_open + limit_step_position)))
+    {
+        Stop_motor_and_reset(); // 공통 정지
+        
+        AAF_Tx_Position = OPEN;
+        AAFx_Position_Status = Open_Status;
+        Tx_position_complete_chk();
+        aaf_step = FINISHED_OPERATE;
+        
+        lin_sleep_step = 5;
+    }
+    // 조건 2: CLOSE 방향 목표 위치 도착
+    else if ((aaf_action == CLOSE) && (step_position >= (step_position_close - limit_step_position)))
+    {
+        Stop_motor_and_reset(); // 공통 정지
+        
+        AAF_Tx_Position = CLOSE;
+        AAFx_Position_Status = Close_Status;
+        AAFx_InitStatus = NORMAL_INITIALIZATION;
+        Tx_position_complete_chk();
+        aaf_step = FINISHED_OPERATE;
+        
+        lin_sleep_step = 5;
+    }
+    // 조건 3: 스톨 발생
+    else if (motor_stall_flag == MOTOR_STALL)
+    {
+        Stop_motor_and_reset(); // 공통 정지
+        
+        aaf_step = AAF_INITIALIZATION;
+        aaf_init_step = WAIT_INITIALIZATION;
+        AAF_Tx_Position = UNKOWN_POSITION;
+        AAFx_Position_Status = Unknown_Status;
+        AAFx_InitStatus = DURING_INITIALIZATION;
+        motor_stall_flag = MOTOR_NORMAL;
+        
+        lin_sleep_step = 5;
+    }
+    else
+    {
+        //invalid
+    }
+}
+
+/***********************************************************************************************************************
+ * Function Name: Process_final_sleep
+ * Description  : 최종 Sleep 진입 전 상태를 정리하고 MCU Sleep을 호출함 (Case 5)
+ * Called By    : Process_lin_sleep_move
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Process_final_sleep(void)
+{
+    if ((AAF_Tx_Position == UNKOWN_POSITION) || (AAFx_Position_Status == Unknown_Status) || (AAFx_InitStatus == DURING_INITIALIZATION))
+    {
+        aaf_init_step = WAIT_INITIALIZATION;
+        AAF_Tx_Position = UNKOWN_POSITION;
+        AAFx_Position_Status = Unknown_Status;
+        AAFx_InitStatus = DURING_INITIALIZATION;
+    }
+    MCU_sleep();
+}
+
+/***********************************************************************************************************************
+ * Function Name: Process_lin_sleep_move
+ * Description  : LIN Sleep 후반부(동작) 단계 처리 (구동 시작 -> 완료 확인 -> Sleep)
+ * Called By    : Lin_sleep (Step 3 ~ 5)
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Process_lin_sleep_move(void)
+{
+    switch (lin_sleep_step)
+    {
+    case 3: 
+        Start_lin_motor_move(); 
+        break;
+    case 4: 
+        Check_lin_motor_completion(); 
+        break;
+    case 5: 
+        Process_final_sleep(); 
+        break;
+    default: 
+        break;
+    }
+}
+
+/***********************************************************************************************************************
+ * Function Name: Lin_sleep
+ * Description  : LIN Sleep 모드 진입 및 Wakeup 동작 시퀀스 전체 제어
+ * Called By    : Main Loop
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
 static void Lin_sleep(void)
 {
-	switch (lin_sleep_step)
-	{
-	case 0:
-		DRV_Off();
-		motor_start = OFF;
-		stall_chk_cnt = 0;
-		stall_chk_time_1ms = 0;
-		softstart_complete = OFF;
-		motor_step_value = STEP_TIME_1000RPM;
-		timer_1ms_init_fail_chk_flag = 0;
-		timer_1ms_init_fail_chk = 0;
-
-		lin_sleep_step = 1;
-		break;
-
-	case 1:
-		timer_1ms_lin_sleep_flag = 1;
-
-		if (timer_1ms_lin_sleep >= 50U)
-		{
-			timer_1ms_lin_sleep_flag = 0;
-			timer_1ms_lin_sleep = 0;
-
-			lin_sleep_step = 2;
-		}
-		break;
-
-	case 2:
-		if (AAF_LINOut == 0x00U)
-		{
-			if (lin_aaf_command == OPEN)
-			{
-				DRV8899_Wakeup();
-				aaf_action = OPEN;
-			}
-			else if (lin_aaf_command == CLOSE)
-			{
-				DRV8899_Wakeup();
-				aaf_action = CLOSE;
-			}
-			else
-			{
-				//invalid
-			}
-
-			lin_sleep_step = 3;
-		}
-		else if (AAF_LINOut == 0x01U)
-		{
-			DRV8899_Wakeup();
-			aaf_action = OPEN;
-
-			lin_sleep_step = 3;
-		}
-		else
-		{
-			//invalid
-		}
-		break;
-
-	case 3:
-		if (aaf_action == OPEN)
-		{
-			Motor_Open();	  // dir CLOSE
-			DRV_On();		  // drv on
-			motor_start = ON; // step start
-
-			motor_stall_flag = MOTOR_NORMAL;				  // stall reset
-			stall_chk_time_1ms = 0;							  // stall reset
-			motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE; // stall reset
-			time_1ms_spi = 0;
-
-			// timer_1ms_lin_sleep_flag = 1; // test
-
-			lin_sleep_step = 4;
-		}
-		else if (aaf_action == CLOSE)
-		{
-			Motor_Close();	  // dir CLOSE
-			DRV_On();		  // drv on
-			motor_start = ON; // step start
-
-			motor_stall_flag = MOTOR_NORMAL;				  // stall reset
-			stall_chk_time_1ms = 0;							  // stall reset
-			motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE; // stall reset
-			time_1ms_spi = 0;
-
-			// timer_1ms_lin_sleep_flag = 1; // test
-
-			lin_sleep_step = 4;
-		}
-		else
-		{
-			lin_sleep_step = 5;
-		}
-		break;
-
-	case 4:
-		if (((aaf_action == OPEN) && (step_position <= (step_position_open + limit_step_position)))) //
-		{
-			DRV_Off();
-			motor_start = OFF;
-			stall_chk_cnt = 0;
-			stall_chk_time_1ms = 0; // stall reset
-			softstart_complete = OFF;
-			motor_step_value = STEP_TIME_1000RPM;
-			AAF_Tx_Position = OPEN;
-			AAFx_Position_Status = Open_Status;
-			Tx_position_complete_chk();
-			aaf_step = FINISHED_OPERATE;
-			// timer_1ms_lin_sleep_flag = 0;
-			// timer_1ms_lin_sleep = 0;
-			lin_sleep_step = 5;
-		}
-		else if (((aaf_action == CLOSE) && (step_position >= (step_position_close - limit_step_position))))
-		{
-			DRV_Off();
-			motor_start = OFF;
-			stall_chk_cnt = 0;
-			stall_chk_time_1ms = 0; // stall reset
-			softstart_complete = OFF;
-			motor_step_value = STEP_TIME_1000RPM;
-			AAF_Tx_Position = CLOSE;
-			AAFx_Position_Status = Close_Status;
-			AAFx_InitStatus = NORMAL_INITIALIZATION;
-			Tx_position_complete_chk();
-			aaf_step = FINISHED_OPERATE;
-			// timer_1ms_lin_sleep_flag = 0;
-			// timer_1ms_lin_sleep = 0;
-			lin_sleep_step = 5;
-		}
-		else if (motor_stall_flag == MOTOR_STALL)
-		{
-			DRV_Off();
-			motor_start = OFF;
-			stall_chk_cnt = 0;
-			stall_chk_time_1ms = 0; // stall reset
-			softstart_complete = OFF;
-			motor_step_value = STEP_TIME_1000RPM;
-			aaf_step = AAF_INITIALIZATION;
-			aaf_init_step = WAIT_INITIALIZATION;
-			AAF_Tx_Position = UNKOWN_POSITION;
-			AAFx_Position_Status = Unknown_Status;
-			AAFx_InitStatus = DURING_INITIALIZATION;
-			motor_stall_flag = MOTOR_NORMAL; // stall reset
-			lin_sleep_step = 5;
-		}
-		else
-		{
-			//invalid
-		}
-		break;
-	case 5:
-		if ((AAF_Tx_Position == UNKOWN_POSITION) || (AAFx_Position_Status == Unknown_Status) || (AAFx_InitStatus == DURING_INITIALIZATION))
-		{
-			aaf_init_step = WAIT_INITIALIZATION;
-			AAF_Tx_Position = UNKOWN_POSITION;
-			AAFx_Position_Status = Unknown_Status;
-			AAFx_InitStatus = DURING_INITIALIZATION;
-		}
-		MCU_sleep();
-		break;
-
-	default:
-		break;
-	}
+    // Step 0 ~ 2: 준비 및 명령 수신 단계
+    if (lin_sleep_step <= 2)
+    {
+        Process_lin_sleep_prep();
+    }
+    // Step 3 ~ 5: 모터 구동 및 Sleep 단계
+    else
+    {
+        Process_lin_sleep_move();
+    }
 }
 
+/* =========================================================================================
+ * Anti-Pinch Movement Helper Functions
+ * ========================================================================================= */
+
+/***********************************************************************************************************************
+ * Function Name: Antipinch_prev_open
+ * Description  : 이전에 OPEN 동작 중 끼임이 발생했을 때의 복구 시퀀스 (Close -> Wait -> Open)
+ * Called By    : Antipinch_move
+ ***********************************************************************************************************************/
+static void Antipinch_prev_open(void)
+{
+    switch (antipinch_step)
+    {
+    case 0:
+        Motor_Close();                
+        DRV_On();                       
+        motor_start = ON;               
+        time_1ms_init_chk_flag = 1;     
+
+        aaf_action = CLOSE;
+        AAFx_ErrorStatus = Open_ErrorStatus; 
+        time_1ms_spi = 0;               
+        motor_stall_flag = MOTOR_NORMAL; 
+        antipinch_step = 1;
+        break;
+
+    case 1:
+        if ((motor_stall_flag == MOTOR_STALL) || (time_1ms_init_chk >= 4500U)) 
+        {
+            DRV_Off();
+            motor_start = OFF;
+            stall_chk_cnt = 0;
+            stall_chk_time_1ms = 0; 
+            softstart_complete = OFF;
+            motor_step_value = STEP_TIME_1000RPM;
+            aaf_action = FLAP_STOP;
+            time_1ms_init_chk_flag = 0;
+            time_1ms_init_chk = 0;
+            
+            if (step_position >= step_position_close)
+            {
+                step_position = step_position_close;
+            }
+
+            antipinch_step = 2;
+        }
+        break;
+
+    case 2:
+        time_1ms_antipinch_flag = 1;
+
+        if (time_1ms_antipinch >= 3000U)
+        {
+            time_1ms_antipinch_flag = 0;
+            time_1ms_antipinch = 0;
+
+            antipinch_step = 3;
+        }
+        break;
+
+    case 3:
+        Motor_Open();    
+        DRV_On();         
+        motor_start = ON; 
+
+        stall_chk_time_1ms = 0;                                           
+        motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE; 
+        motor_stall_flag = MOTOR_NORMAL;                  
+        time_1ms_spi = 0;
+        aaf_action = OPEN;
+
+        time_1ms_init_chk_flag = 1; 
+
+        antipinch_step = 4;
+        break;
+
+    case 4:
+        if ((aaf_action == OPEN) && (step_position <= step_position_open + limit_step_position))
+        {
+            DRV_Off();
+            motor_start = OFF;
+            
+            // 진단 모드 여부에 따른 분기
+            if (Diag_Mode != 0)
+            {
+                if (lin_aaf_command == DIAG_MODE_OPEN)
+                {
+                    aaf_action = DIAG_MODE_OPEN;
+                    aaf_step = AAF_WAITING;
+                    AAFx_ErrorStatus = No_ErrorStatus;
+                    AAFx_InitStatus = NORMAL_FINISHED_INITIALIZATION;
+                    Tx_position_complete_chk();
+                }
+                else if (lin_aaf_command == DIAG_MODE_AUTO)
+                {
+                    aaf_action = DIAG_MODE_AUTO;
+                    aaf_step = AAF_WAITING;
+                    AAFx_ErrorStatus = No_ErrorStatus;
+                    AAFx_InitStatus = NORMAL_FINISHED_INITIALIZATION;
+                    Tx_position_complete_chk();
+                }
+                else
+                {
+                    // invalid
+                }
+            }
+            else
+            {
+                AAF_Tx_Position = OPEN;
+                AAFx_InitStatus = NORMAL_FINISHED_INITIALIZATION;
+                AAFx_ErrorStatus = No_ErrorStatus;
+                Tx_position_complete_chk();
+            }
+
+            fail_safety_flag = OFF;
+            antipinch_action_on = OFF;
+
+            stall_chk_cnt = 0;
+            stall_chk_time_1ms = 0;
+            softstart_complete = OFF;
+            motor_step_value = STEP_TIME_1000RPM;
+
+            antipinch_previous_action = ANTIWAIT;
+            antipinch_step = 0;
+
+            aaf_step = FINISHED_OPERATE;
+        }
+        else if ((motor_stall_flag == MOTOR_STALL) || (time_1ms_init_chk >= 4500U))
+        {
+            DRV_Off();
+            motor_start = OFF;
+            stall_chk_cnt = 0;
+            stall_chk_time_1ms = 0;
+            softstart_complete = OFF;
+            motor_step_value = STEP_TIME_1000RPM;
+
+            time_1ms_init_chk_flag = 0;
+            time_1ms_init_chk = 0;
+
+            antipinch_previous_action = INITIALIZATION;
+            antipinch_action_on = OFF;
+
+            if (Diag_Mode != 0)
+            {
+                AAFx_InitStatus = ABNORMAL_FINISHED_INITIALIZATION;
+                motor_fault_chk = 1;
+                Diag_Mode = 0;
+            }
+            else
+            {
+                fail_safety_flag = ON;
+                fail_safety_step = 5;
+            }
+        }
+        break;
+
+    default:
+        break;
+    }
+}
+
+/***********************************************************************************************************************
+ * Function Name: Antipinch_prev_close
+ * Description  : 이전에 CLOSE 동작 중 끼임이 발생했을 때의 복구 시퀀스 (Open -> Wait -> Close)
+ * Called By    : Antipinch_move
+ ***********************************************************************************************************************/
+static void Antipinch_prev_close(void)
+{
+    AAFx_InitStatus = DURING_INITIALIZATION; 
+
+    switch (antipinch_step)
+    {
+    case 0:
+        Motor_Open();   
+        DRV_On();       
+
+        stall_chk_time_1ms = 0; 
+
+        motor_start = ON;                
+        time_1ms_init_chk_flag = 1;      
+        motor_stall_flag = MOTOR_NORMAL; 
+        time_1ms_spi = 0;
+
+        aaf_action = OPEN;
+        AAFx_ErrorStatus = Close_ErrorStatus; 
+        antipinch_step = 1;
+        break;
+
+    case 1:
+        if ((motor_stall_flag == MOTOR_STALL) || (time_1ms_init_chk >= 4500U))
+        {
+            DRV_Off();
+            motor_start = OFF;
+            stall_chk_cnt = 0;
+            stall_chk_time_1ms = 0; 
+            softstart_complete = OFF;
+            motor_step_value = STEP_TIME_1000RPM;
+
+            time_1ms_init_chk_flag = 0;
+            time_1ms_init_chk = 0;
+            
+            if (step_position <= step_position_open)
+            {
+                step_position = step_position_open;
+            }
+
+            aaf_action = FLAP_STOP;
+            antipinch_step = 2;
+        }
+        break;
+
+    case 2:
+        time_1ms_antipinch_flag = 1;
+
+        if (time_1ms_antipinch >= 3000U)
+        {
+            time_1ms_antipinch_flag = 0;
+            time_1ms_antipinch = 0;
+            antipinch_step = 3;
+
+            time_1ms_init_chk_flag = 0; 
+            time_1ms_init_chk = 0;      
+        }
+        break;
+
+    case 3:
+        Motor_Close();   
+        DRV_On();        
+        motor_start = ON; 
+        motor_stall_flag = MOTOR_NORMAL; 
+
+        stall_chk_time_1ms = 0;                                           
+        motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE; 
+        time_1ms_spi = 0;
+
+        aaf_action = CLOSE;
+        time_1ms_init_chk_flag = 1; 
+        antipinch_step = 4;
+        break;
+
+    case 4:
+        if ((aaf_action == CLOSE) && (step_position >= step_position_close - limit_step_position))
+        {
+            DRV_Off();
+            motor_start = OFF;
+
+            if (Diag_Mode != 0)
+            {
+                if (lin_aaf_command == DIAG_MODE_CLOSE)
+                {
+                    aaf_action = DIAG_MODE_CLOSE;
+                    aaf_step = AAF_WAITING;
+                    AAFx_ErrorStatus = No_ErrorStatus;
+                    AAFx_InitStatus = NORMAL_FINISHED_INITIALIZATION;
+                    Tx_position_complete_chk();
+                }
+                else if (lin_aaf_command == DIAG_MODE_AUTO)
+                {
+                    aaf_action = DIAG_MODE_AUTO;
+                    aaf_step = AAF_WAITING;
+                    AAFx_ErrorStatus = No_ErrorStatus;
+                    AAFx_InitStatus = NORMAL_FINISHED_INITIALIZATION;
+                    Tx_position_complete_chk();
+                }
+                else
+                {
+                    // invalid
+                }
+            }
+            else
+            {
+                AAF_Tx_Position = CLOSE;
+                AAFx_InitStatus = NORMAL_FINISHED_INITIALIZATION;
+                AAFx_ErrorStatus = No_ErrorStatus;
+                Tx_position_complete_chk();
+            }
+
+            fail_safety_flag = OFF;
+            antipinch_action_on = OFF;
+
+            stall_chk_cnt = 0;
+            stall_chk_time_1ms = 0;
+            softstart_complete = OFF;
+            motor_step_value = STEP_TIME_1000RPM;
+
+            antipinch_previous_action = ANTIWAIT;
+            antipinch_step = 0;
+
+            aaf_step = FINISHED_OPERATE;
+        }
+        else if ((motor_stall_flag == MOTOR_STALL) || (time_1ms_init_chk >= 4500U))
+        {
+            DRV_Off();
+            motor_start = OFF;
+            stall_chk_cnt = 0;
+            stall_chk_time_1ms = 0;
+            softstart_complete = OFF;
+            motor_step_value = STEP_TIME_1000RPM;
+
+            time_1ms_init_chk_flag = 0;
+            time_1ms_init_chk = 0;
+
+            aaf_action = FLAP_STOP;
+            antipinch_step = 5;
+        }
+        break;
+
+    case 5:
+        Motor_Open();    
+        DRV_On();         
+        motor_start = ON; 
+        time_1ms_init_chk_flag = 1; 
+        aaf_action = OPEN;
+        motor_stall_flag = MOTOR_NORMAL; 
+        time_1ms_spi = 0;
+
+        stall_chk_time_1ms = 0;                                           
+        motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE; 
+
+        antipinch_step = 6;
+        break;
+
+    case 6:
+        if ((motor_stall_flag == MOTOR_STALL) || (time_1ms_init_chk >= 4500U))
+        {
+            DRV_Off();
+            motor_start = OFF;
+            stall_chk_cnt = 0;
+            stall_chk_time_1ms = 0; 
+            softstart_complete = OFF;
+            motor_step_value = STEP_TIME_1000RPM;
+
+            aaf_action = FLAP_STOP;
+            time_1ms_init_chk_flag = 0;
+            time_1ms_init_chk = 0;
+
+            antipinch_step = 7;
+
+            fail_safety_flag = ON;
+            antipinch_action_on = OFF;
+
+            antipinch_previous_action = INITIALIZATION;
+
+            time_1ms_external_10s_chk_flag = OFF; 
+            time_1ms_external_10s_chk = 0;
+            aaf_action = FLAP_STOP;
+            aaf_action_complete_chk = FLAP_STOP;
+
+            time_1ms_stall_chk = 0;      
+            time_1ms_stall_chk_flag = 0; 
+
+            motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE; 
+
+            if (Diag_Mode != 0)
+            {
+                AAFx_InitStatus = ABNORMAL_FINISHED_INITIALIZATION;
+                motor_fault_chk = 1;
+                Diag_Mode = 0;
+            }
+            else
+            {
+                fail_safety_flag = ON;
+                fail_safety_step = 5;
+            }
+        }
+        break;
+
+    default:
+        break;
+    }
+}
+
+/* =========================================================================================
+ * Main Anti-Pinch Function
+ * ========================================================================================= */
+
+/***********************************************************************************************************************
+ * Function Name: Antipinch_move
+ * Description  : Anti-Pinch(끼임 방지) 동작 시퀀스 제어. 이전 동작 방향에 따라 반대 방향으로 회피 구동함.
+ * Called By    : Main Loop (Operating_mode)
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
 static void Antipinch_move(void)
 {
-	if (antipinch_action_on == ON)
-	{
-		AAFx_Position_Status = Unknown_Status;
-		AAF_Tx_Position = UNKOWN_POSITION;
-		AAFx_InitStatus = DURING_INITIALIZATION;
-		if (antipinch_previous_action == OPEN)
-		{
-			switch (antipinch_step)
-			{
-			case 0:
-				Motor_Close();				// dir CLOSE
-				DRV_On();					// drv on
-				motor_start = ON;			// step start
-				time_1ms_init_chk_flag = 1; // test
-
-				aaf_action = CLOSE;
-				AAFx_ErrorStatus = Open_ErrorStatus;
-				time_1ms_spi = 0;				 // stall reset
-				motor_stall_flag = MOTOR_NORMAL; // stall reset
-				antipinch_step = 1;
-				break;
-
-			case 1:
-				if ((motor_stall_flag == MOTOR_STALL) || (time_1ms_init_chk >= 4500U)) //
-				{
-					DRV_Off();
-					motor_start = OFF;
-					stall_chk_cnt = 0;
-					stall_chk_time_1ms = 0; // stall reset
-					softstart_complete = OFF;
-					motor_step_value = STEP_TIME_1000RPM;
-					aaf_action = FLAP_STOP;
-					time_1ms_init_chk_flag = 0;
-					time_1ms_init_chk = 0;
-					if (step_position >= step_position_close)
-					{
-						step_position = step_position_close;
-					}
-
-					antipinch_step = 2;
-				}
-				break;
-
-			case 2:
-				time_1ms_antipinch_flag = 1;
-
-				if (time_1ms_antipinch >= 3000U)
-				{
-					time_1ms_antipinch_flag = 0;
-					time_1ms_antipinch = 0;
-
-					antipinch_step = 3;
-				}
-				break;
-
-			case 3:
-				Motor_Open();	  // dir OPEN
-				DRV_On();		  // drv on
-				motor_start = ON; // step start
-
-				stall_chk_time_1ms = 0;							  // stall reset
-				motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE; // stall reset
-				motor_stall_flag = MOTOR_NORMAL;				  // stall reset
-				time_1ms_spi = 0;
-				aaf_action = OPEN;
-
-				time_1ms_init_chk_flag = 1; // test
-
-				antipinch_step = 4;
-
-				break;
-
-			case 4:
-				if ((aaf_action == OPEN) && (step_position <= step_position_open + limit_step_position))
-				{
-					DRV_Off();
-					motor_start = OFF;
-					if (Diag_Mode != 0)
-					{
-						if (lin_aaf_command == DIAG_MODE_OPEN)
-						{
-							aaf_action = DIAG_MODE_OPEN;
-							aaf_step = AAF_WAITING;
-							AAFx_ErrorStatus = No_ErrorStatus;
-							AAFx_InitStatus = NORMAL_FINISHED_INITIALIZATION;
-							Tx_position_complete_chk();
-						}
-						else if (lin_aaf_command == DIAG_MODE_AUTO)
-						{
-							aaf_action = DIAG_MODE_AUTO;
-							aaf_step = AAF_WAITING;
-							AAFx_ErrorStatus = No_ErrorStatus;
-							AAFx_InitStatus = NORMAL_FINISHED_INITIALIZATION;
-							Tx_position_complete_chk();
-						}
-						else
-						{
-						}
-					}
-					else
-					{
-						AAF_Tx_Position = OPEN;
-						AAFx_InitStatus = NORMAL_FINISHED_INITIALIZATION;
-						AAFx_ErrorStatus = No_ErrorStatus;
-						Tx_position_complete_chk();
-					}
-
-					fail_safety_flag = OFF;
-					antipinch_action_on = OFF;
-
-					stall_chk_cnt = 0;
-					stall_chk_time_1ms = 0;
-					softstart_complete = OFF;
-					motor_step_value = STEP_TIME_1000RPM;
-
-					antipinch_previous_action = ANTIWAIT;
-					antipinch_step = 0;
-
-					aaf_step = FINISHED_OPERATE;
-				}
-				else if ((motor_stall_flag == MOTOR_STALL) || (time_1ms_init_chk >= 4500U))
-				{
-					DRV_Off();
-					motor_start = OFF;
-					stall_chk_cnt = 0;
-					stall_chk_time_1ms = 0;
-					softstart_complete = OFF;
-					motor_step_value = STEP_TIME_1000RPM;
-
-					// antipinch_step = 5;//??
-
-					time_1ms_init_chk_flag = 0;
-					time_1ms_init_chk = 0;
-
-					antipinch_previous_action = INITIALIZATION;
-					antipinch_action_on = OFF;
-
-					if (Diag_Mode != 0)
-					{
-						AAFx_InitStatus = ABNORMAL_FINISHED_INITIALIZATION;
-						motor_fault_chk = 1;
-						Diag_Mode = 0;
-					}
-					else
-					{
-						fail_safety_flag = ON;
-						fail_safety_step = 5;
-					}
-				}
-				break;
-
-			default:
-				break;
-			}
-		}
-		else if (antipinch_previous_action == CLOSE)
-		{
-			AAFx_InitStatus = DURING_INITIALIZATION;
-			switch (antipinch_step)
-			{
-			case 0:
-				Motor_Open(); // dir CLOSE
-				DRV_On();	  // drv on
-
-				stall_chk_time_1ms = 0; // stall reset
-
-				motor_start = ON;				 // step start
-				time_1ms_init_chk_flag = 1;		 // test
-				motor_stall_flag = MOTOR_NORMAL; // stall reset
-				time_1ms_spi = 0;
-
-				aaf_action = OPEN;
-				AAFx_ErrorStatus = Close_ErrorStatus;
-				antipinch_step = 1;
-				break;
-
-			case 1:
-				if ((motor_stall_flag == MOTOR_STALL) || (time_1ms_init_chk >= 4500U))
-				{
-					DRV_Off();
-					motor_start = OFF;
-					stall_chk_cnt = 0;
-					stall_chk_time_1ms = 0; // stall reset
-					softstart_complete = OFF;
-					motor_step_value = STEP_TIME_1000RPM;
-					time_1ms_init_chk_flag = 0;
-					time_1ms_init_chk = 0;
-					if (step_position <= step_position_open)
-					{
-						step_position = step_position_open;
-					}
-					aaf_action = FLAP_STOP;
-
-					antipinch_step = 2;
-				}
-				break;
-
-			case 2:
-				time_1ms_antipinch_flag = 1;
-
-				if (time_1ms_antipinch >= 3000U)
-				{
-					time_1ms_antipinch_flag = 0;
-					time_1ms_antipinch = 0;
-					antipinch_step = 3;
-
-					time_1ms_init_chk_flag = 0; // test
-					time_1ms_init_chk = 0;		// test
-				}
-				break;
-
-			case 3:
-				Motor_Close();					 // dir OPEN
-				DRV_On();						 // drv on
-				motor_start = ON;				 // step start
-				motor_stall_flag = MOTOR_NORMAL; // stall reset
-
-				stall_chk_time_1ms = 0;							  // stall reset
-				motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE; // stall reset
-				time_1ms_spi = 0;
-
-				aaf_action = CLOSE;
-
-				time_1ms_init_chk_flag = 1; // test
-
-				antipinch_step = 4;
-
-				break;
-
-			case 4:
-				if ((aaf_action == CLOSE) && (step_position >= step_position_close - limit_step_position))
-				{
-					DRV_Off();
-					motor_start = OFF;
-					if (Diag_Mode != 0)
-					{
-						if (lin_aaf_command == DIAG_MODE_CLOSE)
-						{
-							aaf_action = DIAG_MODE_CLOSE;
-							aaf_step = AAF_WAITING;
-							AAFx_ErrorStatus = No_ErrorStatus;
-							AAFx_InitStatus = NORMAL_FINISHED_INITIALIZATION;
-							Tx_position_complete_chk();
-						}
-						else if (lin_aaf_command == DIAG_MODE_AUTO)
-						{
-							aaf_action = DIAG_MODE_AUTO;
-							aaf_step = AAF_WAITING;
-							AAFx_ErrorStatus = No_ErrorStatus;
-							AAFx_InitStatus = NORMAL_FINISHED_INITIALIZATION;
-							Tx_position_complete_chk();
-						}
-						else
-						{
-						}
-					}
-					else
-					{
-						AAF_Tx_Position = CLOSE;
-						AAFx_InitStatus = NORMAL_FINISHED_INITIALIZATION;
-						AAFx_ErrorStatus = No_ErrorStatus;
-						Tx_position_complete_chk();
-					}
-					fail_safety_flag = OFF;
-					antipinch_action_on = OFF;
-
-					stall_chk_cnt = 0;
-					stall_chk_time_1ms = 0;
-					softstart_complete = OFF;
-					motor_step_value = STEP_TIME_1000RPM;
-
-					antipinch_previous_action = ANTIWAIT;
-					antipinch_step = 0;
-
-					aaf_step = FINISHED_OPERATE;
-				}
-				else if ((motor_stall_flag == MOTOR_STALL) || (time_1ms_init_chk >= 4500U))
-				{
-					DRV_Off();
-					motor_start = OFF;
-					stall_chk_cnt = 0;
-					stall_chk_time_1ms = 0;
-					softstart_complete = OFF;
-					motor_step_value = STEP_TIME_1000RPM;
-
-					time_1ms_init_chk_flag = 0;
-					time_1ms_init_chk = 0;
-
-					aaf_action = FLAP_STOP;
-
-					antipinch_step = 5;
-				}
-
-				break;
-
-			case 5:
-				Motor_Open();				// dir CLOSE
-				DRV_On();					// drv on
-				motor_start = ON;			// step start
-				time_1ms_init_chk_flag = 1; // test
-				aaf_action = OPEN;
-				motor_stall_flag = MOTOR_NORMAL; // stall reset
-				time_1ms_spi = 0;
-
-				stall_chk_time_1ms = 0;							  // stall reset
-				motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE; // stall reset
-
-				antipinch_step = 6;
-				break;
-
-			case 6:
-				if ((motor_stall_flag == MOTOR_STALL) || (time_1ms_init_chk >= 4500U))
-				{
-					DRV_Off();
-					motor_start = OFF;
-					stall_chk_cnt = 0;
-					stall_chk_time_1ms = 0; // stall reset
-					softstart_complete = OFF;
-					motor_step_value = STEP_TIME_1000RPM;
-
-					aaf_action = FLAP_STOP;
-					time_1ms_init_chk_flag = 0;
-					time_1ms_init_chk = 0;
-
-					antipinch_step = 7;
-
-					// fail_safety_flag = ON;
-					antipinch_action_on = OFF;
-
-					antipinch_previous_action = INITIALIZATION;
-
-					time_1ms_external_10s_chk_flag = OFF; // 10s chk timer off
-					time_1ms_external_10s_chk = 0;
-					aaf_action = FLAP_STOP;
-					aaf_action_complete_chk = FLAP_STOP;
-
-					time_1ms_stall_chk = 0;		 // test
-					time_1ms_stall_chk_flag = 0; // test
-
-					motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE; // stall reset
-
-					/*aaf_step = AAF_INITIALIZATION;		  // MCU is reset, AAF is initialized.
-					aaf_init_step = START_INITIALIZATION; // MCU is reset, AAF is initialized.
-					AAF_Tx_Position = UNKOWN_POSITION;
-					AAFx_Position_Status = Unknown_Status;
-					lin_aaf_command = OPEN;*/
-					// if ((aaf_action == DIAG_MODE_OPEN) || (aaf_action == DIAG_MODE_CLOSE) || (aaf_action == DIAG_MODE_AUTO))
-					if (Diag_Mode != 0)
-					{
-						AAFx_InitStatus = ABNORMAL_FINISHED_INITIALIZATION;
-						motor_fault_chk = 1;
-						Diag_Mode = 0;
-						// AAFx_Motor_Fault = 1;
-						//  protection_function = ON;
-					}
-					else
-					{
-						fail_safety_flag = ON;
-						fail_safety_step = 5;
-					}
-				}
-				break;
-
-			default:
-				break;
-			}
-		}
-	}
+    if (antipinch_action_on == ON)
+    {
+        AAFx_Position_Status = Unknown_Status;
+        AAF_Tx_Position = UNKOWN_POSITION;
+        AAFx_InitStatus = DURING_INITIALIZATION;
+        
+        if (antipinch_previous_action == OPEN)
+        {
+            Antipinch_prev_open();
+        }
+        else if (antipinch_previous_action == CLOSE)
+        {
+            Antipinch_prev_close();
+        }
+        else
+        {
+            // invalid
+        }
+    }
 }
 
 static void Torque_Test_Mode(void)
@@ -5045,7 +5407,7 @@ static void Torque_Test_Mode(void)
 		break;
 	}
 }
-//-----------------------------------------development START----------------------------------------
+
 static void IGN_On_Memory_read(void)
 {
 	step_position_close = close_memory_read;
@@ -5154,6 +5516,7 @@ static void LIMP_HOME(void)
 		break;
 	}
 }
+
 static void step_check(void)
 {
 	if (((step_position_close - step_position_open) <= STEP_POSITION_MINIMUM_RANGE) || ((step_position_close - step_position_open) > STEP_POSITION_MAXIMUM_RANGE) || (step_position == REFERENCE_POSITION) || (step_position < (step_position_open + limit_step_position)) || (step_position > (step_position_close - limit_step_position)) || (step_position_close == 0) || (step_position_open == 0) || (limit_step_position == 0) || (evrdy_on_flag == OFF) || (step_position > POSITION_MAXIMUM_RANGE) || (step_position_open > POSITION_MAXIMUM_RANGE) || (step_position_close > POSITION_MAXIMUM_RANGE) || (limit_step_position > LIMITSTEP_MAXIMUM_RANGE) || (AAF_Tx_Position == UNKOWN_POSITION) || (AAFx_InitStatus == ABNORMAL_FINISHED_INITIALIZATION) || (AAFx_Position_Status == FlapMoving_Status) || (AAFx_Position_Status == Unknown_Status) || (power_chk == Shutdown_Check))
@@ -5338,6 +5701,7 @@ static void Error_FaultClear(void)
 		}
 	}
 }
+
 static void Motor_SPI_Init(void)
 {
 	for (int i = 0; i < 11; i++)
@@ -5363,7 +5727,7 @@ static void Motor_SPI_Init(void)
 			{
 				time_1ms_spi_error_chk = 0;
 				time_1ms_spi_error_chk_flag = 0;
-				spi_fail = 1;
+				// spi_fail = 1;
 				break;
 			}
 		}
@@ -5406,7 +5770,7 @@ static void Motor_SPI_Init(void)
 			{
 				time_1ms_spi_error_chk = 0;
 				time_1ms_spi_error_chk_flag = 0;
-				spi_fail = 1;
+				// spi_fail = 1;
 				break;
 			}
 		}
@@ -5426,6 +5790,7 @@ static void Motor_SPI_Init(void)
 		}
 	}
 }
+
 static void LIN_Diag_Rx(void)
 {
 	if (Slave_RxSwData1[0] == 0x26)
@@ -5481,15 +5846,6 @@ static void LIN_Diag_Action(void)
 		// invalid
 	}
 }
-static void AAF_communicate_chk(void)
-{
-	Lin_rx_data_chk();
 
-	Lin_tx_data_chk();
 
-	SPI_chk();
-
-	Lin_bus_chk();
-}
-//-----------------------------------------development END----------------------------------------
 /* End user code. Do not edit comment generated here */
