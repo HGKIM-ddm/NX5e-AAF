@@ -97,6 +97,7 @@ void r_Config_CSIH0_interrupt_send(void)
         else
         {
             sio_dummy = CSIH0.RX0H;
+            (void)sio_dummy; //for build error
         }
         temp = g_csih0_total_num;
         if (temp > g_csih0_tx_num)

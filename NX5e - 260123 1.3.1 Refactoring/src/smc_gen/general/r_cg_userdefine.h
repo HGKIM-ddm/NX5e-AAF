@@ -66,13 +66,14 @@ Global functions
 #define R_WUF_INTP10           (uint32_t)(1<<12)
 #define R_WUF_ERROR           (uint32_t)0xff
 
+#ifndef protected_write
 #define protected_write(preg,pstatus,reg,value)   do{\
                                                   (preg)=0xa5u;\
                                                   (reg)=(value);\
                                                   (reg)=~(value);\
                                                   (reg)=(value);\
                                                   }while((pstatus)==1u)
-
+#endif
 /***********************************************************************************************************************
  * 2. General Defines
 ***********************************************************************************************************************/
@@ -80,8 +81,13 @@ Global functions
 #define ON 1U
 #define FAIL 0U
 #define PASS 1U
-#define FALSE 0U
-#define TRUE  1U
+#ifndef TRUE
+    #define TRUE  1
+#endif
+
+#ifndef FALSE
+    #define FALSE 0
+#endif
 #define WAITING 2U
 #define UNKNOWN 0U
 #define STOP 0U

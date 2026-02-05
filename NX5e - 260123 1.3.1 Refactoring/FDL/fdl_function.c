@@ -231,6 +231,7 @@ char function_FDL_init(void)
     r_fdl_request_t           req;
 	
     fdlRet = R_FDL_Init( &sampleApp_fdlConfig_enu );
+    (void)fdlRet;//for build error
     if( R_FDL_OK != fdlRet )
     {
 		return -1;
@@ -262,7 +263,7 @@ char function_FDL_init(void)
 //==================================================================================================
 char function_FDL_erease(uint32_t start_block,  uint16_t blcok_cnt)
 {
-    r_fdl_status_t            fdlRet;
+    // r_fdl_status_t            fdlRet;
     r_fdl_request_t           req;
 	
     /* -----------------------------------------------------------------------
@@ -291,7 +292,7 @@ char function_FDL_erease(uint32_t start_block,  uint16_t blcok_cnt)
 //==================================================================================================
 char function_FDL_write(uint8_t* buff,uint32_t addr,  uint16_t size)
 {
-    r_fdl_status_t            fdlRet;
+    // r_fdl_status_t            fdlRet;
     r_fdl_request_t           req;
 	
     req.command_enu     = R_FDL_CMD_WRITE;
@@ -321,9 +322,9 @@ char function_FDL_write(uint8_t* buff,uint32_t addr,  uint16_t size)
 //==================================================================================================
 char function_FDL_read(uint32_t* buff, uint32_t addr, uint16_t size)
 {
-    r_fdl_status_t            fdlRet;
+    // r_fdl_status_t            fdlRet;
     r_fdl_request_t           req;
-		
+	
     req.command_enu     = R_FDL_CMD_READ;
     req.idx_u32         = addr;
     req.cnt_u16         = size;
