@@ -39,14 +39,14 @@ Macro definitions (Register bit)
 /***********************************************************************************************************************
 Macro definitions
 ***********************************************************************************************************************/
-//1Mhz
-#define _CSIH0_MASTER_PCLK_DIV                         (0x6000U) /* Selects the basic clock */
+//100Khz
+#define _CSIH0_MASTER_PCLK_DIV                         (0x8000U) /* Selects the basic clock */
 #define _CSIH0_SELECT_CHIP_SUM                         (0x00030000UL) /* CSIH select chip sum */
 #define _CSIH0_SETTING_INIT                            (0x00FF0000UL) /* CSIH setting init value */
-#define _CSIH0_BAUD_RATE_0                             (0x0005U) /* baudrate set */
-#define _CSIH0_BAUD_RATE_1                             (0x0005U) /* baudrate set */
-#define _CSIH0_BAUD_RATE_2                             (0x0005U) /* baudrate set */
-#define _CSIH0_BAUD_RATE_3                             (0x0005U) /* baudrate set */
+#define _CSIH0_BAUD_RATE_0                             (0x0019U) /* baudrate set */
+#define _CSIH0_BAUD_RATE_1                             (0x0019U) /* baudrate set */
+#define _CSIH0_BAUD_RATE_2                             (0x0019U) /* baudrate set */
+#define _CSIH0_BAUD_RATE_3                             (0x0019U) /* baudrate set */
 
 /***********************************************************************************************************************
 Typedef definitions
