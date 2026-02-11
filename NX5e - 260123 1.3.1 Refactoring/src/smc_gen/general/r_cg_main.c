@@ -100,6 +100,10 @@ static uint16_t tx_16bit_spi_current_limit[16] = {
     0x06E1,
     0x06F1};
 
+static uint16_t tx_16bit_spi_slew_change[2] = {
+    0x0690,
+    0x0691};
+
 static uint16_t rx_16bit_spi_id[11] = {
     0x4000,
     0x4200,
@@ -282,14 +286,14 @@ static unsigned int position_memory_read = 0;
 static unsigned int Initial_memory_write = 0; // evrdy flag
 static unsigned int Initial_memory_read = 0;
 static unsigned int position_Initial_combined_read = 0; // AAFx_Position+evrdy flag
-static unsigned int limit_memory_write = 0; // limit step(5%)
+static unsigned int limit_memory_write = 0;             // limit step(5%)
 static unsigned int limit_memory_read = 0;
 static unsigned int position_status_memory_write = 0; // AAFx_Position_Status
 static unsigned int position_status_memory_read = 0;
 static unsigned int AAFx_InitStatus_memory_write = 0; // AAFx_InitStatus
 static unsigned int AAFx_InitStatus_memory_read = 0;
 static unsigned int position_Initstatus_combined_read = 0; // AAFx_Position_Status+AAFx_InitStatus
-static unsigned int DTC_memory_write = 0; // DTC
+static unsigned int DTC_memory_write = 0;                  // DTC
 static unsigned int DTC_memory_read = 0;
 static unsigned int power_chk_memory_write = 0; // power chk
 static unsigned int power_chk_memory_read = 0;
@@ -362,17 +366,17 @@ unsigned int time_1ms_adc_1s_chk_flag = 0U;
 unsigned int time_1ms_IGN_chk = 0U;
 unsigned int time_1ms_IGN_chk_flag = 0U;
 
-//development
+// development
 static unsigned int SW_Chk = 0U;
 // static unsigned int Open_Min_Limit = 0U;
 // static unsigned int Open_Max_Limit = 0U;
 // static unsigned int Close_Min_Limit = 0U;
 // static unsigned int Close_Max_Limit = 0U;
 // static unsigned int test = 0U;
-static uint8_t Slave_RxSwData1[8];      /*  */
+static uint8_t Slave_RxSwData1[8]; /*  */
 // static unsigned int wakeup_chk = 1;      /*  */
 // static unsigned int spi_fail = 0;        /*  */
-static unsigned int LIN_Short_Ok = 0U;   /*  */
+static unsigned int LIN_Short_Ok = 0U; /*  */
 
 /***********************************************************************************************************************
  * Section 3: Function Prototypes
@@ -412,11 +416,11 @@ static void Lin_rx_data_chk(void); // V
 static void Lin_tx_data_chk(void); // V
 static void SPI_chk(void);
 static void Lin_bus_chk(void);
-static void Lin_sleep(void);      // V
+static void Lin_sleep(void); // V
 
 /* 3.3 Application Logic Functions */
 static void Operating_mode(void);
-static void MCU_sleep(void);       // V
+static void MCU_sleep(void); // V
 static void Stall_chk(void);
 static void CHK_external_factors(void);
 static void Fail_safety_mode(void);
@@ -425,10 +429,10 @@ static void Voltage_chk_current_limit_init(void);
 // static void Current_limiting_select(void);
 static void Antipinch_move(void); // V
 static void Torque_Test_Mode(void);
-static void LIMP_HOME(void);          // V
+static void LIMP_HOME(void); // V
 static void Init_move(void);
-static void step_check(void);         // V
-static void Re_Init(void);            // V
+static void step_check(void); // V
+static void Re_Init(void);    // V
 static void LIN_Short_Chk(void);
 static void Error_FaultClear(void);
 static void ERROR_chk(void);
@@ -456,25 +460,25 @@ void r_main_userinit(void);
  ***********************************************************************************************************************/
 int main(void)
 {
-	r_main_userinit();
-	/* Start user code for main. Do not edit comment generated here */
+    r_main_userinit();
+    /* Start user code for main. Do not edit comment generated here */
 
-	R_Config_TAUD0_3_Start();
-	R_Config_TAUD0_13_Start();
-	R_Config_ADCA0_ScanGroup1_OperationOn();
-	R_Config_CSIH0_Start();
-	RLIN3_slave_init();
-	R_Config_WDT0_Create();
-	R_Config_WDT0_Restart();
+    R_Config_TAUD0_3_Start();
+    R_Config_TAUD0_13_Start();
+    R_Config_ADCA0_ScanGroup1_OperationOn();
+    R_Config_CSIH0_Start();
+    RLIN3_slave_init();
+    R_Config_WDT0_Create();
+    R_Config_WDT0_Restart();
 
-	AAF_Init();
+    AAF_Init();
 
-	while (1)
-	{
-		AAF_App();
-	}
+    while (1)
+    {
+        AAF_App();
+    }
 
-	/* End user code. Do not edit comment generated here */
+    /* End user code. Do not edit comment generated here */
 }
 
 /***********************************************************************************************************************
@@ -485,11 +489,11 @@ int main(void)
  ***********************************************************************************************************************/
 void r_main_userinit(void)
 {
-	DI();
-	/* Start user code for r_main_userinit. Do not edit comment generated here */
-	/* End user code. Do not edit comment generated here */
-	R_Systeminit();
-	EI();
+    DI();
+    /* Start user code for r_main_userinit. Do not edit comment generated here */
+    /* End user code. Do not edit comment generated here */
+    R_Systeminit();
+    EI();
 }
 
 /* Start user code for adding. Do not edit comment generated here */
@@ -501,16 +505,16 @@ void r_main_userinit(void)
  ***********************************************************************************************************************/
 void Clear_DataBuffer(void)
 {
-	uint8_t i;
-	// uint32_t Databuf_adr;
-	uint8_t *Databuf_adr;
+    uint8_t i;
+    // uint32_t Databuf_adr;
+    uint8_t *Databuf_adr;
 
-	// Databuf_adr = &RLN30.LDBR1;
-	Databuf_adr = (uint8_t *)&RLN30.LDBR1;
-	for (i = 0; i < 8; i++)
-	{
-		*((uint8_t *)(Databuf_adr + i)) = 0U;
-	}
+    // Databuf_adr = &RLN30.LDBR1;
+    Databuf_adr = (uint8_t *)&RLN30.LDBR1;
+    for (i = 0; i < 8; i++)
+    {
+        *((uint8_t *)(Databuf_adr + i)) = 0U;
+    }
 }
 
 /***********************************************************************************************************************
@@ -521,52 +525,52 @@ void Clear_DataBuffer(void)
  ***********************************************************************************************************************/
 void RLIN_Slave_Receive(uint8_t Data_length)
 {
-	Clear_DataBuffer();
-	// RLN30.LDFC = 0x20;		   /*b5=1:enhanced checksum mode; b4=0:Reception*/
-	if (GetIDbuffer == 0x3C) // 0x3C / 0x3D
-	{
-		RLN30.LDFC = 0x00; // b5=0 → Classic checksum
-	}
-	else
-	{
-		RLN30.LDFC = 0x20; // b5=1 → Enhanced checksum
-	}
-	RLN30.LDFC |= Data_length; /* b4-b0=Data_length: response data lengh select byte*/
-	RLN30.LTRC = 0x02;		   /*setting RTS=1,response reception is started*/
+    Clear_DataBuffer();
+    // RLN30.LDFC = 0x20;		   /*b5=1:enhanced checksum mode; b4=0:Reception*/
+    if (GetIDbuffer == 0x3C) // 0x3C / 0x3D
+    {
+        RLN30.LDFC = 0x00; // b5=0 → Classic checksum
+    }
+    else
+    {
+        RLN30.LDFC = 0x20; // b5=1 → Enhanced checksum
+    }
+    RLN30.LDFC |= Data_length; /* b4-b0=Data_length: response data lengh select byte*/
+    RLN30.LTRC = 0x02;         /*setting RTS=1,response reception is started*/
 }
 
 /***********************************************************************************************************************
 * Function Name: RLIN_Slave_Transmit(void)
 * Description  : This function seting data buffer for response transmission start
 * Arguments    : uint8_t* databuf    : variable array data.
-				 uint8_t Data_length : transmit data length.
+                 uint8_t Data_length : transmit data length.
 * Return Value : None
 ***********************************************************************************************************************/
 void RLIN_Slave_Transmit(uint8_t *databuf, uint8_t Data_length)
 {
-	uint8_t i;
-	// uint32_t  Databuf_adr;
-	uint8_t *Databuf_adr;
+    uint8_t i;
+    // uint32_t  Databuf_adr;
+    uint8_t *Databuf_adr;
 
-	// RLN30.LDFC = 0x30;		   /*b5=1:enhanced checksum mode; b4=1:transmission*/
-	if ((GetIDbuffer == 0x7D)) // 0x3C / 0x3D
-	{
-		RLN30.LDFC = 0x10; // b5=0 → Classic checksum
-	}
-	else
-	{
-		RLN30.LDFC = 0x30; // b5=1 → Enhanced checksum
-	}
-	RLN30.LDFC |= Data_length; /* b4-b0=Data_length: response data lengh select byte*/
-	// Databuf_adr = &RLN30.LDBR1;    /* get the data buffer address*/
-	Databuf_adr = (uint8_t *)&RLN30.LDBR1; /* get the data buffer address*/
+    // RLN30.LDFC = 0x30;		   /*b5=1:enhanced checksum mode; b4=1:transmission*/
+    if ((GetIDbuffer == 0x7D)) // 0x3C / 0x3D
+    {
+        RLN30.LDFC = 0x10; // b5=0 → Classic checksum
+    }
+    else
+    {
+        RLN30.LDFC = 0x30; // b5=1 → Enhanced checksum
+    }
+    RLN30.LDFC |= Data_length; /* b4-b0=Data_length: response data lengh select byte*/
+    // Databuf_adr = &RLN30.LDBR1;    /* get the data buffer address*/
+    Databuf_adr = (uint8_t *)&RLN30.LDBR1; /* get the data buffer address*/
 
-	for (i = 0; i < Data_length; i++) /* setting tansmission data to date buffer*/
-	{
-		*((uint8_t *)(Databuf_adr + i)) = databuf[i];
-	}
+    for (i = 0; i < Data_length; i++) /* setting tansmission data to date buffer*/
+    {
+        *((uint8_t *)(Databuf_adr + i)) = databuf[i];
+    }
 
-	RLN30.LTRC = 0x02; /*setting RTS=1;Response transmission start*/
+    RLN30.LTRC = 0x02; /*setting RTS=1;Response transmission start*/
 }
 
 /***********************************************************************************************************************
@@ -577,17 +581,17 @@ void RLIN_Slave_Transmit(uint8_t *databuf, uint8_t Data_length)
  ***********************************************************************************************************************/
 void Get_reponse_RxData(uint8_t *RxData)
 {
-	uint8_t i, k;
-	// uint32_t Databuf_adr;
-	uint8_t *Databuf_adr;
+    uint8_t i, k;
+    // uint32_t Databuf_adr;
+    uint8_t *Databuf_adr;
 
-	k = RLN30.LDFC & 0x0F;
-	// Databuf_adr = &RLN30.LDBR1;
-	Databuf_adr = (uint8_t *)&RLN30.LDBR1;
-	for (i = 0; i < k; i++)
-	{
-		RxData[i] = (*((uint8_t *)(Databuf_adr + i)));
-	}
+    k = RLN30.LDFC & 0x0F;
+    // Databuf_adr = &RLN30.LDBR1;
+    Databuf_adr = (uint8_t *)&RLN30.LDBR1;
+    for (i = 0; i < k; i++)
+    {
+        RxData[i] = (*((uint8_t *)(Databuf_adr + i)));
+    }
 }
 
 /***********************************************************************************************************************
@@ -598,75 +602,75 @@ void Get_reponse_RxData(uint8_t *RxData)
  ***********************************************************************************************************************/
 void RLIN3_slave_init(void)
 {
-	R_PORT_SetAltFunc(Port10, 10, Alt2, Output);
-	R_PORT_SetAltFunc(Port10, 9, Alt2, Input);
+    R_PORT_SetAltFunc(Port10, 10, Alt2, Output);
+    R_PORT_SetAltFunc(Port10, 9, Alt2, Input);
 
-	do
-	{
-		/*LIN control register*/
-		RLN30.LCUC = 0x00; // LIN reset mode
-	} while (RLN30.LMST != 0u); // LIN mode status register
+    do
+    {
+        /*LIN control register*/
+        RLN30.LCUC = 0x00; // LIN reset mode
+    } while (RLN30.LMST != 0u); // LIN mode status register
 
-	// Sets a baud rate
-	RLN30.LWBR = 0x34; // 4sampling_1/4 Prescaler
-	// RLN30.LWBR = 0x00; //jdy_test
-	RLN30.LBRP01.UINT16 = 0x0081; /*  0X81=129D, Baud rate= 40M / 4 / (129+1) / 4 = 19230 bps*/
-	// Sets noise filter ON/OFF
-	RLN30.LMD = 0x12; // The noise filter is enabled; transmission interrupt, reception interrupt, status interrupt are used ;LIN Slave mode (auto baud rate)
-					  // Enables interrupt
+    // Sets a baud rate
+    RLN30.LWBR = 0x34; // 4sampling_1/4 Prescaler
+    // RLN30.LWBR = 0x00; //jdy_test
+    RLN30.LBRP01.UINT16 = 0x0081; /*  0X81=129D, Baud rate= 40M / 4 / (129+1) / 4 = 19230 bps*/
+    // Sets noise filter ON/OFF
+    RLN30.LMD = 0x12; // The noise filter is enabled; transmission interrupt, reception interrupt, status interrupt are used ;LIN Slave mode (auto baud rate)
+                      // Enables interrupt
 
 #if 0 // for RLN30.LMD LIOS bit set 0
-	  // RLIN30 interrupt
+      // RLIN30 interrupt
 	INTC2.ICRLIN30.BIT.MKRLIN30 = _INT_PROCESSING_DISABLED;
 	INTC2.ICRLIN30.BIT.RFRLIN30 = _INT_REQUEST_NOT_OCCUR;
 	INTC2.ICRLIN30.BIT.TBRLIN30 = _INT_TABLE_VECTOR;
 	INTC2.ICRLIN30.UINT16 &= _INT_PRIORITY_LOWEST;
 #else // for RLN30.LMD LIOS bit set 1
-	  // RLIN30 transmit interrupt
-	INTC2.ICRLIN30UR0.BIT.MKRLIN30UR0 = _INT_PROCESSING_DISABLED;
-	INTC2.ICRLIN30UR0.BIT.RFRLIN30UR0 = _INT_REQUEST_NOT_OCCUR;
-	INTC2.ICRLIN30UR0.BIT.TBRLIN30UR0 = _INT_TABLE_VECTOR;
-	INTC2.ICRLIN30UR0.UINT16 &= _INT_PRIORITY_LOWEST;
+      // RLIN30 transmit interrupt
+    INTC2.ICRLIN30UR0.BIT.MKRLIN30UR0 = _INT_PROCESSING_DISABLED;
+    INTC2.ICRLIN30UR0.BIT.RFRLIN30UR0 = _INT_REQUEST_NOT_OCCUR;
+    INTC2.ICRLIN30UR0.BIT.TBRLIN30UR0 = _INT_TABLE_VECTOR;
+    INTC2.ICRLIN30UR0.UINT16 &= _INT_PRIORITY_LOWEST;
 
-	// RLIN30 receive complete interrupt
-	INTC2.ICRLIN30UR1.BIT.MKRLIN30UR1 = _INT_PROCESSING_DISABLED;
-	INTC2.ICRLIN30UR1.BIT.RFRLIN30UR1 = _INT_REQUEST_NOT_OCCUR;
-	INTC2.ICRLIN30UR1.BIT.TBRLIN30UR1 = _INT_TABLE_VECTOR;
-	INTC2.ICRLIN30UR1.UINT16 &= _INT_PRIORITY_LOWEST;
+    // RLIN30 receive complete interrupt
+    INTC2.ICRLIN30UR1.BIT.MKRLIN30UR1 = _INT_PROCESSING_DISABLED;
+    INTC2.ICRLIN30UR1.BIT.RFRLIN30UR1 = _INT_REQUEST_NOT_OCCUR;
+    INTC2.ICRLIN30UR1.BIT.TBRLIN30UR1 = _INT_TABLE_VECTOR;
+    INTC2.ICRLIN30UR1.UINT16 &= _INT_PRIORITY_LOWEST;
 
-	// RLIN30 status interrupt
-	INTC2.ICRLIN30UR2.BIT.MKRLIN30UR2 = _INT_PROCESSING_DISABLED;
-	INTC2.ICRLIN30UR2.BIT.RFRLIN30UR2 = _INT_REQUEST_NOT_OCCUR;
-	INTC2.ICRLIN30UR2.BIT.TBRLIN30UR2 = _INT_TABLE_VECTOR;
-	INTC2.ICRLIN30UR2.UINT16 &= _INT_PRIORITY_LOWEST;
+    // RLIN30 status interrupt
+    INTC2.ICRLIN30UR2.BIT.MKRLIN30UR2 = _INT_PROCESSING_DISABLED;
+    INTC2.ICRLIN30UR2.BIT.RFRLIN30UR2 = _INT_REQUEST_NOT_OCCUR;
+    INTC2.ICRLIN30UR2.BIT.TBRLIN30UR2 = _INT_TABLE_VECTOR;
+    INTC2.ICRLIN30UR2.UINT16 &= _INT_PRIORITY_LOWEST;
 
-	RLN30.LIE = 0x0f; // enable all interrupt
-	// Enables error detection
-	RLN30.LEDE = 0xdd; // enable all error
+    RLN30.LIE = 0x0f; // enable all interrupt
+    // Enables error detection
+    RLN30.LEDE = 0xdd; // enable all error
 
-	// Sets frame configuration parameters
-	RLN30.LBFC = 0x00; // Reception break of 9.5/10 or more Tbits
-	RLN30.LSC = 0x11;  // inter-byte space 1bit;Response space 1bit
-	RLN30.LWUP = 0x30; // Wake-up Transmission Low level Width Select 4 Tbits
-	RLN30.LIDB = 0x00; // Clear the ID buffer
+    // Sets frame configuration parameters
+    RLN30.LBFC = 0x00; // Reception break of 9.5/10 or more Tbits
+    RLN30.LSC = 0x11;  // inter-byte space 1bit;Response space 1bit
+    RLN30.LWUP = 0x30; // Wake-up Transmission Low level Width Select 4 Tbits
+    RLN30.LIDB = 0x00; // Clear the ID buffer
 #endif
 
-	// Transitions to the LIN slave mode: LIN operation mode
-	do
-	{
-		RLN30.LCUC = 0x03u; // LIN Opeation mode, Exit LIN reset mode.
-	} while (RLN30.LMST != 0x03u);
+    // Transitions to the LIN slave mode: LIN operation mode
+    do
+    {
+        RLN30.LCUC = 0x03u; // LIN Opeation mode, Exit LIN reset mode.
+    } while (RLN30.LMST != 0x03u);
 
-	// Sets the FTS bit in the RLN3nLTRC register to 1 (header reception or wake-up transmission/reception started)
-	RLN30.LTRC = 0x01;
+    // Sets the FTS bit in the RLN3nLTRC register to 1 (header reception or wake-up transmission/reception started)
+    RLN30.LTRC = 0x01;
 
-	// Interrupt processing enable
-	INTC2.ICRLIN30UR0.BIT.RFRLIN30UR0 = _INT_REQUEST_NOT_OCCUR;
-	INTC2.ICRLIN30UR0.BIT.MKRLIN30UR0 = _INT_PROCESSING_ENABLED;
-	INTC2.ICRLIN30UR1.BIT.RFRLIN30UR1 = _INT_REQUEST_NOT_OCCUR;
-	INTC2.ICRLIN30UR1.BIT.MKRLIN30UR1 = _INT_PROCESSING_ENABLED;
-	INTC2.ICRLIN30UR2.BIT.RFRLIN30UR2 = _INT_REQUEST_NOT_OCCUR;
-	INTC2.ICRLIN30UR2.BIT.MKRLIN30UR2 = _INT_PROCESSING_ENABLED;
+    // Interrupt processing enable
+    INTC2.ICRLIN30UR0.BIT.RFRLIN30UR0 = _INT_REQUEST_NOT_OCCUR;
+    INTC2.ICRLIN30UR0.BIT.MKRLIN30UR0 = _INT_PROCESSING_ENABLED;
+    INTC2.ICRLIN30UR1.BIT.RFRLIN30UR1 = _INT_REQUEST_NOT_OCCUR;
+    INTC2.ICRLIN30UR1.BIT.MKRLIN30UR1 = _INT_PROCESSING_ENABLED;
+    INTC2.ICRLIN30UR2.BIT.RFRLIN30UR2 = _INT_REQUEST_NOT_OCCUR;
+    INTC2.ICRLIN30UR2.BIT.MKRLIN30UR2 = _INT_PROCESSING_ENABLED;
 }
 
 /***********************************************************************************************************************
@@ -677,7 +681,7 @@ void RLIN3_slave_init(void)
  ***********************************************************************************************************************/
 void RLIN_Slave_NoResponse(void)
 {
-	RLN30.LTRC = 0x04; /* setting LNRR=1, No response request*/
+    RLN30.LTRC = 0x04; /* setting LNRR=1, No response request*/
 }
 
 /***********************************************************************************************************************
@@ -700,7 +704,7 @@ void RLIN30_interrupt(void)
 #pragma ghs interrupt
 void RLIN30_transmit_interrupt(void)
 {
-	RLN30.LST &= 0xFE;
+    RLN30.LST &= 0xFE;
 }
 
 /***********************************************************************************************************************
@@ -709,77 +713,77 @@ void RLIN30_transmit_interrupt(void)
  * Arguments    : None
  * Return Value : None
  ***********************************************************************************************************************/
-static void AAF_Init(void) 
+static void AAF_Init(void)
 {
 
-	protected_write(WPROTR.PROTCMD0, WPROTR.PROTS0, STBC_IOHOLD.IOHOLD, 0x00u);
+    protected_write(WPROTR.PROTCMD0, WPROTR.PROTS0, STBC_IOHOLD.IOHOLD, 0x00u);
 
-	// flash memory setup
+    // flash memory setup
 
-	FDL_Open();
-	ret = function_FDL_init();
+    FDL_Open();
+    ret = function_FDL_init();
 
-	time_1ms_fdl_error_chk_flag = 1;
-	if (ret < 0) // error
-	{
-		while (1)
-		{
-			if (time_1ms_fdl_error_chk >= 100U)
-			{
-				fdl_fail += 1;
-				break;
-			}
-		}
-	}
+    time_1ms_fdl_error_chk_flag = 1;
+    if (ret < 0) // error
+    {
+        while (1)
+        {
+            if (time_1ms_fdl_error_chk >= 100U)
+            {
+                fdl_fail += 1;
+                break;
+            }
+        }
+    }
 
-	time_1ms_fdl_error_chk_flag = 0;
-	time_1ms_fdl_error_chk = 0;
+    time_1ms_fdl_error_chk_flag = 0;
+    time_1ms_fdl_error_chk = 0;
 
-	Lin_Transceiver_On();
-	DRV8899_Init();
+    Lin_Transceiver_On();
+    DRV8899_Init();
 
-	AAFx_Type = EXTERNAL_TYPE; // NX5e AAF1, 2 EXTERNAL_TYPE
+    AAFx_Type = EXTERNAL_TYPE; // NX5e AAF1, 2 EXTERNAL_TYPE
 
-	// AAFx_Type = INTERNAL_TYPE; //  NX5e AAF3 INTERNAL_TYPE(LOWER)
+    // AAFx_Type = INTERNAL_TYPE; //  NX5e AAF3 INTERNAL_TYPE(LOWER)
 
-	// AAFx_Index = AAF_1;			 //
-	// AAF_location_type = LH_TYPE; // CW
+    // AAFx_Index = AAF_1;			 //
+    // AAF_location_type = LH_TYPE; // CW
 
-	AAFx_Index = AAF_2;			 //
-	AAF_location_type = RH_TYPE; // CCW
+    AAFx_Index = AAF_2;          //
+    AAF_location_type = RH_TYPE; // CCW
 
-	// AAFx_Index = AAF_3;			 //
-	// AAF_location_type = LH_TYPE; // CW
+    // AAFx_Index = AAF_3;			 //
+    // AAF_location_type = LH_TYPE; // CW
 
-	TotalNumOfAAF = AAFx3; // aaf 3 ea
+    TotalNumOfAAF = AAFx3; // aaf 3 ea
 
-	TotalNumOfAAFSensor = 0;
+    TotalNumOfAAFSensor = 0;
 
-	aaf_step = AAF_INITIALIZATION;
-	aaf_init_step = WAIT_INITIALIZATION;
-	AAF_Tx_Position = UNKOWN_POSITION;
-	AAFx_Position_Status = Unknown_Status;
-	AAFx_InitStatus = DURING_INITIALIZATION;
-	time_1ms_spi_flag = 1; // spi timer on
-	while (1)			   // 1ms wait (spi error prevention)
-	{
-		if (time_1ms_spi >= 1U)
-		{
-			break;
-		}
-	}
-	Motor_SPI_Init();
+    aaf_step = AAF_INITIALIZATION;
+    aaf_init_step = WAIT_INITIALIZATION;
+    AAF_Tx_Position = UNKOWN_POSITION;
+    AAFx_Position_Status = Unknown_Status;
+    AAFx_InitStatus = DURING_INITIALIZATION;
+    time_1ms_spi_flag = 1; // spi timer on
+    while (1)              // 1ms wait (spi error prevention)
+    {
+        if (time_1ms_spi >= 1U)
+        {
+            break;
+        }
+    }
+    Motor_SPI_Init();
 
-	motor_stall_value = (unsigned int)(rx_16bit_spi[9] & 0xFFU);
-	time_1ms_volt_chk_dly_flag = 1; // POWER ON AFTER 500ms
+    motor_stall_value = (unsigned int)(rx_16bit_spi[9] & 0xFFU);
+    time_1ms_volt_chk_dly_flag = 1; // POWER ON AFTER 500ms
 
-	motor_cw_stall_value = MOTOR_CW_STALL_CHK_VALUE_NORMAL_VOLTAGE;
-	motor_ccw_stall_value = MOTOR_CCW_STALL_CHK_VALUE_NORMAL_VOLTAGE;
+    motor_cw_stall_value = MOTOR_CW_STALL_CHK_VALUE_NORMAL_VOLTAGE;
+    motor_ccw_stall_value = MOTOR_CCW_STALL_CHK_VALUE_NORMAL_VOLTAGE;
 
-	diag_mode_auto_dir = OPEN;
-	time_1ms_protection_chk_flag = 1;
+    diag_mode_auto_dir = OPEN;
+    time_1ms_protection_chk_flag = 1;
 
-	voltage_status_change_complete = COMPLETE;
+    voltage_status_change_complete = COMPLETE;
 }
 
 /* =========================================================================================
@@ -796,7 +800,7 @@ static void AAF_Init(void)
 static void Process_motor_action(void)
 {
     // 1. Protection Timer Clamp (Max 550ms)
-    if (time_1ms_protection_chk >= 550) 
+    if (time_1ms_protection_chk >= 550)
     {
         time_1ms_protection_chk_flag = 0;
         time_1ms_protection_chk = 550;
@@ -811,7 +815,7 @@ static void Process_motor_action(void)
 
 /***********************************************************************************************************************
  * Function Name: Process_IGN_Error_Check
- * Description  : IGN/HEV 신호를 모니터링하고 에러 체크 루틴을 수행함 
+ * Description  : IGN/HEV 신호를 모니터링하고 에러 체크 루틴을 수행함
  ***********************************************************************************************************************/
 static void Process_IGN_Error_Check(void)
 {
@@ -845,7 +849,7 @@ static void Main_mode_chk(void)
     {
         Operating_mode();
     }
-    else if (AAF_Maximum_Torque_Test_Mode == ON) 
+    else if (AAF_Maximum_Torque_Test_Mode == ON)
     {
         Torque_Test_Mode();
     }
@@ -858,7 +862,6 @@ static void Main_mode_chk(void)
         // invalid
     }
 }
-
 
 /***********************************************************************************************************************
  * Function Name: AAF_communicate_chk
@@ -891,7 +894,7 @@ static void Safety_protect_chk(void)
         Antipinch_move();
     }
 
-    // 3. LIN Bus Check 
+    // 3. LIN Bus Check
     Lin_bus_chk();
 
     // 4. Protection Mode
@@ -962,7 +965,7 @@ static void Process_monitoring_sw_logic(void)
  * Arguments    : void
  * Return Value : void
  ***********************************************************************************************************************/
-static void AAF_App(void) 
+static void AAF_App(void)
 {
     // 1. Motor Action & Timer
     Process_motor_action();
@@ -972,9 +975,9 @@ static void AAF_App(void)
 
     // 3. Software Logic Execution (Modes, Comms, Safety)
     Process_monitoring_sw_logic();
-    
+
     // 4. Watchdog Refresh
-    R_Config_WDT0_Restart(); 
+    R_Config_WDT0_Restart();
 }
 
 /***********************************************************************************************************************
@@ -1016,29 +1019,29 @@ static void Wakeup_from_lin_sleep(void)
  ***********************************************************************************************************************/
 static void Handle_lin_header_received(void)
 {
-    RLN30.LST = 0x00U; // Clear Status
+    RLN30.LST = 0x00U;        // Clear Status
     GetIDbuffer = RLN30.LIDB; // Get ID
 
-	if (GetIDbuffer == 0x25U)
-	{
-		RLIN_Slave_Receive(6); // 0x25
-	}
-	else if ((GetIDbuffer == 0xA6U) && (AAFx_Index == ReqRespAAFID))
-	{
-		RLIN_Slave_Transmit(Slave_TxData, 7); // 0x26
-	}
-	else if (GetIDbuffer == 0x3CU)
-	{
-		RLIN_Slave_Receive(8); // 0x3C
-	}
-	else if ((GetIDbuffer == 0x7DU) && ((SW_Chk == 1U) || (SW_Chk == 3U)))
-	{
-		RLIN_Slave_Transmit(Slave_SwData, 8); // 0x3D
-	}
-	else
-	{
-		RLIN_Slave_NoResponse();
-	}
+    if (GetIDbuffer == 0x25U)
+    {
+        RLIN_Slave_Receive(6); // 0x25
+    }
+    else if ((GetIDbuffer == 0xA6U) && (AAFx_Index == ReqRespAAFID))
+    {
+        RLIN_Slave_Transmit(Slave_TxData, 7); // 0x26
+    }
+    else if (GetIDbuffer == 0x3CU)
+    {
+        RLIN_Slave_Receive(8); // 0x3C
+    }
+    else if ((GetIDbuffer == 0x7DU) && ((SW_Chk == 1U) || (SW_Chk == 3U)))
+    {
+        RLIN_Slave_Transmit(Slave_SwData, 8); // 0x3D
+    }
+    else
+    {
+        RLIN_Slave_NoResponse();
+    }
 
     Wakeup_from_lin_sleep();
 }
@@ -1054,18 +1057,18 @@ static void Handle_lin_response_received(void)
 {
     RLN30.LST &= 0xFD; // Clear successful response reception flag
 
-	switch (GetIDbuffer)
-		{
-	case 0x25:
-		Get_reponse_RxData(Slave_RxData1);
-		lin_rx_chk_flag = ON;
-		break;
-	case 0x3C:
-		Get_reponse_RxData(Slave_RxSwData1);
-		break;
-	default:
-		break;
-	}
+    switch (GetIDbuffer)
+    {
+    case 0x25:
+        Get_reponse_RxData(Slave_RxData1);
+        lin_rx_chk_flag = ON;
+        break;
+    case 0x3C:
+        Get_reponse_RxData(Slave_RxSwData1);
+        break;
+    default:
+        break;
+    }
 }
 
 /***********************************************************************************************************************
@@ -1080,7 +1083,7 @@ static void Calculate_and_verify_checksum(uint8_t is_response_received)
     unsigned int sum_val = 0U;
 
     ReqRespAAFID = WAIT;
-    
+
     Req_ChkSum_Rx = (unsigned int)((Slave_RxData1[5] & 0xF0U) >> 4U);
     Req_Alive_Rx = (unsigned int)(Slave_RxData1[5] & 0x0FU);
     Req_Alive_Tx = Req_Alive_Rx;
@@ -1095,29 +1098,31 @@ static void Calculate_and_verify_checksum(uint8_t is_response_received)
                              (Slave_RxData1[4] >> 4U) + (Slave_RxData1[4] & 0x0FU) +
                              Req_Alive_Rx);
 
-
     AAF_LIN_ChkSum_CHK_value = (unsigned int)((16U - (sum_val & 0x0FU)) & 0x0FU);
 
     if ((is_response_received == 0x02U) && (AAF_LIN_ChkSum_CHK_value == Req_ChkSum_Rx))
     {
         AAF_LIN_ChkSum_CHK = PASS;
 
-        if (LIMP_HOME_Count >= 4U) LIMP_HOME_Count -= 4U; 
-        else                       LIMP_HOME_Count = 0U;  
+        if (LIMP_HOME_Count >= 4U)
+            LIMP_HOME_Count -= 4U;
+        else
+            LIMP_HOME_Count = 0U;
     }
     else if ((is_response_received == 0x02U) && (AAF_LIN_ChkSum_CHK_value != Req_ChkSum_Rx))
     {
         AAF_LIN_ChkSum_CHK = FAIL;
 
-        if (LIMP_HOME_Count <= 158U) LIMP_HOME_Count += 2U; 
-        else                         LIMP_HOME_Count = 160U; 
+        if (LIMP_HOME_Count <= 158U)
+            LIMP_HOME_Count += 2U;
+        else
+            LIMP_HOME_Count = 160U;
     }
     else
     {
         // Waiting
     }
 }
-
 
 /***********************************************************************************************************************
  * Function Name: RLIN30_receive_complete_interrupt
@@ -1132,7 +1137,7 @@ void RLIN30_receive_complete_interrupt(void)
     uint8_t receive_response_flag; // Typo Fixed: reponse -> response
 
     // 1. Get Status Flags
-    receive_header_flag = (uint8_t)(RLN30.LST & 0x80U);  /* 1: Header transmission completed */
+    receive_header_flag = (uint8_t)(RLN30.LST & 0x80U);   /* 1: Header transmission completed */
     receive_response_flag = (uint8_t)(RLN30.LST & 0x02U); /* 1: Frame/Wake-up reception completed */
 
     // 2. Handle Header Reception
@@ -1152,7 +1157,7 @@ void RLIN30_receive_complete_interrupt(void)
 
     // 5. Reset Timer & Update Hardware Status
     timer_1ms_lin_bus_inactive = 0U; // Reset LIN timeout timer
-    RLN30.LTRC = 0x01U; // Set FTS bit (Ready for next frame)
+    RLN30.LTRC = 0x01U;              // Set FTS bit (Ready for next frame)
 }
 
 /***********************************************************************************************************************
@@ -1164,184 +1169,183 @@ void RLIN30_receive_complete_interrupt(void)
 #pragma ghs interrupt
 void RLIN30_status_interrupt(void)
 {
-	NOP();
-	error_status = RLN30.LEST; // check status
-	if (time_1ms_IGN_chk >= 500)
-	{
-		if (LIMP_HOME_Count <= 160)
-		{
-			LIMP_HOME_Count += 2;
-		}
-	}
+    NOP();
+    error_status = RLN30.LEST; // check status
+    if (time_1ms_IGN_chk >= 500)
+    {
+        if (LIMP_HOME_Count <= 160)
+        {
+            LIMP_HOME_Count += 2;
+        }
+    }
 
 #if 1 // LEST Clear
-	while (1)
-	{
-		if ((RLN30.LTRC & 0x01) == 1)
-		{
-			RLN30.LEST = 0;
-			NOP();
-			NOP();
-			NOP();
-			NOP();
-			NOP();
-			NOP();
-			NOP();
-			NOP();
-			NOP();
-			NOP();
-			NOP();
-			NOP();
-			NOP();
-			NOP();
-			NOP();
-			NOP();
-			NOP();
-			NOP();
-			NOP();
-			NOP();
-			NOP();
-			error_status = RLN30.LEST;
-			break;
-		}
-	}
+    while (1)
+    {
+        if ((RLN30.LTRC & 0x01) == 1)
+        {
+            RLN30.LEST = 0;
+            NOP();
+            NOP();
+            NOP();
+            NOP();
+            NOP();
+            NOP();
+            NOP();
+            NOP();
+            NOP();
+            NOP();
+            NOP();
+            NOP();
+            NOP();
+            NOP();
+            NOP();
+            NOP();
+            NOP();
+            NOP();
+            NOP();
+            NOP();
+            NOP();
+            error_status = RLN30.LEST;
+            break;
+        }
+    }
 #endif
 }
 
 static void DRV8899_Init(void)
 {
-	PORT.P10 |= _PORT_Pn0_OUTPUT_HIGH;	// MCU_DRVOFF
-	PORT.P10 |= _PORT_Pn2_OUTPUT_HIGH;	// MCU_DRV_SLEEP_MODE
-	PORT.P9 |= _PORT_Pn1_OUTPUT_HIGH;	// VREF
-	PORT.P10 &= ~_PORT_Pn4_OUTPUT_HIGH; // MCU_DIR
-	PORT.P9 &= ~_PORT_Pn0_OUTPUT_HIGH;	// MCU_STEP
+    PORT.P10 |= _PORT_Pn0_OUTPUT_HIGH;  // MCU_DRVOFF
+    PORT.P10 |= _PORT_Pn2_OUTPUT_HIGH;  // MCU_DRV_SLEEP_MODE
+    PORT.P9 |= _PORT_Pn1_OUTPUT_HIGH;   // VREF
+    PORT.P10 &= ~_PORT_Pn4_OUTPUT_HIGH; // MCU_DIR
+    PORT.P9 &= ~_PORT_Pn0_OUTPUT_HIGH;  // MCU_STEP
 }
 
 static void DRV8899_Wakeup(void)
 {
-	PORT.P10 |= _PORT_Pn0_OUTPUT_HIGH; // MCU_DRVOFF
-	PORT.P10 |= _PORT_Pn2_OUTPUT_HIGH; // MCU_DRV_SLEEP_MODE
-	PORT.P9 |= _PORT_Pn1_OUTPUT_HIGH;  // VREF
+    PORT.P10 |= _PORT_Pn0_OUTPUT_HIGH; // MCU_DRVOFF
+    PORT.P10 |= _PORT_Pn2_OUTPUT_HIGH; // MCU_DRV_SLEEP_MODE
+    PORT.P9 |= _PORT_Pn1_OUTPUT_HIGH;  // VREF
 }
 
 static void DRV8899_Sleep(void)
 {
-	PORT.P10 |= _PORT_Pn0_OUTPUT_HIGH;	// MCU_DRVOFF
-	PORT.P10 &= ~_PORT_Pn2_OUTPUT_HIGH; // MCU_DRV_SLEEP_MODE
-	PORT.P9 &= ~_PORT_Pn1_OUTPUT_HIGH;	// VREF
-	PORT.P10 &= ~_PORT_Pn4_OUTPUT_HIGH; // MCU_DIR
-	PORT.P9 &= ~_PORT_Pn0_OUTPUT_HIGH;	// MCU_STEP
+    PORT.P10 |= _PORT_Pn0_OUTPUT_HIGH;  // MCU_DRVOFF
+    PORT.P10 &= ~_PORT_Pn2_OUTPUT_HIGH; // MCU_DRV_SLEEP_MODE
+    PORT.P9 &= ~_PORT_Pn1_OUTPUT_HIGH;  // VREF
+    PORT.P10 &= ~_PORT_Pn4_OUTPUT_HIGH; // MCU_DIR
+    PORT.P9 &= ~_PORT_Pn0_OUTPUT_HIGH;  // MCU_STEP
 }
 
 static void DRV_On(void)
 {
-	PORT.P10 &= ~_PORT_Pn0_OUTPUT_HIGH; // MCU_DRVOFF
+    PORT.P10 &= ~_PORT_Pn0_OUTPUT_HIGH; // MCU_DRVOFF
 }
 
 static void DRV_Off(void)
 {
-	PORT.P10 |= _PORT_Pn0_OUTPUT_HIGH; // MCU_DRVOFF
-	stall_chk_cnt = 0;
-	stall_chk_time_1ms = 0;
+    PORT.P10 |= _PORT_Pn0_OUTPUT_HIGH; // MCU_DRVOFF
+    stall_chk_cnt = 0;
+    stall_chk_time_1ms = 0;
 }
 
 static void DRV8899_On(void)
 {
-	PORT.P10 &= ~_PORT_Pn0_OUTPUT_HIGH; // MCU_DRVON
+    PORT.P10 &= ~_PORT_Pn0_OUTPUT_HIGH; // MCU_DRVON
 }
 
 static void DRV8899_Off(void)
 {
-	PORT.P10 |= _PORT_Pn0_OUTPUT_HIGH; // MCU_DRVOFF
+    PORT.P10 |= _PORT_Pn0_OUTPUT_HIGH; // MCU_DRVOFF
 
-	stall_chk_cnt = 0;
-	stall_chk_time_1ms = 0;
+    stall_chk_cnt = 0;
+    stall_chk_time_1ms = 0;
 }
-
 
 static void SPI_select_pin_Off(void)
 {
-	PORT.P8 &= ~_PORT_Pn0_OUTPUT_HIGH;
+    PORT.P8 &= ~_PORT_Pn0_OUTPUT_HIGH;
 }
 
 static void Lin_Transceiver_On(void)
 {
-	PORT.P10 |= _PORT_Pn3_OUTPUT_HIGH; // MCU_LIN_SLEEP_MODE
+    PORT.P10 |= _PORT_Pn3_OUTPUT_HIGH; // MCU_LIN_SLEEP_MODE
 }
 
 static void Lin_Transceiver_Off(void)
 {
-	PORT.P10 &= ~_PORT_Pn3_OUTPUT_HIGH; // MCU_LIN_SLEEP_MODE
+    PORT.P10 &= ~_PORT_Pn3_OUTPUT_HIGH; // MCU_LIN_SLEEP_MODE
 }
 
 static void Motor_Open(void)
 {
-	if (AAF_location_type == RH_TYPE)
-	{
-		PORT.P10 &= ~_PORT_Pn4_OUTPUT_HIGH; // CCW
-		dir_state = OPEN;
-	}
-	else if (AAF_location_type == LH_TYPE)
-	{
-		PORT.P10 |= _PORT_Pn4_OUTPUT_HIGH; // CW
-		dir_state = OPEN;
-	}
-	else
-	{
-	}
+    if (AAF_location_type == RH_TYPE)
+    {
+        PORT.P10 &= ~_PORT_Pn4_OUTPUT_HIGH; // CCW
+        dir_state = OPEN;
+    }
+    else if (AAF_location_type == LH_TYPE)
+    {
+        PORT.P10 |= _PORT_Pn4_OUTPUT_HIGH; // CW
+        dir_state = OPEN;
+    }
+    else
+    {
+    }
 }
 
 static void Motor_dir_open(void)
 {
-	if (AAF_location_type == RH_TYPE)
-	{
-		PORT.P10 &= ~_PORT_Pn4_OUTPUT_HIGH; // CCW
-		dir_state = OPEN;
-	}
-	else if (AAF_location_type == LH_TYPE)
-	{
-		PORT.P10 |= _PORT_Pn4_OUTPUT_HIGH; // CW
-		dir_state = OPEN;
-	}
-	else
-	{
-		//invalid
-	}
+    if (AAF_location_type == RH_TYPE)
+    {
+        PORT.P10 &= ~_PORT_Pn4_OUTPUT_HIGH; // CCW
+        dir_state = OPEN;
+    }
+    else if (AAF_location_type == LH_TYPE)
+    {
+        PORT.P10 |= _PORT_Pn4_OUTPUT_HIGH; // CW
+        dir_state = OPEN;
+    }
+    else
+    {
+        // invalid
+    }
 }
 
 static void Motor_Close(void)
 {
-	if (AAF_location_type == RH_TYPE)
-	{
-		PORT.P10 |= _PORT_Pn4_OUTPUT_HIGH; // MCU_DIR
-		dir_state = CLOSE;
-	}
-	else if (AAF_location_type == LH_TYPE)
-	{
-		PORT.P10 &= ~_PORT_Pn4_OUTPUT_HIGH; // MCU_DIR
-		dir_state = CLOSE;
-	}
-	else
-	{
-	}
+    if (AAF_location_type == RH_TYPE)
+    {
+        PORT.P10 |= _PORT_Pn4_OUTPUT_HIGH; // MCU_DIR
+        dir_state = CLOSE;
+    }
+    else if (AAF_location_type == LH_TYPE)
+    {
+        PORT.P10 &= ~_PORT_Pn4_OUTPUT_HIGH; // MCU_DIR
+        dir_state = CLOSE;
+    }
+    else
+    {
+    }
 }
 
 static void Motor_dir_close(void)
 {
-	if (AAF_location_type == RH_TYPE)
-	{
-		PORT.P10 |= _PORT_Pn4_OUTPUT_HIGH; // MCU_DIR
-		dir_state = CLOSE;
-	}
-	else if (AAF_location_type == LH_TYPE)
-	{
-		PORT.P10 &= ~_PORT_Pn4_OUTPUT_HIGH; // MCU_DIR
-		dir_state = CLOSE;
-	}
-	else
-	{
-		//invalid
-	}
+    if (AAF_location_type == RH_TYPE)
+    {
+        PORT.P10 |= _PORT_Pn4_OUTPUT_HIGH; // MCU_DIR
+        dir_state = CLOSE;
+    }
+    else if (AAF_location_type == LH_TYPE)
+    {
+        PORT.P10 &= ~_PORT_Pn4_OUTPUT_HIGH; // MCU_DIR
+        dir_state = CLOSE;
+    }
+    else
+    {
+        // invalid
+    }
 }
 
 /***********************************************************************************************************************
@@ -1417,7 +1421,7 @@ static void Execute_legacy_soft_start(void)
 static void Process_active_acceleration(void)
 {
     // Development START
-    if ((AAF_Tx_Position != UNKOWN_POSITION) && (Diag_Mode == 0)) 
+    if ((AAF_Tx_Position != UNKOWN_POSITION) && (Diag_Mode == 0))
     {
         AAFx_Position_Status = FlapMoving_Status;
     }
@@ -1435,7 +1439,7 @@ static void Process_active_acceleration(void)
     stall_chk_cnt = ON;
     time_1ms_motor_acceleration_flag = 1;
 
-    Execute_legacy_soft_start(); //not used
+    Execute_legacy_soft_start(); // not used
 
     // Active acceleration logic
     if (((motor_step_value <= STEP_TIME_1000RPM) && (motor_step_value > STEP_TIME_1250RPM)) && (time_1ms_motor_acceleration >= 10))
@@ -1514,7 +1518,7 @@ static void Motor_Action(void)
     {
         Process_active_acceleration();
     }
-    else 
+    else
     {
         motor_wait_chk = OFF;
     }
@@ -1534,12 +1538,14 @@ static void Motor_Action(void)
  ***********************************************************************************************************************/
 static void Start_motor_move_init(uint8_t next_step, uint8_t dir, uint8_t is_case0)
 {
-    if (dir == OPEN) Motor_dir_open();
-    else             Motor_dir_close();
+    if (dir == OPEN)
+        Motor_dir_open();
+    else
+        Motor_dir_close();
 
     DRV8899_On();
     motor_start = ON;
-    
+
     // (Case 0, 6, 9)
     motor_stall_flag = MOTOR_NORMAL;
     stall_chk_time_1ms = 0;
@@ -1549,7 +1555,7 @@ static void Start_motor_move_init(uint8_t next_step, uint8_t dir, uint8_t is_cas
     AAFx_Position_Status = Unknown_Status;
     antipinch_previous_action = INITIALIZATION;
     time_1ms_init_chk = 0;
-    time_1ms_init_chk_flag = 1; 
+    time_1ms_init_chk_flag = 1;
 
     // (Case 0)
     if (is_case0 == TRUE)
@@ -1562,7 +1568,6 @@ static void Start_motor_move_init(uint8_t next_step, uint8_t dir, uint8_t is_cas
     init_move_step = next_step;
 }
 
-
 /***********************************************************************************************************************
  * Function Name: Check_stall_and_move
  * Called By: Init_move (Case 4, 7, 10)
@@ -1574,12 +1579,14 @@ static void Check_stall_and_move(uint8_t next_step, uint8_t retry_step, uint8_t 
 {
     if ((motor_stall_flag == MOTOR_STALL) || (time_1ms_init_chk >= 4500U))
     {
-    
+
         DRV8899_Off();
         motor_start = OFF;
-        
-        if (dir == CLOSE) step_position_close = step_position;
-        else              step_position_open = step_position;
+
+        if (dir == CLOSE)
+            step_position_close = step_position;
+        else
+            step_position_open = step_position;
 
         stall_chk_cnt = 0;
         stall_chk_time_1ms = 0;
@@ -1621,8 +1628,8 @@ static void Wait_delay_move(uint8_t next_step)
         time_1ms_init_move = 0;
         init_move_step = next_step;
 
-        time_1ms_init_chk_flag = 0; 
-        time_1ms_init_chk = 0;      
+        time_1ms_init_chk_flag = 0;
+        time_1ms_init_chk = 0;
     }
 }
 
@@ -1635,27 +1642,27 @@ static void Wait_delay_move(uint8_t next_step)
  ***********************************************************************************************************************/
 static void Move_to_limit_position(void)
 {
-	if (step_position <= step_position_open + limit_step_position)
-	{
-		Motor_dir_close();						 // dir CLOSE
-		DRV8899_On();							 // drv on
-		motor_start = ON;					 // step start
-		time_1ms_external_10s_chk_flag = ON; // 10s chk timer on
+    if (step_position <= step_position_open + limit_step_position)
+    {
+        Motor_dir_close();                   // dir CLOSE
+        DRV8899_On();                        // drv on
+        motor_start = ON;                    // step start
+        time_1ms_external_10s_chk_flag = ON; // 10s chk timer on
 
-		motor_stall_flag = MOTOR_NORMAL; // stall reset
-		// stall_chk_cnt = 0;			 stall reset
-		stall_chk_time_1ms = 0;							  // stall reset
-		motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE; // stall reset
-		time_1ms_spi = 0;
+        motor_stall_flag = MOTOR_NORMAL; // stall reset
+        // stall_chk_cnt = 0;			 stall reset
+        stall_chk_time_1ms = 0;                           // stall reset
+        motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE; // stall reset
+        time_1ms_spi = 0;
 
-		init_move_step = 14;
-	}
-	else
-	{
-		time_1ms_external_10s_chk_flag = ON; // 10s chk timer on
+        init_move_step = 14;
+    }
+    else
+    {
+        time_1ms_external_10s_chk_flag = ON; // 10s chk timer on
 
-		init_move_step = 14;
-	}
+        init_move_step = 14;
+    }
 }
 
 /***********************************************************************************************************************
@@ -1667,50 +1674,50 @@ static void Move_to_limit_position(void)
  ***********************************************************************************************************************/
 static void Check_limit_arrival(void)
 {
-	if (((motor_stall_flag == MOTOR_STALL) || ((step_position_close - step_position_open) <= STEP_POSITION_MINIMUM_RANGE)) && (stall_test_mode == 0U))
-	{
-		DRV8899_Off();
-		motor_start = OFF;
-		fail_safety_1_cycle_flag = OFF;
-		softstart_complete = OFF;
-		motor_step_value = STEP_TIME_1000RPM;
-		timer_1ms_init_fail_chk_flag = 0;
-		timer_1ms_init_fail_chk = 0;
-	}
-	else if (step_position >= step_position_open + limit_step_position)
-	{
-		DRV8899_Off();
-		motor_start = OFF;
-		// step_position_open = step_position;
-		stall_chk_cnt = 0;
-		stall_chk_time_1ms = 0; // stall reset
-		time_1ms_external_10s_chk_flag = OFF;
-		time_1ms_external_10s_chk = 0;
-		softstart_complete = OFF;
-		motor_step_value = STEP_TIME_1000RPM;
-		timer_1ms_init_fail_chk_flag = 0;
-		timer_1ms_init_fail_chk = 0;
+    if (((motor_stall_flag == MOTOR_STALL) || ((step_position_close - step_position_open) <= STEP_POSITION_MINIMUM_RANGE)) && (stall_test_mode == 0U))
+    {
+        DRV8899_Off();
+        motor_start = OFF;
+        fail_safety_1_cycle_flag = OFF;
+        softstart_complete = OFF;
+        motor_step_value = STEP_TIME_1000RPM;
+        timer_1ms_init_fail_chk_flag = 0;
+        timer_1ms_init_fail_chk = 0;
+    }
+    else if (step_position >= step_position_open + limit_step_position)
+    {
+        DRV8899_Off();
+        motor_start = OFF;
+        // step_position_open = step_position;
+        stall_chk_cnt = 0;
+        stall_chk_time_1ms = 0; // stall reset
+        time_1ms_external_10s_chk_flag = OFF;
+        time_1ms_external_10s_chk = 0;
+        softstart_complete = OFF;
+        motor_step_value = STEP_TIME_1000RPM;
+        timer_1ms_init_fail_chk_flag = 0;
+        timer_1ms_init_fail_chk = 0;
 
-		init_move_step = 15;
-	}
-	else
-	{
-		timer_1ms_init_fail_chk_flag = 1;
+        init_move_step = 15;
+    }
+    else
+    {
+        timer_1ms_init_fail_chk_flag = 1;
 
-		if (timer_1ms_init_fail_chk >= 5000U)
-		{
-			init_move_step = 0;
+        if (timer_1ms_init_fail_chk >= 5000U)
+        {
+            init_move_step = 0;
 
-			timer_1ms_init_fail_chk_flag = 0;
-			timer_1ms_init_fail_chk = 0;
-		}
-	}
+            timer_1ms_init_fail_chk_flag = 0;
+            timer_1ms_init_fail_chk = 0;
+        }
+    }
 }
 
 /***********************************************************************************************************************
  * Function Name: Init_move_0_to_9
  * Description  : case 0 ~ 9
- * Called By    : Init_move 
+ * Called By    : Init_move
  * Arguments    : void
  * Return Value : void
  ***********************************************************************************************************************/
@@ -1747,7 +1754,7 @@ static void Init_move_0_to_9(void)
 /***********************************************************************************************************************
  * Function Name: Init_move_10_to_15
  * Description  : case 10 ~ 15
- * Called By    : Init_move 
+ * Called By    : Init_move
  * Arguments    : void
  * Return Value : void
  ***********************************************************************************************************************/
@@ -1765,7 +1772,7 @@ static void Init_move_10_to_15(void)
         limit_step_position = (step_position_close - step_position_open) * AAF_ERROR_ANGLE / AAF_FULL_ANGLE;
         // open_1st_step_position = (step_position_close - step_position_open) * AAF_1ST_OPEN_ANGLE / AAF_FULL_ANGLE;  ICE NOT USED
         // open_2nd_step_position = (step_position_close - step_position_open) * AAF_2ST_OPEN_ANGLE / AAF_FULL_ANGLE;  ICE NOT USED
-		init_move_step = 13;
+        init_move_step = 13;
         break;
     case 13:
         Move_to_limit_position();
@@ -1777,13 +1784,13 @@ static void Init_move_10_to_15(void)
         time_1ms_init_move_flag = 1;
         if (time_1ms_init_move >= 100U)
         {
-			wake_up_motor_range_init_chk = COMPLETE;
-			time_1ms_init_move_flag = 0;
-			time_1ms_init_move = 0;
-			evrdy_on_flag = ON;
-			motor_Short_chk_count = 0U;
-			motor_Open_chk_count = 0U;
-			init_move_step = 19;
+            wake_up_motor_range_init_chk = COMPLETE;
+            time_1ms_init_move_flag = 0;
+            time_1ms_init_move = 0;
+            evrdy_on_flag = ON;
+            motor_Short_chk_count = 0U;
+            motor_Open_chk_count = 0U;
+            init_move_step = 19;
         }
         break;
     default:
@@ -1805,7 +1812,7 @@ static void Init_move(void)
 
 static void VDC_adc(void)
 {
-	time_1ms_adc_flag = 1;
+    time_1ms_adc_flag = 1;
 #if 0
 	if ((time_1ms_adc >= 10U) && (voltage_chk_delay_complete == 1U))
 	{
@@ -1859,61 +1866,61 @@ static void VDC_adc(void)
 		time_1ms_adc = 0;
 	}
 #endif
-	if (adc_chk_ready == 1U)
-	{
-		INTC1.ICADCA0I0.BIT.RFADCA0I0 = 0;
-		// R_Config_ADCA0_ScanGroup1_GetResult(&bat_adc, 8);
-		R_Config_ADCA0_ScanGroup1_GetResult(scan_results, 1);
-		bat_adc = scan_results[0];
-		adc_sum = 0;
+    if (adc_chk_ready == 1U)
+    {
+        INTC1.ICADCA0I0.BIT.RFADCA0I0 = 0;
+        // R_Config_ADCA0_ScanGroup1_GetResult(&bat_adc, 8);
+        R_Config_ADCA0_ScanGroup1_GetResult(scan_results, 1);
+        bat_adc = scan_results[0];
+        adc_sum = 0;
 
-		for (int i = 8; i >= 0; i--)
-		{
-			adc_chk[i + 1] = adc_chk[i];
-			adc_sum += adc_chk[i];
-		}
+        for (int i = 8; i >= 0; i--)
+        {
+            adc_chk[i + 1] = adc_chk[i];
+            adc_sum += adc_chk[i];
+        }
 
-		adc_chk[0] = bat_adc;
+        adc_chk[0] = bat_adc;
 
-		adc_sum += adc_chk[0];
+        adc_sum += adc_chk[0];
 
-		adc_avr = adc_sum / 10U;
+        adc_avr = adc_sum / 10U;
 
-		adc_chk_ok_flag++;
+        adc_chk_ok_flag++;
 
-		if (adc_chk_ok_flag >= 10U)
-		{
-			adc_chk_ok_flag = 10;
-		}
+        if (adc_chk_ok_flag >= 10U)
+        {
+            adc_chk_ok_flag = 10;
+        }
 
-		adc_chk_ready = 0;
-		time_1ms_adc = 0;
-	}
-	else if ((time_1ms_adc >= 10U) && (voltage_chk_delay_complete == 1U) && (adc_chk_ready == 0U))
-	{
-		if (INTC1.ICADCA0I0.BIT.RFADCA0I0 == 1U)
-		{
-			adc_chk_ready = 1;
-			time_1ms_adc = 0;
-		}
-	}
-	else if (time_1ms_voltage_chk_delay >= 500U)
-	{
-		voltage_chk_delay_complete = 1;
-		time_1ms_voltage_chk_delay = 0;
-		time_1ms_volt_chk_dly_flag = 0;
-		Voltage_chk_current_limit_init();
-	}
-	else
-	{
-	}
+        adc_chk_ready = 0;
+        time_1ms_adc = 0;
+    }
+    else if ((time_1ms_adc >= 10U) && (voltage_chk_delay_complete == 1U) && (adc_chk_ready == 0U))
+    {
+        if (INTC1.ICADCA0I0.BIT.RFADCA0I0 == 1U)
+        {
+            adc_chk_ready = 1;
+            time_1ms_adc = 0;
+        }
+    }
+    else if (time_1ms_voltage_chk_delay >= 500U)
+    {
+        voltage_chk_delay_complete = 1;
+        time_1ms_voltage_chk_delay = 0;
+        time_1ms_volt_chk_dly_flag = 0;
+        Voltage_chk_current_limit_init();
+    }
+    else
+    {
+    }
 
-	if ((time_1ms_volt_stat_chg_wait >= 10U) && (motor_start == OFF))
-	{
-		voltage_status_change_complete = COMPLETE;
-		time_1ms_volt_stat_chg_wait = 0;
-		time_1ms_volt_stat_chg_wait_flag = 0;
-	}
+    if ((time_1ms_volt_stat_chg_wait >= 10U) && (motor_start == OFF))
+    {
+        voltage_status_change_complete = COMPLETE;
+        time_1ms_volt_stat_chg_wait = 0;
+        time_1ms_volt_stat_chg_wait_flag = 0;
+    }
 }
 
 /***********************************************************************************************************************
@@ -1924,7 +1931,8 @@ static void VDC_adc(void)
  ***********************************************************************************************************************/
 static uint8_t Check_voltage_error(void)
 {
-    if (adc_chk_ok_flag != 10U) return 0;
+    if (adc_chk_ok_flag != 10U)
+        return 0;
 
     // 1. 저전압 (Under Voltage)
     if (adc_avr <= ADC_UNDER_VOLTAGE_7V)
@@ -2038,7 +2046,8 @@ static uint8_t Check_voltage_error(void)
  ***********************************************************************************************************************/
 static void Check_short_error(void)
 {
-    if (AAFx_Circuit_Short == AAF_CIRCUIT_SHORT) return;
+    if (AAFx_Circuit_Short == AAF_CIRCUIT_SHORT)
+        return;
 
     if ((AAF_OverCurrent == OVER_CURRENT) && (Short_Detected == 0))
     {
@@ -2046,7 +2055,7 @@ static void Check_short_error(void)
         time_1ms_motor_Short_chk_flag = 1;
         Short_Detected = 1;
         Short_fault_check = 0;
-        motor_Short_chk_count++; 
+        motor_Short_chk_count++;
         DRV_Off();
         motor_start = OFF;
         stall_chk_cnt = 0;
@@ -2090,13 +2099,12 @@ static void Check_short_error(void)
             Flash_memory_write();
         }
     }
-	else
-	{
-		//invalid
-	}
+    else
+    {
+        // invalid
+    }
 
-	LIN_Short_Chk();
-
+    LIN_Short_Chk();
 }
 
 /***********************************************************************************************************************
@@ -2105,7 +2113,8 @@ static void Check_short_error(void)
  ***********************************************************************************************************************/
 static void Check_open_error(void)
 {
-    if (AAFx_Motor_Fault == 1) return;
+    if (AAFx_Motor_Fault == 1)
+        return;
 
     if ((motor_open_load == MOTOR_FAULT) && (Open_Detected == 0))
     {
@@ -2113,7 +2122,7 @@ static void Check_open_error(void)
         time_1ms_motor_Open_chk_flag = 1;
         Open_Detected = 1;
         Open_fault_check = 0;
-        motor_Open_chk_count++; 
+        motor_Open_chk_count++;
         DRV_Off();
         motor_start = OFF;
         stall_chk_cnt = 0;
@@ -2160,7 +2169,7 @@ static void Check_open_error(void)
 
 /***********************************************************************************************************************
  * Function Name: ERROR_chk
- * Description  : 외부 보호 요청, 전압, 드라이버 결함, 쇼트/오픈 상태를 순차적으로 체크함 
+ * Description  : 외부 보호 요청, 전압, 드라이버 결함, 쇼트/오픈 상태를 순차적으로 체크함
  ***********************************************************************************************************************/
 static void ERROR_chk(void)
 {
@@ -2172,7 +2181,8 @@ static void ERROR_chk(void)
     else if ((AAF_ProtectionMode_Rx == OFF) && (stall_test_mode == 0U))
     {
         // 1. 전압 체크 (내부 return 로직 포함)
-        if (Check_voltage_error() == 1) return;
+        if (Check_voltage_error() == 1)
+            return;
 
         // 2. 모터 초기화 결함 체크
         if (((AAFx_InitStatus == ABNORMAL_FINISHED_INITIALIZATION)) && (motor_fault_chk == 1))
@@ -2211,181 +2221,181 @@ static void ERROR_chk(void)
 
 static void Tx_position_complete_chk(void)
 {
-	if (AAFx_Index == AAF_1)
-	{
-		AAF_Tx_Position = aaf_action;
-	}
-	else if (AAFx_Index == AAF_2)
-	{
-		AAF_Tx_Position = aaf_action;
-	}
-	else if (AAFx_Index == AAF_3)
-	{
-		AAF_Tx_Position = aaf_action;
-	}
-	else
-	{
-	}
+    if (AAFx_Index == AAF_1)
+    {
+        AAF_Tx_Position = aaf_action;
+    }
+    else if (AAFx_Index == AAF_2)
+    {
+        AAF_Tx_Position = aaf_action;
+    }
+    else if (AAFx_Index == AAF_3)
+    {
+        AAF_Tx_Position = aaf_action;
+    }
+    else
+    {
+    }
 }
 
 static void Flash_memory_write(void)
 {
-	time_1ms_fdl_error_chk_flag = 0;
-	time_1ms_fdl_error_chk = 0;
-	close_memory_write = step_position_close;
-	open_memory_write = step_position_open;
-	now_step_memory_write = step_position;
-	position_memory_write = AAF_Tx_Position;
-	Initial_memory_write = evrdy_on_flag;
-	limit_memory_write = limit_step_position;
+    time_1ms_fdl_error_chk_flag = 0;
+    time_1ms_fdl_error_chk = 0;
+    close_memory_write = step_position_close;
+    open_memory_write = step_position_open;
+    now_step_memory_write = step_position;
+    position_memory_write = AAF_Tx_Position;
+    Initial_memory_write = evrdy_on_flag;
+    limit_memory_write = limit_step_position;
 
-	position_status_memory_write = AAFx_Position_Status;
-	AAFx_InitStatus_memory_write = AAFx_InitStatus;
-	DTC_memory_write |= DTC_Status;
-	power_chk_memory_write = power_chk;
-	First_Powerchk_memory_write = First_Powerchk;
+    position_status_memory_write = AAFx_Position_Status;
+    AAFx_InitStatus_memory_write = AAFx_InitStatus;
+    DTC_memory_write |= DTC_Status;
+    power_chk_memory_write = power_chk;
+    First_Powerchk_memory_write = First_Powerchk;
 
-	w_buff[0] = close_memory_write & 0x00FFU; // write 2byte read 4byte ?븯?쐞
-	w_buff[1] = (close_memory_write & 0xFF00U) >> 8U;
+    w_buff[0] = close_memory_write & 0x00FFU; // write 2byte read 4byte ?븯?쐞
+    w_buff[1] = (close_memory_write & 0xFF00U) >> 8U;
 
-	w_buff[2] = open_memory_write & 0x00FFU; // write 2byte read 4byte ?긽?쐞
-	w_buff[3] = (open_memory_write & 0xFF00U) >> 8U;
+    w_buff[2] = open_memory_write & 0x00FFU; // write 2byte read 4byte ?긽?쐞
+    w_buff[3] = (open_memory_write & 0xFF00U) >> 8U;
 
-	w_buff[4] = now_step_memory_write & 0x00FFU; // write 2byte read 4byte
-	w_buff[5] = (now_step_memory_write & 0xFF00U) >> 8U;
+    w_buff[4] = now_step_memory_write & 0x00FFU; // write 2byte read 4byte
+    w_buff[5] = (now_step_memory_write & 0xFF00U) >> 8U;
 
-	w_buff[6] = position_memory_write & 0xFFU; // write 2byte read 4byte position+evrdy
-	w_buff[7] = (Initial_memory_write & 0xFFU);
+    w_buff[6] = position_memory_write & 0xFFU; // write 2byte read 4byte position+evrdy
+    w_buff[7] = (Initial_memory_write & 0xFFU);
 
-	w_buff[8] = limit_memory_write & 0x00FFU; // write 2byte read 4byte limitstep
-	w_buff[9] = (limit_memory_write & 0xFF00U) >> 8U;
+    w_buff[8] = limit_memory_write & 0x00FFU; // write 2byte read 4byte limitstep
+    w_buff[9] = (limit_memory_write & 0xFF00U) >> 8U;
 
-	w_buff[10] = position_status_memory_write & 0xFFU; // write 2byte read 4byte limitstep
-	w_buff[11] = (AAFx_InitStatus_memory_write & 0xFFU);
+    w_buff[10] = position_status_memory_write & 0xFFU; // write 2byte read 4byte limitstep
+    w_buff[11] = (AAFx_InitStatus_memory_write & 0xFFU);
 
-	w_buff[12] = DTC_memory_write & 0x00FFU; // write 2byte read 4byte limitstep
-	w_buff[13] = (DTC_memory_write & 0xFF00U) >> 8U;
+    w_buff[12] = DTC_memory_write & 0x00FFU; // write 2byte read 4byte limitstep
+    w_buff[13] = (DTC_memory_write & 0xFF00U) >> 8U;
 
-	w_buff[14] = power_chk_memory_write & 0x00FFU; // write 2byte read 4byte limitstep
-	w_buff[15] = (power_chk_memory_write & 0xFF00U) >> 8U;
+    w_buff[14] = power_chk_memory_write & 0x00FFU; // write 2byte read 4byte limitstep
+    w_buff[15] = (power_chk_memory_write & 0xFF00U) >> 8U;
 
-	w_buff[16] = First_Powerchk_memory_write & 0x00FFU; // write 2byte read 4byte limitstep
-	w_buff[17] = (First_Powerchk_memory_write & 0xFF00U) >> 8U;
+    w_buff[16] = First_Powerchk_memory_write & 0x00FFU; // write 2byte read 4byte limitstep
+    w_buff[17] = (First_Powerchk_memory_write & 0xFF00U) >> 8U;
 
-	ret = function_FDL_erease(0, 1);
+    ret = function_FDL_erease(0, 1);
 
-	time_1ms_fdl_error_chk_flag = 1;
+    time_1ms_fdl_error_chk_flag = 1;
 
-	if (ret < (char)0) // error
-	{
-		while (1)
-		{
-			if (time_1ms_fdl_error_chk >= 100U)
-			{
-				fdl_fail += 1;
-				break;
-			}
-		}
-	}
+    if (ret < (char)0) // error
+    {
+        while (1)
+        {
+            if (time_1ms_fdl_error_chk >= 100U)
+            {
+                fdl_fail += 1;
+                break;
+            }
+        }
+    }
 
-	ret = function_FDL_write(w_buff, 0, 9); // size = word(2byte)
+    ret = function_FDL_write(w_buff, 0, 9); // size = word(2byte)
 
-	time_1ms_fdl_error_chk_flag = 1;
+    time_1ms_fdl_error_chk_flag = 1;
 
-	if (ret < (char)0) // error
-	{
-		while (1)
-		{
-			if (time_1ms_fdl_error_chk >= 100U)
-			{
-				fdl_fail += 1;
-				break;
-			}
-		}
-	}
+    if (ret < (char)0) // error
+    {
+        while (1)
+        {
+            if (time_1ms_fdl_error_chk >= 100U)
+            {
+                fdl_fail += 1;
+                break;
+            }
+        }
+    }
 
-	time_1ms_fdl_error_chk_flag = 0;
-	time_1ms_fdl_error_chk = 0;
+    time_1ms_fdl_error_chk_flag = 0;
+    time_1ms_fdl_error_chk = 0;
 }
 
 static void Flash_memory_read(void)
 {
 
-	ret = function_FDL_read(r_buff, 0, 9); // size = word(2byte) read 4byte
+    ret = function_FDL_read(r_buff, 0, 9); // size = word(2byte) read 4byte
 
-	time_1ms_fdl_error_chk_flag = 1;
+    time_1ms_fdl_error_chk_flag = 1;
 
-	if (ret < (char)0) // error
-	{
-		while (1)
-		{
-			if (time_1ms_fdl_error_chk >= 100U)
-			{
-				fdl_fail += 1;
-				break;
-			}
-		}
-	}
+    if (ret < (char)0) // error
+    {
+        while (1)
+        {
+            if (time_1ms_fdl_error_chk >= 100U)
+            {
+                fdl_fail += 1;
+                break;
+            }
+        }
+    }
 
-	time_1ms_fdl_error_chk_flag = 0;
-	time_1ms_fdl_error_chk = 0;
+    time_1ms_fdl_error_chk_flag = 0;
+    time_1ms_fdl_error_chk = 0;
 
-	close_memory_read = (unsigned int)r_buff[0] & 0xFFFF;		 // 4byte 源뚯?
-	open_memory_read = (unsigned int)(r_buff[0] >> 16) & 0xFFFF; // 4byte 源뚯?
+    close_memory_read = (unsigned int)r_buff[0] & 0xFFFF;        // 4byte 源뚯?
+    open_memory_read = (unsigned int)(r_buff[0] >> 16) & 0xFFFF; // 4byte 源뚯?
 
-	now_step_memory_read = (unsigned int)r_buff[1] & 0xFFFF; // 4byte 源뚯?
+    now_step_memory_read = (unsigned int)r_buff[1] & 0xFFFF; // 4byte 源뚯?
 
-	position_Initial_combined_read = (unsigned int)(r_buff[1] >> 16) & 0xFFFF;		  // position_memory_read+Initial_memory_read
-	position_memory_read = (unsigned int)position_Initial_combined_read & 0xFF;		  // 4byte 源뚯?
-	Initial_memory_read = (unsigned int)(position_Initial_combined_read >> 8) & 0xFF; // 4byte 源뚯?
+    position_Initial_combined_read = (unsigned int)(r_buff[1] >> 16) & 0xFFFF;        // position_memory_read+Initial_memory_read
+    position_memory_read = (unsigned int)position_Initial_combined_read & 0xFF;       // 4byte 源뚯?
+    Initial_memory_read = (unsigned int)(position_Initial_combined_read >> 8) & 0xFF; // 4byte 源뚯?
 
-	limit_memory_read = (unsigned int)r_buff[2] & 0xFFFF;
+    limit_memory_read = (unsigned int)r_buff[2] & 0xFFFF;
 
-	position_Initstatus_combined_read = (unsigned int)(r_buff[2] >> 16) & 0xFFFF;
-	position_status_memory_read = (unsigned int)position_Initstatus_combined_read & 0xFF;
-	AAFx_InitStatus_memory_read = (unsigned int)(position_Initstatus_combined_read >> 8) & 0xFF;
+    position_Initstatus_combined_read = (unsigned int)(r_buff[2] >> 16) & 0xFFFF;
+    position_status_memory_read = (unsigned int)position_Initstatus_combined_read & 0xFF;
+    AAFx_InitStatus_memory_read = (unsigned int)(position_Initstatus_combined_read >> 8) & 0xFF;
 
-	DTC_memory_read = (unsigned int)(r_buff[3]) & 0xFFFF;
+    DTC_memory_read = (unsigned int)(r_buff[3]) & 0xFFFF;
 
-	power_chk_memory_read = (unsigned int)(r_buff[3] >> 16) & 0xF;
-	First_Powerchk_memory_read = (unsigned int)(r_buff[4]) & 0xF;
+    power_chk_memory_read = (unsigned int)(r_buff[3] >> 16) & 0xF;
+    First_Powerchk_memory_read = (unsigned int)(r_buff[4]) & 0xF;
 }
 
 void Re_Init(void)
 {
-	/*DRV_Off();							  // drv of
-	motor_start = OFF;					  // step stop
-	time_1ms_external_10s_chk_flag = OFF; // 10s chk timer off
-	time_1ms_external_10s_chk = 0;
-	aaf_action = FLAP_STOP;
-	aaf_action_complete_chk = FLAP_STOP;
-	time_1ms_init_chk = 0;
-	time_1ms_init_chk_flag = 0;	 // test
-	time_1ms_stall_chk = 0;		 // test
-	time_1ms_stall_chk_flag = 0; // test
+    /*DRV_Off();							  // drv of
+    motor_start = OFF;					  // step stop
+    time_1ms_external_10s_chk_flag = OFF; // 10s chk timer off
+    time_1ms_external_10s_chk = 0;
+    aaf_action = FLAP_STOP;
+    aaf_action_complete_chk = FLAP_STOP;
+    time_1ms_init_chk = 0;
+    time_1ms_init_chk_flag = 0;	 // test
+    time_1ms_stall_chk = 0;		 // test
+    time_1ms_stall_chk_flag = 0; // test
 
-	stall_chk_cnt = 0;		// stall reset
-	stall_chk_time_1ms = 0; // stall reset
+    stall_chk_cnt = 0;		// stall reset
+    stall_chk_time_1ms = 0; // stall reset
 
-	motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE; // stall reset*/
-	time_1ms_diag_auto = 0;
-	time_1ms_diag_auto_flag = OFF;
-	diag_mode_auto_action = OFF;
-	aaf_action = 0;
-	motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE; // stall reset
-	aaf_step = AAF_INITIALIZATION;					  // MCU is reset, AAF is initialized.
-	aaf_init_step = START_INITIALIZATION;			  // MCU is reset, AAF is initialized.
-	AAFx_Position_Status = Unknown_Status;
-	AAF_Tx_Position = UNKOWN_POSITION;
-	init_move_step = 0;
-	AAFx_ErrorStatus = No_ErrorStatus;
-	step_position = REFERENCE_POSITION;
-	step_position_open = 0;
-	step_position_close = 0;
-	lin_aaf_command = OPEN;
-	Diag_Mode = 0;
-	Diag_Mode_chk = 0;
-	evrdy_on_flag = OFF;
+    motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE; // stall reset*/
+    time_1ms_diag_auto = 0;
+    time_1ms_diag_auto_flag = OFF;
+    diag_mode_auto_action = OFF;
+    aaf_action = 0;
+    motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE; // stall reset
+    aaf_step = AAF_INITIALIZATION;                    // MCU is reset, AAF is initialized.
+    aaf_init_step = START_INITIALIZATION;             // MCU is reset, AAF is initialized.
+    AAFx_Position_Status = Unknown_Status;
+    AAF_Tx_Position = UNKOWN_POSITION;
+    init_move_step = 0;
+    AAFx_ErrorStatus = No_ErrorStatus;
+    step_position = REFERENCE_POSITION;
+    step_position_open = 0;
+    step_position_close = 0;
+    lin_aaf_command = OPEN;
+    Diag_Mode = 0;
+    Diag_Mode_chk = 0;
+    evrdy_on_flag = OFF;
 }
 
 /***********************************************************************************************************************
@@ -2400,7 +2410,7 @@ static void lin_command_to_action(unsigned int action)
     time_1ms_diag_auto = 0;
     time_1ms_diag_auto_flag = OFF;
     diag_mode_auto_action = OFF;
-    
+
     aaf_action = action;
     aaf_step = AAF_OPERATE;
 }
@@ -2412,59 +2422,59 @@ static void lin_command_to_action(unsigned int action)
  * Arguments    : void
  * Return Value : void
  ***********************************************************************************************************************/
-static void Setup_action(void) {
+static void Setup_action(void)
+{
 
-	if ((lin_aaf_command == OPEN) || (lin_aaf_command == CLOSE) ||
+    if ((lin_aaf_command == OPEN) || (lin_aaf_command == CLOSE) ||
         (lin_aaf_command == OPEN_1ST) || (lin_aaf_command == OPEN_2ND))
     {
         lin_command_to_action(lin_aaf_command);
-	}
-	else if ((lin_aaf_command == DIAG_MODE_OPEN) && (AAF_Tx_Position != DIAG_MODE_OPEN)) // lin init command chk
-	{
-		lin_command_to_action(DIAG_MODE_OPEN);
-	}
-	else if ((lin_aaf_command == DIAG_MODE_CLOSE) && (AAF_Tx_Position != DIAG_MODE_CLOSE)) // lin init command chk
-	{
-		lin_command_to_action(DIAG_MODE_CLOSE);
-	}
-	else if (lin_aaf_command == DIAG_MODE_AUTO) // lin init command chk
-	{
-		DRV8899_Wakeup();
+    }
+    else if ((lin_aaf_command == DIAG_MODE_OPEN) && (AAF_Tx_Position != DIAG_MODE_OPEN)) // lin init command chk
+    {
+        lin_command_to_action(DIAG_MODE_OPEN);
+    }
+    else if ((lin_aaf_command == DIAG_MODE_CLOSE) && (AAF_Tx_Position != DIAG_MODE_CLOSE)) // lin init command chk
+    {
+        lin_command_to_action(DIAG_MODE_CLOSE);
+    }
+    else if (lin_aaf_command == DIAG_MODE_AUTO) // lin init command chk
+    {
+        DRV8899_Wakeup();
 
-		if (diag_mode_auto_action == ON)
-		{
-			if (diag_mode_auto_dir == OPEN)
-			{
-				diag_mode_auto_dir = CLOSE;
-			}
-			else if (diag_mode_auto_dir == CLOSE)
-			{
-				diag_mode_auto_dir = OPEN;
-			}
-			else
-			{
-				//invalid
-			}
-		}
-		else
-		{
-			diag_mode_auto_action = ON;
-			diag_mode_auto_dir = OPEN;
-		}
+        if (diag_mode_auto_action == ON)
+        {
+            if (diag_mode_auto_dir == OPEN)
+            {
+                diag_mode_auto_dir = CLOSE;
+            }
+            else if (diag_mode_auto_dir == CLOSE)
+            {
+                diag_mode_auto_dir = OPEN;
+            }
+            else
+            {
+                // invalid
+            }
+        }
+        else
+        {
+            diag_mode_auto_action = ON;
+            diag_mode_auto_dir = OPEN;
+        }
 
-		time_1ms_diag_auto_flag = ON;
-		aaf_action = DIAG_MODE_AUTO;
-		aaf_step = AAF_OPERATE;
-	}
-	else
-	{
-		//invalid
-	}
+        time_1ms_diag_auto_flag = ON;
+        aaf_action = DIAG_MODE_AUTO;
+        aaf_step = AAF_OPERATE;
+    }
+    else
+    {
+        // invalid
+    }
 
-	aaf_action_complete_chk = FLAP_START;
+    aaf_action_complete_chk = FLAP_START;
 
-	step_start_flag = OFF;
-
+    step_start_flag = OFF;
 }
 
 /***********************************************************************************************************************
@@ -2486,7 +2496,7 @@ static void Setup_auto_action(void)
     }
     else
     {
-        // Invalid 
+        // Invalid
     }
 
     aaf_action = DIAG_MODE_AUTO;
@@ -2505,20 +2515,19 @@ static void Setup_auto_action(void)
  ***********************************************************************************************************************/
 static void Process_operating_waiting(void)
 {
-	if ((step_start_flag == ON) && (lin_bus_inactive_flag == OFF))
-	{
-		Setup_action();
-	}
-	else if ((diag_mode_auto_action == ON) && (lin_bus_inactive_flag == OFF))
-	{
-		Setup_auto_action();
-	}
-	else
-	{
-		// invalid
-	}
-
-}   
+    if ((step_start_flag == ON) && (lin_bus_inactive_flag == OFF))
+    {
+        Setup_action();
+    }
+    else if ((diag_mode_auto_action == ON) && (lin_bus_inactive_flag == OFF))
+    {
+        Setup_auto_action();
+    }
+    else
+    {
+        // invalid
+    }
+}
 
 /***********************************************************************************************************************
  * Function Name: Action_normal_operate
@@ -2528,18 +2537,22 @@ static void Process_operating_waiting(void)
  ***********************************************************************************************************************/
 static void Action_normal_operate(unsigned int direction)
 {
-	if (direction == OPEN) Motor_dir_open();
-    else Motor_dir_close();
+    if (direction == OPEN)
+        Motor_dir_open();
+    else
+        Motor_dir_close();
 
     DRV8899_On();
     motor_start = ON;
-    time_1ms_external_10s_chk_flag = ON; 
+    time_1ms_external_10s_chk_flag = ON;
     time_1ms_stall_chk_flag = ON;
     stall_chk_time_1ms = 0;
     motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE;
 
-    if (direction == OPEN) flap_move = OPEN;
-    else flap_move = CLOSE;
+    if (direction == OPEN)
+        flap_move = OPEN;
+    else
+        flap_move = CLOSE;
 
     Diag_Mode = 0;
     aaf_step = TRAVEL_RANGE_COMPLETE_CHECK;
@@ -2554,8 +2567,10 @@ static void Action_normal_operate(unsigned int direction)
  ***********************************************************************************************************************/
 static void Action_diag_operate(unsigned int direction, unsigned int is_auto)
 {
-    if (direction == OPEN) Motor_dir_open();
-    else Motor_dir_close();
+    if (direction == OPEN)
+        Motor_dir_open();
+    else
+        Motor_dir_close();
 
     DRV8899_On();
     motor_start = ON;
@@ -2564,16 +2579,18 @@ static void Action_diag_operate(unsigned int direction, unsigned int is_auto)
     motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE;
     Diag_Mode = 1;
 
-    if (direction == OPEN) flap_move = OPEN;
-    else flap_move = CLOSE;
+    if (direction == OPEN)
+        flap_move = OPEN;
+    else
+        flap_move = CLOSE;
 
-	// time_1ms_init_chk_flag = 1;
-    
-	if (is_auto == ON)
+    // time_1ms_init_chk_flag = 1;
+
+    if (is_auto == ON)
     {
         time_1ms_diag_auto_flag = 1;
     }
-	
+
     aaf_step = TRAVEL_RANGE_COMPLETE_CHECK;
 }
 
@@ -2613,12 +2630,12 @@ static void Process_normal_operate(void)
         {
             Action_normal_operate(CLOSE);
         }
-        else  
+        else
         {
             Action_normal_operate(OPEN);
         }
 
-		Diag_Mode = 0;
+        Diag_Mode = 0;
         aaf_step = TRAVEL_RANGE_COMPLETE_CHECK;
     }
     else if (aaf_action == OPEN_2ND)
@@ -2632,13 +2649,13 @@ static void Process_normal_operate(void)
             Action_normal_operate(OPEN);
         }
 
-		Diag_Mode = 0;
+        Diag_Mode = 0;
         aaf_step = TRAVEL_RANGE_COMPLETE_CHECK;
     }
-	else
-	{
-		//invalid
-	}
+    else
+    {
+        // invalid
+    }
 }
 
 /***********************************************************************************************************************
@@ -2659,15 +2676,15 @@ static void Process_diag_operate(void)
     }
     else if ((aaf_action == DIAG_MODE_AUTO) && (diag_mode_auto_dir == OPEN))
     {
-        Action_diag_operate(OPEN, ON); //auto
+        Action_diag_operate(OPEN, ON); // auto
     }
     else if ((aaf_action == DIAG_MODE_AUTO) && (diag_mode_auto_dir == CLOSE))
     {
-        Action_diag_operate(CLOSE, ON); //auto
+        Action_diag_operate(CLOSE, ON); // auto
     }
     else
     {
-        // invalid 
+        // invalid
     }
 }
 
@@ -2679,7 +2696,7 @@ static void Process_diag_operate(void)
  ***********************************************************************************************************************/
 static void Process_operating_operate(void)
 {
-    if ((aaf_action == OPEN) || (aaf_action == CLOSE) || 
+    if ((aaf_action == OPEN) || (aaf_action == CLOSE) ||
         (aaf_action == OPEN_1ST) || (aaf_action == OPEN_2ND))
     {
         Process_normal_operate();
@@ -2700,42 +2717,42 @@ static void Process_operating_operate(void)
  ***********************************************************************************************************************/
 static void Check_stall(void)
 {
-	// if(((motor_stall_flag == MOTOR_STALL) && (time_1ms_stall_chk >= 100)) || (time_1ms_init_chk >= 4800))
-	if ((motor_stall_flag == MOTOR_STALL) && (time_1ms_stall_chk >= 100U))
-	{
-		DRV_Off();
-		motor_start = OFF;
-		softstart_complete = OFF;
-		motor_step_value = STEP_TIME_1000RPM;
+    // if(((motor_stall_flag == MOTOR_STALL) && (time_1ms_stall_chk >= 100)) || (time_1ms_init_chk >= 4800))
+    if ((motor_stall_flag == MOTOR_STALL) && (time_1ms_stall_chk >= 100U))
+    {
+        DRV_Off();
+        motor_start = OFF;
+        softstart_complete = OFF;
+        motor_step_value = STEP_TIME_1000RPM;
 
-		if (aaf_action == DIAG_MODE_OPEN)
-		{
-			AAF_Tx_Position = DIAG_MODE_OPEN;
-			aaf_step = FINISHED_OPERATE;
-		}
-		else if (aaf_action == DIAG_MODE_CLOSE)
-		{
-			AAF_Tx_Position = DIAG_MODE_CLOSE;
-			aaf_step = FINISHED_OPERATE;
-		}
-		else if (aaf_action == DIAG_MODE_AUTO)
-		{
-			AAF_Tx_Position = DIAG_MODE_AUTO;
-			aaf_step = FINISHED_OPERATE;
-		}
-		else
-		{
-			//invalid
-		}
-		
-		time_1ms_external_10s_chk_flag = OFF; // 10s chk timer on
-		time_1ms_external_10s_chk = 0;
-		aaf_step = CHECK_AAF_CONDITION;
-		time_1ms_init_chk_flag = 0; // test
-		time_1ms_init_chk = 0;		// test
+        if (aaf_action == DIAG_MODE_OPEN)
+        {
+            AAF_Tx_Position = DIAG_MODE_OPEN;
+            aaf_step = FINISHED_OPERATE;
+        }
+        else if (aaf_action == DIAG_MODE_CLOSE)
+        {
+            AAF_Tx_Position = DIAG_MODE_CLOSE;
+            aaf_step = FINISHED_OPERATE;
+        }
+        else if (aaf_action == DIAG_MODE_AUTO)
+        {
+            AAF_Tx_Position = DIAG_MODE_AUTO;
+            aaf_step = FINISHED_OPERATE;
+        }
+        else
+        {
+            // invalid
+        }
 
-		aaf_action = FLAP_STOP;
-	}
+        time_1ms_external_10s_chk_flag = OFF; // 10s chk timer on
+        time_1ms_external_10s_chk = 0;
+        aaf_step = CHECK_AAF_CONDITION;
+        time_1ms_init_chk_flag = 0; // test
+        time_1ms_init_chk = 0;      // test
+
+        aaf_action = FLAP_STOP;
+    }
 }
 
 /***********************************************************************************************************************
@@ -2746,53 +2763,54 @@ static void Check_stall(void)
  ***********************************************************************************************************************/
 static void Process_operating_Range_Chk(void)
 {
-	if ((aaf_action == OPEN) && (step_position <= (step_position_open + limit_step_position))) //
-	{
-		AAF_Tx_Position = OPEN;
-		Tx_position_complete_chk();
-		aaf_step = FINISHED_OPERATE;
-	}
-	else if ((aaf_action == CLOSE) && (step_position >= (step_position_close - limit_step_position)))
-	{
-		AAF_Tx_Position = CLOSE;
-		Tx_position_complete_chk();
-		aaf_step = FINISHED_OPERATE;
-	}
-	else if ((aaf_action == OPEN_1ST) && ((step_position >= (step_position_open + open_1st_step_position - ERROR_RANGE)) && (step_position <= (step_position_open + open_1st_step_position + ERROR_RANGE))))
-	{
-		AAF_Tx_Position = OPEN_1ST;
-		Tx_position_complete_chk();
-		aaf_step = FINISHED_OPERATE;
-	}
-	else if ((aaf_action == OPEN_2ND) && ((step_position >= (step_position_open + open_2nd_step_position - ERROR_RANGE)) && (step_position <= (step_position_open + open_2nd_step_position + ERROR_RANGE))))
-	{
-		AAF_Tx_Position = OPEN_2ND;
-		Tx_position_complete_chk();
-		aaf_step = FINISHED_OPERATE;
-	}
-	else if ((aaf_action == DIAG_MODE_OPEN) && (step_position <= (step_position_open + limit_step_position)))
-	{
-		AAF_Tx_Position = DIAG_MODE_OPEN;
-		aaf_step = FINISHED_OPERATE;
-	}
-	else if ((aaf_action == DIAG_MODE_CLOSE) && (step_position >= (step_position_close - limit_step_position)))
-	{
-		AAF_Tx_Position = DIAG_MODE_CLOSE;
-		aaf_step = FINISHED_OPERATE;
-	}
-	else if ((aaf_action == DIAG_MODE_AUTO) && (diag_mode_auto_dir == OPEN) && (step_position <= (step_position_open + limit_step_position)))
-	{
-		AAF_Tx_Position = DIAG_MODE_AUTO;
-		aaf_step = FINISHED_OPERATE;
-	}
-	else if ((aaf_action == DIAG_MODE_AUTO) && (diag_mode_auto_dir == CLOSE) && (step_position >= (step_position_close - limit_step_position)))
-	{
-		AAF_Tx_Position = DIAG_MODE_AUTO;
-		aaf_step = FINISHED_OPERATE;
-	}
-	else{
-		Check_stall();
-	}
+    if ((aaf_action == OPEN) && (step_position <= (step_position_open + limit_step_position))) //
+    {
+        AAF_Tx_Position = OPEN;
+        Tx_position_complete_chk();
+        aaf_step = FINISHED_OPERATE;
+    }
+    else if ((aaf_action == CLOSE) && (step_position >= (step_position_close - limit_step_position)))
+    {
+        AAF_Tx_Position = CLOSE;
+        Tx_position_complete_chk();
+        aaf_step = FINISHED_OPERATE;
+    }
+    else if ((aaf_action == OPEN_1ST) && ((step_position >= (step_position_open + open_1st_step_position - ERROR_RANGE)) && (step_position <= (step_position_open + open_1st_step_position + ERROR_RANGE))))
+    {
+        AAF_Tx_Position = OPEN_1ST;
+        Tx_position_complete_chk();
+        aaf_step = FINISHED_OPERATE;
+    }
+    else if ((aaf_action == OPEN_2ND) && ((step_position >= (step_position_open + open_2nd_step_position - ERROR_RANGE)) && (step_position <= (step_position_open + open_2nd_step_position + ERROR_RANGE))))
+    {
+        AAF_Tx_Position = OPEN_2ND;
+        Tx_position_complete_chk();
+        aaf_step = FINISHED_OPERATE;
+    }
+    else if ((aaf_action == DIAG_MODE_OPEN) && (step_position <= (step_position_open + limit_step_position)))
+    {
+        AAF_Tx_Position = DIAG_MODE_OPEN;
+        aaf_step = FINISHED_OPERATE;
+    }
+    else if ((aaf_action == DIAG_MODE_CLOSE) && (step_position >= (step_position_close - limit_step_position)))
+    {
+        AAF_Tx_Position = DIAG_MODE_CLOSE;
+        aaf_step = FINISHED_OPERATE;
+    }
+    else if ((aaf_action == DIAG_MODE_AUTO) && (diag_mode_auto_dir == OPEN) && (step_position <= (step_position_open + limit_step_position)))
+    {
+        AAF_Tx_Position = DIAG_MODE_AUTO;
+        aaf_step = FINISHED_OPERATE;
+    }
+    else if ((aaf_action == DIAG_MODE_AUTO) && (diag_mode_auto_dir == CLOSE) && (step_position >= (step_position_close - limit_step_position)))
+    {
+        AAF_Tx_Position = DIAG_MODE_AUTO;
+        aaf_step = FINISHED_OPERATE;
+    }
+    else
+    {
+        Check_stall();
+    }
 }
 
 /***********************************************************************************************************************
@@ -2803,35 +2821,35 @@ static void Process_operating_Range_Chk(void)
  ***********************************************************************************************************************/
 static void Process_operating_check_condition(void)
 {
-	if (flap_move == OPEN)
-	{
-		antipinch_previous_action = OPEN;
-		antipinch_action_on = ON;
+    if (flap_move == OPEN)
+    {
+        antipinch_previous_action = OPEN;
+        antipinch_action_on = ON;
 
-		motor_start = OFF;
-		stall_chk_cnt = 0;
-		stall_chk_time_1ms = 0; // stall reset
+        motor_start = OFF;
+        stall_chk_cnt = 0;
+        stall_chk_time_1ms = 0; // stall reset
 
-		flap_move = FLAP_STOP;
-	}
-	else if (flap_move == CLOSE)
-	{
-		antipinch_previous_action = CLOSE;
-		antipinch_action_on = ON;
+        flap_move = FLAP_STOP;
+    }
+    else if (flap_move == CLOSE)
+    {
+        antipinch_previous_action = CLOSE;
+        antipinch_action_on = ON;
 
-		motor_start = OFF;
-		stall_chk_cnt = 0;
-		stall_chk_time_1ms = 0; // stall reset
+        motor_start = OFF;
+        stall_chk_cnt = 0;
+        stall_chk_time_1ms = 0; // stall reset
 
-		flap_move = FLAP_STOP;
-	}
-	else
-	{
-		//invalid
-	}
+        flap_move = FLAP_STOP;
+    }
+    else
+    {
+        // invalid
+    }
 
-	time_1ms_stall_chk = 0;		 // test
-	time_1ms_stall_chk_flag = 0; // test	
+    time_1ms_stall_chk = 0;      // test
+    time_1ms_stall_chk_flag = 0; // test
 }
 
 /***********************************************************************************************************************
@@ -2842,46 +2860,46 @@ static void Process_operating_check_condition(void)
  ***********************************************************************************************************************/
 static void Process_operating_init(void)
 {
-switch (aaf_init_step)
-	{
-	case START_INITIALIZATION:
-		AAFx_InitStatus = DURING_INITIALIZATION;
+    switch (aaf_init_step)
+    {
+    case START_INITIALIZATION:
+        AAFx_InitStatus = DURING_INITIALIZATION;
 
-		if (fail_safety_flag == ON)
-		{
-			init_move_step = 0;
-		}
+        if (fail_safety_flag == ON)
+        {
+            init_move_step = 0;
+        }
 
-		aaf_init_step = CHECK_TRAVELRANGE;
+        aaf_init_step = CHECK_TRAVELRANGE;
 
-		break;
+        break;
 
-	case CHECK_TRAVELRANGE:
-		Init_move();
+    case CHECK_TRAVELRANGE:
+        Init_move();
 
-		if ((init_move_step == 19U) && (fail_safety_flag == OFF))
-		{
-			init_move_step = 0;
-			aaf_init_step = NORMAL_INITIALIZATION;
-		}
+        if ((init_move_step == 19U) && (fail_safety_flag == OFF))
+        {
+            init_move_step = 0;
+            aaf_init_step = NORMAL_INITIALIZATION;
+        }
 
-		break;
+        break;
 
-	case TRAVEL_RANGE_ERROR:
+    case TRAVEL_RANGE_ERROR:
 
-		break;
+        break;
 
-	case NORMAL_INITIALIZATION:
-		aaf_step = FINISHED_OPERATE;
-		AAF_Tx_Position = OPEN;
-		AAFx_Position_Status = Open_Status;
-		AAFx_InitStatus = NORMAL_FINISHED_INITIALIZATION;
+    case NORMAL_INITIALIZATION:
+        aaf_step = FINISHED_OPERATE;
+        AAF_Tx_Position = OPEN;
+        AAFx_Position_Status = Open_Status;
+        AAFx_InitStatus = NORMAL_FINISHED_INITIALIZATION;
 
-		break;
+        break;
 
-	default:
-		break;
-	}
+    default:
+        break;
+    }
 }
 
 /***********************************************************************************************************************
@@ -2892,57 +2910,57 @@ switch (aaf_init_step)
  ***********************************************************************************************************************/
 static void Process_operating_finish(void)
 {
-	DRV_Off();							  // drv of
-	motor_start = OFF;					  // step stop
-	time_1ms_external_10s_chk_flag = OFF; // 10s chk timer off
-	time_1ms_external_10s_chk = 0;
+    DRV_Off();                            // drv of
+    motor_start = OFF;                    // step stop
+    time_1ms_external_10s_chk_flag = OFF; // 10s chk timer off
+    time_1ms_external_10s_chk = 0;
 
-	if ((AAF_Tx_Position == OPEN) && (Diag_Mode == 0))
-	{
-			AAFx_Position_Status = Open_Status;
-	}
-	else if ((AAF_Tx_Position == CLOSE) && (Diag_Mode == 0))
-	{
-		AAFx_Position_Status = Close_Status;
-	}
-	else if ((AAF_Tx_Position == DIAG_MODE_OPEN) || (AAF_Tx_Position == DIAG_MODE_CLOSE) || (AAF_Tx_Position == DIAG_MODE_AUTO))
-	{
-		AAFx_Position_Status = Unknown_Status;
-	}
-	else
-	{
-		//invalid
-	}
+    if ((AAF_Tx_Position == OPEN) && (Diag_Mode == 0))
+    {
+        AAFx_Position_Status = Open_Status;
+    }
+    else if ((AAF_Tx_Position == CLOSE) && (Diag_Mode == 0))
+    {
+        AAFx_Position_Status = Close_Status;
+    }
+    else if ((AAF_Tx_Position == DIAG_MODE_OPEN) || (AAF_Tx_Position == DIAG_MODE_CLOSE) || (AAF_Tx_Position == DIAG_MODE_AUTO))
+    {
+        AAFx_Position_Status = Unknown_Status;
+    }
+    else
+    {
+        // invalid
+    }
 
-	time_1ms_stall_chk = 0;		 // test
-	time_1ms_stall_chk_flag = 0; // test
-	softstart_complete = OFF;
-	motor_step_value = STEP_TIME_1000RPM;
-	time_1ms_init_chk_flag = 0;						  // test
-	time_1ms_init_chk = 0;							  // test
-	stall_chk_cnt = 0;								  // stall reset
-	stall_chk_time_1ms = 0;							  // stall reset
-	motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE; // stall reset
-	if (aaf_action == DIAG_MODE_AUTO)
-	{
-		if (time_1ms_diag_auto >= 5000U)
-		{
-			time_1ms_diag_auto = 0;
-			time_1ms_diag_auto_flag = 0;
+    time_1ms_stall_chk = 0;      // test
+    time_1ms_stall_chk_flag = 0; // test
+    softstart_complete = OFF;
+    motor_step_value = STEP_TIME_1000RPM;
+    time_1ms_init_chk_flag = 0;                       // test
+    time_1ms_init_chk = 0;                            // test
+    stall_chk_cnt = 0;                                // stall reset
+    stall_chk_time_1ms = 0;                           // stall reset
+    motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE; // stall reset
+    if (aaf_action == DIAG_MODE_AUTO)
+    {
+        if (time_1ms_diag_auto >= 5000U)
+        {
+            time_1ms_diag_auto = 0;
+            time_1ms_diag_auto_flag = 0;
 
-			AAF_Tx_Position = DIAG_MODE_AUTO;
+            AAF_Tx_Position = DIAG_MODE_AUTO;
 
-			aaf_action = FLAP_STOP;
-			aaf_action_complete_chk = FLAP_STOP;
-			aaf_step = AAF_WAITING;
-		}
-	}
-	else
-	{
-		aaf_action = FLAP_STOP;
-		aaf_action_complete_chk = FLAP_STOP;
-		aaf_step = AAF_WAITING;
-	}
+            aaf_action = FLAP_STOP;
+            aaf_action_complete_chk = FLAP_STOP;
+            aaf_step = AAF_WAITING;
+        }
+    }
+    else
+    {
+        aaf_action = FLAP_STOP;
+        aaf_action_complete_chk = FLAP_STOP;
+        aaf_step = AAF_WAITING;
+    }
 }
 
 /***********************************************************************************************************************
@@ -2953,49 +2971,49 @@ static void Process_operating_finish(void)
  ***********************************************************************************************************************/
 static void Operating_mode(void)
 {
-	switch (aaf_step)
-	{
-	case AAF_WAITING:
-		
-		Process_operating_waiting();
-		
-		break;
+    switch (aaf_step)
+    {
+    case AAF_WAITING:
 
-	case AAF_OPERATE:
+        Process_operating_waiting();
 
-		Process_operating_operate();
+        break;
 
-		break;
+    case AAF_OPERATE:
 
-	case TRAVEL_RANGE_COMPLETE_CHECK:
+        Process_operating_operate();
 
-	    Process_operating_Range_Chk();
-		
-		break;
+        break;
 
-	case CHECK_AAF_CONDITION:
+    case TRAVEL_RANGE_COMPLETE_CHECK:
 
-		Process_operating_check_condition();
+        Process_operating_Range_Chk();
 
-		break;
+        break;
 
-	case AAF_INITIALIZATION:
+    case CHECK_AAF_CONDITION:
 
-		// init action
+        Process_operating_check_condition();
 
-		Process_operating_init();
+        break;
 
-		break;
+    case AAF_INITIALIZATION:
 
-	case FINISHED_OPERATE:
+        // init action
 
-		Process_operating_finish();
+        Process_operating_init();
 
-		break;
+        break;
 
-	default:
-		break;
-	}
+    case FINISHED_OPERATE:
+
+        Process_operating_finish();
+
+        break;
+
+    default:
+        break;
+    }
 }
 
 /***********************************************************************************************************************
@@ -3062,65 +3080,65 @@ static void Translate_rxdata(void)
  * Arguments    : void
  * Return Value : void
  ***********************************************************************************************************************/
-static void AAF1_lin_rx_data_chk(void){
-	
-	if (ReqAAF1DiagMode == 0x00)
-	{
-		if (AAF1_TargetPosition == 0x00)
-		{
-			AAF1_TargetPosition_select = OPEN;
-		}
-		else if (AAF1_TargetPosition == 0x64)
-		{
-			AAF1_TargetPosition_select = CLOSE;
-		}
-		else if (AAF1_TargetPosition == 0x7F)
-		{
-			AAF1_TargetPosition_select = UNKOWN_POSITION;
-		}
-		else
-		{
-			//invalid
-		}
-	}
-	else if (ReqAAF1DiagMode == 0x01)
-	{
-		AAF1_TargetPosition_select = DIAG_MODE_AUTO;
-	}
-	else if (ReqAAF1DiagMode == 0x02)
-	{
-		AAF1_TargetPosition_select = DIAG_MODE_OPEN;
-	}
-	else if (ReqAAF1DiagMode == 0x03)
-	{
-		AAF1_TargetPosition_select = DIAG_MODE_CLOSE;
-	}
-	else
-	{
-		//invalid
-	}
+static void AAF1_lin_rx_data_chk(void)
+{
 
-	if (aaf_action_complete_chk == FLAP_STOP)
-	{
-		if ((AAF1_TargetPosition_select != AAF_Tx_Position) && (AAF_Tx_Position != UNKOWN_POSITION) && (AAF1_TargetPosition_select != UNKOWN_POSITION))
-		{
-			step_start_flag = ON;
-		}
-	}
-	else if (aaf_action == DIAG_MODE_AUTO)
-	{
-		if (AAF1_TargetPosition_select != aaf_action)
-		{
-			step_start_flag = ON;
-		}
-	}
-	else
-	{
-		//invalid
-	}
+    if (ReqAAF1DiagMode == 0x00)
+    {
+        if (AAF1_TargetPosition == 0x00)
+        {
+            AAF1_TargetPosition_select = OPEN;
+        }
+        else if (AAF1_TargetPosition == 0x64)
+        {
+            AAF1_TargetPosition_select = CLOSE;
+        }
+        else if (AAF1_TargetPosition == 0x7F)
+        {
+            AAF1_TargetPosition_select = UNKOWN_POSITION;
+        }
+        else
+        {
+            // invalid
+        }
+    }
+    else if (ReqAAF1DiagMode == 0x01)
+    {
+        AAF1_TargetPosition_select = DIAG_MODE_AUTO;
+    }
+    else if (ReqAAF1DiagMode == 0x02)
+    {
+        AAF1_TargetPosition_select = DIAG_MODE_OPEN;
+    }
+    else if (ReqAAF1DiagMode == 0x03)
+    {
+        AAF1_TargetPosition_select = DIAG_MODE_CLOSE;
+    }
+    else
+    {
+        // invalid
+    }
 
-	Update_lin_command(AAF1_TargetPosition_select);
+    if (aaf_action_complete_chk == FLAP_STOP)
+    {
+        if ((AAF1_TargetPosition_select != AAF_Tx_Position) && (AAF_Tx_Position != UNKOWN_POSITION) && (AAF1_TargetPosition_select != UNKOWN_POSITION))
+        {
+            step_start_flag = ON;
+        }
+    }
+    else if (aaf_action == DIAG_MODE_AUTO)
+    {
+        if (AAF1_TargetPosition_select != aaf_action)
+        {
+            step_start_flag = ON;
+        }
+    }
+    else
+    {
+        // invalid
+    }
 
+    Update_lin_command(AAF1_TargetPosition_select);
 }
 
 /***********************************************************************************************************************
@@ -3129,59 +3147,60 @@ static void AAF1_lin_rx_data_chk(void){
  * Arguments    : void
  * Return Value : void
  ***********************************************************************************************************************/
-static void AAF2_lin_rx_data_chk(void){
-	if (ReqAAF2DiagMode == 0x00)
-	{
-		if (AAF2_TargetPosition == 0x00)
-		{
-			AAF2_TargetPosition_select = OPEN;
-		}
-		else if (AAF2_TargetPosition == 0x64)
-		{
-			AAF2_TargetPosition_select = CLOSE;
-		}
-		else if (AAF2_TargetPosition == 0x7F)
-		{
-			AAF2_TargetPosition_select = UNKOWN_POSITION;
-		}
-		else
-		{
-			//invalid
-		}
-	}
-	else if (ReqAAF2DiagMode == 0x01)
-	{
-		AAF2_TargetPosition_select = DIAG_MODE_AUTO;
-	}
-	else if (ReqAAF2DiagMode == 0x02)
-	{
-		AAF2_TargetPosition_select = DIAG_MODE_OPEN;
-	}
-	else
-	{
-		AAF2_TargetPosition_select = DIAG_MODE_CLOSE;
-	}
+static void AAF2_lin_rx_data_chk(void)
+{
+    if (ReqAAF2DiagMode == 0x00)
+    {
+        if (AAF2_TargetPosition == 0x00)
+        {
+            AAF2_TargetPosition_select = OPEN;
+        }
+        else if (AAF2_TargetPosition == 0x64)
+        {
+            AAF2_TargetPosition_select = CLOSE;
+        }
+        else if (AAF2_TargetPosition == 0x7F)
+        {
+            AAF2_TargetPosition_select = UNKOWN_POSITION;
+        }
+        else
+        {
+            // invalid
+        }
+    }
+    else if (ReqAAF2DiagMode == 0x01)
+    {
+        AAF2_TargetPosition_select = DIAG_MODE_AUTO;
+    }
+    else if (ReqAAF2DiagMode == 0x02)
+    {
+        AAF2_TargetPosition_select = DIAG_MODE_OPEN;
+    }
+    else
+    {
+        AAF2_TargetPosition_select = DIAG_MODE_CLOSE;
+    }
 
-	if (aaf_action_complete_chk == FLAP_STOP)
-	{
-		if ((AAF2_TargetPosition_select != AAF_Tx_Position) && (AAF_Tx_Position != UNKOWN_POSITION) && (AAF2_TargetPosition_select != UNKOWN_POSITION))
-		{
-			step_start_flag = ON;
-		}
-	}
-	else if (aaf_action == DIAG_MODE_AUTO)
-	{
-		if (AAF2_TargetPosition_select != aaf_action)
-		{
-			step_start_flag = ON;
-		}
-	}
-	else
-	{
-		//invalid
-	}
+    if (aaf_action_complete_chk == FLAP_STOP)
+    {
+        if ((AAF2_TargetPosition_select != AAF_Tx_Position) && (AAF_Tx_Position != UNKOWN_POSITION) && (AAF2_TargetPosition_select != UNKOWN_POSITION))
+        {
+            step_start_flag = ON;
+        }
+    }
+    else if (aaf_action == DIAG_MODE_AUTO)
+    {
+        if (AAF2_TargetPosition_select != aaf_action)
+        {
+            step_start_flag = ON;
+        }
+    }
+    else
+    {
+        // invalid
+    }
 
-	Update_lin_command(AAF2_TargetPosition_select);
+    Update_lin_command(AAF2_TargetPosition_select);
 }
 
 /***********************************************************************************************************************
@@ -3190,60 +3209,61 @@ static void AAF2_lin_rx_data_chk(void){
  * Arguments    : void
  * Return Value : void
  ***********************************************************************************************************************/
-static void AAF3_lin_rx_data_chk(void){
-	if (ReqAAF3DiagMode == 0x00)
-	{
-		if (AAF3_TargetPosition == 0x00)
-		{
-			AAF3_TargetPosition_select = OPEN;
-		}
-		else if (AAF3_TargetPosition == 0x64)
-		{
-			AAF3_TargetPosition_select = CLOSE;
-		}
-		else if (AAF3_TargetPosition == 0x7F)
-		{
-			AAF3_TargetPosition_select = UNKOWN_POSITION;
-		}
-		else 
-		{
-			//invalid
-		}
-	}
-	else if (ReqAAF3DiagMode == 0x01)
-	{
-		AAF3_TargetPosition_select = DIAG_MODE_AUTO;
-	}
-	else if (ReqAAF3DiagMode == 0x02)
-	{
-		AAF3_TargetPosition_select = DIAG_MODE_OPEN;
-	}
-	else
-	{
-		AAF3_TargetPosition_select = DIAG_MODE_CLOSE;
-	}
+static void AAF3_lin_rx_data_chk(void)
+{
+    if (ReqAAF3DiagMode == 0x00)
+    {
+        if (AAF3_TargetPosition == 0x00)
+        {
+            AAF3_TargetPosition_select = OPEN;
+        }
+        else if (AAF3_TargetPosition == 0x64)
+        {
+            AAF3_TargetPosition_select = CLOSE;
+        }
+        else if (AAF3_TargetPosition == 0x7F)
+        {
+            AAF3_TargetPosition_select = UNKOWN_POSITION;
+        }
+        else
+        {
+            // invalid
+        }
+    }
+    else if (ReqAAF3DiagMode == 0x01)
+    {
+        AAF3_TargetPosition_select = DIAG_MODE_AUTO;
+    }
+    else if (ReqAAF3DiagMode == 0x02)
+    {
+        AAF3_TargetPosition_select = DIAG_MODE_OPEN;
+    }
+    else
+    {
+        AAF3_TargetPosition_select = DIAG_MODE_CLOSE;
+    }
 
-	if (aaf_action_complete_chk == FLAP_STOP)
-	{
-		if ((AAF3_TargetPosition_select != AAF_Tx_Position) && (AAF_Tx_Position != UNKOWN_POSITION) && (AAF3_TargetPosition_select != UNKOWN_POSITION))
-		{
-			step_start_flag = ON;
-		}
-	}
-	else if (aaf_action == DIAG_MODE_AUTO)
-	{
-		if (AAF3_TargetPosition_select != aaf_action)
-		{
-			step_start_flag = ON;
-		}
-	}
-	else
-	{
-		//invalid
-	}
+    if (aaf_action_complete_chk == FLAP_STOP)
+    {
+        if ((AAF3_TargetPosition_select != AAF_Tx_Position) && (AAF_Tx_Position != UNKOWN_POSITION) && (AAF3_TargetPosition_select != UNKOWN_POSITION))
+        {
+            step_start_flag = ON;
+        }
+    }
+    else if (aaf_action == DIAG_MODE_AUTO)
+    {
+        if (AAF3_TargetPosition_select != aaf_action)
+        {
+            step_start_flag = ON;
+        }
+    }
+    else
+    {
+        // invalid
+    }
 
-	Update_lin_command(AAF3_TargetPosition_select);
-}	
+    Update_lin_command(AAF3_TargetPosition_select);
+}
 
 /***********************************************************************************************************************
  * Function Name: Protection_function_off_mode
@@ -3251,49 +3271,50 @@ static void AAF3_lin_rx_data_chk(void){
  * Arguments    : void
  * Return Value : void
  ***********************************************************************************************************************/
-static void Protection_function_off_mode(void){
-	
-	Translate_rxdata();
+static void Protection_function_off_mode(void)
+{
 
-	if (lin_rx_pass_flag == PASS)
-	{
-		if (AAFx_InitStatus != DURING_INITIALIZATION)
-		{
-			ReqAAF3DiagMode = (unsigned int)((ID_chk_rxdata[0] & 0x30U) >> 4U);
-			ReqAAF2DiagMode = (unsigned int)((ID_chk_rxdata[0] & 0x0CU) >> 2U);
-			ReqAAF1DiagMode = (unsigned int)(ID_chk_rxdata[0] & 0x03U);
-			AAF1_TargetPosition = (unsigned int)(ID_chk_rxdata[1] & 0x7FU);
-			AAF2_TargetPosition = (unsigned int)(ID_chk_rxdata[2] & 0x7FU);
-			AAF3_TargetPosition = (unsigned int)(ID_chk_rxdata[3] & 0x7FU);
-			EngRunSta = (unsigned int)((ID_chk_rxdata[4] & 0x30U) >> 4U);
-			HevRdy = (unsigned int)((ID_chk_rxdata[4] & 0x0CU) >> 2U);
-			AAF_LINOut = (unsigned int)(ID_chk_rxdata[4] & 0x03U);
+    Translate_rxdata();
 
-			if (AAFx_Index == AAF_1)
-			{
-				AAF1_lin_rx_data_chk();
-			}
-			else if (AAFx_Index == AAF_2)
-			{
-				AAF2_lin_rx_data_chk();
-			}
-			else if (AAFx_Index == AAF_3)
-			{
-				AAF3_lin_rx_data_chk();
-			}
-			else
-			{
-				//invalid
-			}	
-		}
-		else 
-		{
-			ReqRespAAFID = (unsigned int)((ID_chk_rxdata[0] & 0xC0U) >> 6U);
-			EngRunSta = (unsigned int)((ID_chk_rxdata[4] & 0x30U) >> 4U);
-			HevRdy = (unsigned int)((ID_chk_rxdata[4] & 0x0CU) >> 2U);
-			AAF_LINOut = (unsigned int)(ID_chk_rxdata[4] & 0x03U);
-		}
-	}
+    if (lin_rx_pass_flag == PASS)
+    {
+        if (AAFx_InitStatus != DURING_INITIALIZATION)
+        {
+            ReqAAF3DiagMode = (unsigned int)((ID_chk_rxdata[0] & 0x30U) >> 4U);
+            ReqAAF2DiagMode = (unsigned int)((ID_chk_rxdata[0] & 0x0CU) >> 2U);
+            ReqAAF1DiagMode = (unsigned int)(ID_chk_rxdata[0] & 0x03U);
+            AAF1_TargetPosition = (unsigned int)(ID_chk_rxdata[1] & 0x7FU);
+            AAF2_TargetPosition = (unsigned int)(ID_chk_rxdata[2] & 0x7FU);
+            AAF3_TargetPosition = (unsigned int)(ID_chk_rxdata[3] & 0x7FU);
+            EngRunSta = (unsigned int)((ID_chk_rxdata[4] & 0x30U) >> 4U);
+            HevRdy = (unsigned int)((ID_chk_rxdata[4] & 0x0CU) >> 2U);
+            AAF_LINOut = (unsigned int)(ID_chk_rxdata[4] & 0x03U);
+
+            if (AAFx_Index == AAF_1)
+            {
+                AAF1_lin_rx_data_chk();
+            }
+            else if (AAFx_Index == AAF_2)
+            {
+                AAF2_lin_rx_data_chk();
+            }
+            else if (AAFx_Index == AAF_3)
+            {
+                AAF3_lin_rx_data_chk();
+            }
+            else
+            {
+                // invalid
+            }
+        }
+        else
+        {
+            ReqRespAAFID = (unsigned int)((ID_chk_rxdata[0] & 0xC0U) >> 6U);
+            EngRunSta = (unsigned int)((ID_chk_rxdata[4] & 0x30U) >> 4U);
+            HevRdy = (unsigned int)((ID_chk_rxdata[4] & 0x0CU) >> 2U);
+            AAF_LINOut = (unsigned int)(ID_chk_rxdata[4] & 0x03U);
+        }
+    }
 }
 
 /***********************************************************************************************************************
@@ -3302,13 +3323,14 @@ static void Protection_function_off_mode(void){
  * Arguments    : void
  * Return Value : void
  ***********************************************************************************************************************/
-static void Protection_function_on_mode(void){
-	Translate_rxdata();
+static void Protection_function_on_mode(void)
+{
+    Translate_rxdata();
 
-	if (lin_rx_pass_flag == PASS)
-	{
-		AAF_ProtectionMode_Rx = (unsigned int)((ID_chk_rxdata[7] & 0x40U) >> 6U);
-	}
+    if (lin_rx_pass_flag == PASS)
+    {
+        AAF_ProtectionMode_Rx = (unsigned int)((ID_chk_rxdata[7] & 0x40U) >> 6U);
+    }
 }
 
 /***********************************************************************************************************************
@@ -3319,208 +3341,208 @@ static void Protection_function_on_mode(void){
  ***********************************************************************************************************************/
 static void Lin_rx_data_chk(void)
 {
-	LIN_Diag_Rx();
+    LIN_Diag_Rx();
 
-	ReqRespAAFID = (unsigned int)((Slave_RxData1[0] & 0xC0U) >> 6U);
-	if (AAF_LIN_ChkSum_CHK == PASS)
-	{
-		// ReqRespAAFID = (unsigned int)((Slave_RxData1[0] & 0xC0U) >> 6U);
+    ReqRespAAFID = (unsigned int)((Slave_RxData1[0] & 0xC0U) >> 6U);
+    if (AAF_LIN_ChkSum_CHK == PASS)
+    {
+        // ReqRespAAFID = (unsigned int)((Slave_RxData1[0] & 0xC0U) >> 6U);
 
-		if (protection_function == OFF) //
-		{
-			Protection_function_off_mode();
-		}
-		else if (protection_function == ON)
-		{
-			Protection_function_on_mode();
-		}
-		else
-		{
-			//invalid
-		}
-	}
+        if (protection_function == OFF) //
+        {
+            Protection_function_off_mode();
+        }
+        else if (protection_function == ON)
+        {
+            Protection_function_on_mode();
+        }
+        else
+        {
+            // invalid
+        }
+    }
 }
 
 static void Lin_tx_data_chk(void)
 {
 
-	/*
-	Slave_TxData[0] = (uint8_t)((AAFx_Type << 7) | AAF_Tx_Position);
-	Slave_TxData[1] = (uint8_t)((TotalNumOfAAF << 6) | (AAFx_Index << 4) | AAFx_InitStatus);
-	Slave_TxData[2] = (uint8_t)((AAF_ProtectionMode_Tx << 7) | (AAFx_Over_Volt << 6) | (AAFx_Low_Volt << 5) | (AAFx_Motor_Fault << 4) | (AAFx_Circuit_Short << 2) | (AAFx_Circuit_Open << 1));
-	*/
-	/*
-		if (init_move_step >= 15U)
-		{
-			Slave_TxData[3] = (uint8_t)((0xF0U) | (stall_test_mode << 2) | Calibration_chk);
-		}
-		else
-		{
-			Slave_TxData[3] = (uint8_t)((init_move_step << 4) | (wakeup_chk << 3) | (stall_test_mode << 2) | Calibration_chk);
-		}	// wakeup chk ?占쏙옙 ?占쏙옙?占쏙옙?占쏙옙
+    /*
+    Slave_TxData[0] = (uint8_t)((AAFx_Type << 7) | AAF_Tx_Position);
+    Slave_TxData[1] = (uint8_t)((TotalNumOfAAF << 6) | (AAFx_Index << 4) | AAFx_InitStatus);
+    Slave_TxData[2] = (uint8_t)((AAF_ProtectionMode_Tx << 7) | (AAFx_Over_Volt << 6) | (AAFx_Low_Volt << 5) | (AAFx_Motor_Fault << 4) | (AAFx_Circuit_Short << 2) | (AAFx_Circuit_Open << 1));
+    */
+    /*
+        if (init_move_step >= 15U)
+        {
+            Slave_TxData[3] = (uint8_t)((0xF0U) | (stall_test_mode << 2) | Calibration_chk);
+        }
+        else
+        {
+            Slave_TxData[3] = (uint8_t)((init_move_step << 4) | (wakeup_chk << 3) | (stall_test_mode << 2) | Calibration_chk);
+        }	// wakeup chk ?占쏙옙 ?占쏙옙?占쏙옙?占쏙옙
 
-		Slave_TxData[4] = (uint8_t)((protection_Mode_step << 4) | current_value);
-	*/
-	/*
-		if ((rx_16bit_spi[9] & 0xFFU) >= 200U)
-		{
-			if(fail_safety_step <= 15U)
-			{
-				Slave_TxData[4] = (uint8_t)((fail_safety_step << 4) | 0x02);
-			}
-			else if(fail_safety_step >= 16U)
-			{
-				Slave_TxData[4] = 0xF2U;
-			}
-			else
-			{
+        Slave_TxData[4] = (uint8_t)((protection_Mode_step << 4) | current_value);
+    */
+    /*
+        if ((rx_16bit_spi[9] & 0xFFU) >= 200U)
+        {
+            if(fail_safety_step <= 15U)
+            {
+                Slave_TxData[4] = (uint8_t)((fail_safety_step << 4) | 0x02);
+            }
+            else if(fail_safety_step >= 16U)
+            {
+                Slave_TxData[4] = 0xF2U;
+            }
+            else
+            {
 
-			}
+            }
 
-			Slave_TxData[5] = (uint8_t)(((((rx_16bit_spi[9] & 0xFFU) - 200) / 10) << 4) | ((rx_16bit_spi[9] & 0xFFU) % 10));
-		}
-		else if ((rx_16bit_spi[9] & 0xFFU) >= 100U)
-		{
-			if(fail_safety_step <= 15U)
-			{
-				Slave_TxData[4] = (uint8_t)((fail_safety_step << 4) | 0x01U);
-			}
-			else if(fail_safety_step >= 16U)
-			{
-				Slave_TxData[4] = 0xF1U;
-			}
-			else
-			{
+            Slave_TxData[5] = (uint8_t)(((((rx_16bit_spi[9] & 0xFFU) - 200) / 10) << 4) | ((rx_16bit_spi[9] & 0xFFU) % 10));
+        }
+        else if ((rx_16bit_spi[9] & 0xFFU) >= 100U)
+        {
+            if(fail_safety_step <= 15U)
+            {
+                Slave_TxData[4] = (uint8_t)((fail_safety_step << 4) | 0x01U);
+            }
+            else if(fail_safety_step >= 16U)
+            {
+                Slave_TxData[4] = 0xF1U;
+            }
+            else
+            {
 
-			}
+            }
 
-			Slave_TxData[5] = (uint8_t)(((((rx_16bit_spi[9] & 0xFFU) - 100) / 10) << 4) | ((rx_16bit_spi[9] & 0xFFU) % 10));
-		}
-		else
-		{
-			if(fail_safety_step <= 15U)
-			{
-				Slave_TxData[4] = (uint8_t)((fail_safety_step << 4) | 0x00U);
-			}
-			else if(fail_safety_step >= 16U)
-			{
-				Slave_TxData[4] = 0xF0U;
-			}
-			else
-			{
+            Slave_TxData[5] = (uint8_t)(((((rx_16bit_spi[9] & 0xFFU) - 100) / 10) << 4) | ((rx_16bit_spi[9] & 0xFFU) % 10));
+        }
+        else
+        {
+            if(fail_safety_step <= 15U)
+            {
+                Slave_TxData[4] = (uint8_t)((fail_safety_step << 4) | 0x00U);
+            }
+            else if(fail_safety_step >= 16U)
+            {
+                Slave_TxData[4] = 0xF0U;
+            }
+            else
+            {
 
-			}
+            }
 
-			Slave_TxData[5] = (uint8_t)((((rx_16bit_spi[9] & 0xFFU) / 10) << 4) | ((rx_16bit_spi[9] & 0xFFU) % 10));
-		}
-	*/
+            Slave_TxData[5] = (uint8_t)((((rx_16bit_spi[9] & 0xFFU) / 10) << 4) | ((rx_16bit_spi[9] & 0xFFU) % 10));
+        }
+    */
 
-	/*if (motor_stall_value >= 200U)
-	{
-		if(fail_safety_step <= 15U)
-		{
-			Slave_TxData[4] = (uint8_t)((fail_safety_step << 4) | 0x02);
-		}
-		else if(fail_safety_step >= 16U)
-		{
-			Slave_TxData[4] = 0xF2U;
-		}
-		else
-		{
+    /*if (motor_stall_value >= 200U)
+    {
+        if(fail_safety_step <= 15U)
+        {
+            Slave_TxData[4] = (uint8_t)((fail_safety_step << 4) | 0x02);
+        }
+        else if(fail_safety_step >= 16U)
+        {
+            Slave_TxData[4] = 0xF2U;
+        }
+        else
+        {
 
-		}
+        }
 
-		Slave_TxData[5] = (uint8_t)((((motor_stall_value - 200) / 10) << 4) | (motor_stall_value % 10));
-	}
-	else if (motor_stall_value >= 100U)
-	{
-		if(fail_safety_step <= 15U)
-		{
-			Slave_TxData[4] = (uint8_t)((fail_safety_step << 4) | 0x01U);
-		}
-		else if(fail_safety_step >= 16U)
-		{
-			Slave_TxData[4] = 0xF1U;
-		}
-		else
-		{
+        Slave_TxData[5] = (uint8_t)((((motor_stall_value - 200) / 10) << 4) | (motor_stall_value % 10));
+    }
+    else if (motor_stall_value >= 100U)
+    {
+        if(fail_safety_step <= 15U)
+        {
+            Slave_TxData[4] = (uint8_t)((fail_safety_step << 4) | 0x01U);
+        }
+        else if(fail_safety_step >= 16U)
+        {
+            Slave_TxData[4] = 0xF1U;
+        }
+        else
+        {
 
-		}
+        }
 
-		Slave_TxData[5] = (uint8_t)((((motor_stall_value - 100) / 10) << 4) | (motor_stall_value % 10));
-	}
-	else
-	{
-		if(fail_safety_step <= 15U)
-		{
-			Slave_TxData[4] = (uint8_t)((fail_safety_step << 4) | 0x00U);
-		}
-		else if(fail_safety_step >= 16U)
-		{
-			Slave_TxData[4] = 0xF0U;
-		}
-		else
-		{
+        Slave_TxData[5] = (uint8_t)((((motor_stall_value - 100) / 10) << 4) | (motor_stall_value % 10));
+    }
+    else
+    {
+        if(fail_safety_step <= 15U)
+        {
+            Slave_TxData[4] = (uint8_t)((fail_safety_step << 4) | 0x00U);
+        }
+        else if(fail_safety_step >= 16U)
+        {
+            Slave_TxData[4] = 0xF0U;
+        }
+        else
+        {
 
-		}
+        }
 
-		Slave_TxData[5] = (uint8_t)(((motor_stall_value / 10) << 4) | (motor_stall_value % 10));
-	}*/
-	switch (AAF_Tx_Position)
-	{
-	case CLOSE:
-		AAF_Tx_Position_LIN = 0x64;
-		AAFx_Mode = 0x00;
-		Diag_Mode_chk = 0;
-		break;
-	case OPEN:
-		AAF_Tx_Position_LIN = 0x00;
-		AAFx_Mode = 0x00;
-		Diag_Mode_chk = 0;
-		break;
-	case DIAG_MODE_OPEN:
-		AAF_Tx_Position_LIN = 0x7F;
-		AAFx_Mode = 0x02;
-		Diag_Mode_chk = 1;
-		break;
-	case DIAG_MODE_CLOSE:
-		AAF_Tx_Position_LIN = 0x7F;
-		AAFx_Mode = 0x03;
-		Diag_Mode_chk = 1;
-		break;
-	case DIAG_MODE_AUTO:
-		AAF_Tx_Position_LIN = 0x7F;
-		AAFx_Mode = 0x01;
-		Diag_Mode_chk = 1;
-		break;
-	case UNKOWN_POSITION:
-		AAF_Tx_Position_LIN = 0x7F;
-		break;
-	default:
-		break;
-	}
+        Slave_TxData[5] = (uint8_t)(((motor_stall_value / 10) << 4) | (motor_stall_value % 10));
+    }*/
+    switch (AAF_Tx_Position)
+    {
+    case CLOSE:
+        AAF_Tx_Position_LIN = 0x64;
+        AAFx_Mode = 0x00;
+        Diag_Mode_chk = 0;
+        break;
+    case OPEN:
+        AAF_Tx_Position_LIN = 0x00;
+        AAFx_Mode = 0x00;
+        Diag_Mode_chk = 0;
+        break;
+    case DIAG_MODE_OPEN:
+        AAF_Tx_Position_LIN = 0x7F;
+        AAFx_Mode = 0x02;
+        Diag_Mode_chk = 1;
+        break;
+    case DIAG_MODE_CLOSE:
+        AAF_Tx_Position_LIN = 0x7F;
+        AAFx_Mode = 0x03;
+        Diag_Mode_chk = 1;
+        break;
+    case DIAG_MODE_AUTO:
+        AAF_Tx_Position_LIN = 0x7F;
+        AAFx_Mode = 0x01;
+        Diag_Mode_chk = 1;
+        break;
+    case UNKOWN_POSITION:
+        AAF_Tx_Position_LIN = 0x7F;
+        break;
+    default:
+        break;
+    }
 
-	if (((AAFx_Mode == 0x01) || (AAFx_Mode == 0x02) || (AAFx_Mode == 0x03)) && (Diag_Mode_chk == 1))
-	{
-		if ((ReqAAF1DiagMode == 0) && (ReqAAF2DiagMode == 0) && (ReqAAF3DiagMode == 0))
-		{
-			Re_Init();
-		}
-	}
+    if (((AAFx_Mode == 0x01) || (AAFx_Mode == 0x02) || (AAFx_Mode == 0x03)) && (Diag_Mode_chk == 1))
+    {
+        if ((ReqAAF1DiagMode == 0) && (ReqAAF2DiagMode == 0) && (ReqAAF3DiagMode == 0))
+        {
+            Re_Init();
+        }
+    }
 
-	Slave_TxData[0] = (uint8_t)((AAFx_Type << 7) | AAF_Tx_Position_LIN);
-	Slave_TxData[1] = (uint8_t)((TotalNumOfAAF << 6) | (AAFx_Index << 4) | (AAFx_Mode << 2) | AAFx_InitStatus);
-	Slave_TxData[2] = (uint8_t)((1U << 7) | (AAFx_Over_Volt << 6) | (AAFx_Low_Volt << 5) | (AAFx_Motor_Fault << 4) | (1U << 3) | (AAFx_Circuit_Short << 2) | (AAFx_Circuit_Open << 1) | 1U);
-	Slave_TxData[3] = (uint8_t)((AAFx_SNSR_SCG << 7) | (AAFx_SNSR_SCB << 6) | (AAFx_SNSR_OC << 5) | (AAFx_Position_Status << 2) | AAFx_ErrorStatus);
-	Slave_TxData[4] = (uint8_t)((0x1F << 3) | (TotalNumOfAAFSensor));
-	Slave_TxData[5] = (uint8_t)((AAFx_SNSR4_Position << 6) | (AAFx_SNSR3_Position << 4) | (AAFx_SNSR2_Position << 2) | AAFx_SNSR1_Position);
+    Slave_TxData[0] = (uint8_t)((AAFx_Type << 7) | AAF_Tx_Position_LIN);
+    Slave_TxData[1] = (uint8_t)((TotalNumOfAAF << 6) | (AAFx_Index << 4) | (AAFx_Mode << 2) | AAFx_InitStatus);
+    Slave_TxData[2] = (uint8_t)((1U << 7) | (AAFx_Over_Volt << 6) | (AAFx_Low_Volt << 5) | (AAFx_Motor_Fault << 4) | (1U << 3) | (AAFx_Circuit_Short << 2) | (AAFx_Circuit_Open << 1) | 1U);
+    Slave_TxData[3] = (uint8_t)((AAFx_SNSR_SCG << 7) | (AAFx_SNSR_SCB << 6) | (AAFx_SNSR_OC << 5) | (AAFx_Position_Status << 2) | AAFx_ErrorStatus);
+    Slave_TxData[4] = (uint8_t)((0x1F << 3) | (TotalNumOfAAFSensor));
+    Slave_TxData[5] = (uint8_t)((AAFx_SNSR4_Position << 6) | (AAFx_SNSR3_Position << 4) | (AAFx_SNSR2_Position << 2) | AAFx_SNSR1_Position);
 
-	Req_ChkSum_Tx = (unsigned int)((16 - ((((Slave_TxData[0] / 16) + (Slave_TxData[1] / 16) + (Slave_TxData[2] / 16) + (Slave_TxData[3] / 16) + (Slave_TxData[4] / 16) + (Slave_TxData[5] / 16) + Req_Alive_Tx) + ((Slave_TxData[0] % 16) + (Slave_TxData[1] % 16) + (Slave_TxData[2] % 16) + (Slave_TxData[3] % 16) + (Slave_TxData[4] % 16) + (Slave_TxData[5] % 16))) & 0x0F) & 0x0F));
+    Req_ChkSum_Tx = (unsigned int)((16 - ((((Slave_TxData[0] / 16) + (Slave_TxData[1] / 16) + (Slave_TxData[2] / 16) + (Slave_TxData[3] / 16) + (Slave_TxData[4] / 16) + (Slave_TxData[5] / 16) + Req_Alive_Tx) + ((Slave_TxData[0] % 16) + (Slave_TxData[1] % 16) + (Slave_TxData[2] % 16) + (Slave_TxData[3] % 16) + (Slave_TxData[4] % 16) + (Slave_TxData[5] % 16))) & 0x0F) & 0x0F));
 
-	Slave_TxData[6] = (uint8_t)((Req_ChkSum_Tx << 4) | Req_Alive_Tx);
-	LIN_Diag_Action();
+    Slave_TxData[6] = (uint8_t)((Req_ChkSum_Tx << 4) | Req_Alive_Tx);
+    LIN_Diag_Action();
 
-	lin_rx_pass_flag = WAITING;
+    lin_rx_pass_flag = WAITING;
 }
 
 /* =========================================================================================
@@ -3535,9 +3557,9 @@ static void Lin_tx_data_chk(void)
  ***********************************************************************************************************************/
 static void External_device_off(void)
 {
-    DRV8899_Sleep();        // 모터 드라이버 슬립 전환
-    Lin_Transceiver_Off();  // LIN 트랜시버 전원 차단
-    SPI_select_pin_Off();   // SPI 통신 핀 비활성화
+    DRV8899_Sleep();       // 모터 드라이버 슬립 전환
+    Lin_Transceiver_Off(); // LIN 트랜시버 전원 차단
+    SPI_select_pin_Off();  // SPI 통신 핀 비활성화
 }
 
 /***********************************************************************************************************************
@@ -3564,15 +3586,15 @@ static void Sleep_port_config(void)
  ***********************************************************************************************************************/
 static void Sleep_internal_module_stop(void)
 {
-    R_Config_INTC_Create();         // 인터럽트 컨트롤러 재설정 (Wake-up 준비)
+    R_Config_INTC_Create(); // 인터럽트 컨트롤러 재설정 (Wake-up 준비)
     // R_Config_INTC_INTP5_Start(); // (주석 유지)
 
-    R_Config_CSIH0_Stop();          // SPI 모듈 정지
-    R_Config_ADCA0_Halt();          // ADC 모듈 정지
-    R_Config_TAUD0_13_Stop();       // 타이머 정지
-    R_Config_TAUD0_3_Stop();        // 타이머 정지
+    R_Config_CSIH0_Stop();    // SPI 모듈 정지
+    R_Config_ADCA0_Halt();    // ADC 모듈 정지
+    R_Config_TAUD0_13_Stop(); // 타이머 정지
+    R_Config_TAUD0_3_Stop();  // 타이머 정지
 
-    time_1ms_spi_flag = 0;          // 관련 플래그 초기화
+    time_1ms_spi_flag = 0; // 관련 플래그 초기화
     time_1ms_spi = 0;
 }
 
@@ -3584,10 +3606,10 @@ static void Sleep_internal_module_stop(void)
  ***********************************************************************************************************************/
 static void Sleep_enter_deep_stop(void)
 {
-    R_CGC_Create_sleepmode();                   // 클럭 설정 변경
+    R_CGC_Create_sleepmode(); // 클럭 설정 변경
 
-    R_Config_STBC_Prepare_Deep_Stop_Mode();     // 대기 모드 진입 준비 레지스터 설정
-    R_Config_STBC_Start_Deep_Stop_Mode();       // [진입점] 여기서 MCU 동작 멈춤
+    R_Config_STBC_Prepare_Deep_Stop_Mode(); // 대기 모드 진입 준비 레지스터 설정
+    R_Config_STBC_Start_Deep_Stop_Mode();   // [진입점] 여기서 MCU 동작 멈춤
 }
 
 /***********************************************************************************************************************
@@ -3620,7 +3642,6 @@ static void MCU_sleep(void)
     // 6. Deep Stop 모드 진입 (Wake-up 이벤트 발생 전까지 정지)
     Sleep_enter_deep_stop();
 }
-
 
 /* =========================================================================================
  * SPI Communication & Stall Check Functions
@@ -3712,9 +3733,9 @@ static void Handle_spi_step_wait(void)
     {
         spi_action_step = 2;
         // DRV_Off();
-        
-        // spi_fail = 1; 
-        
+
+        // spi_fail = 1;
+
         time_1ms_spi_error_chk = 0;
         time_1ms_spi_error_chk_flag = 0;
     }
@@ -3790,7 +3811,7 @@ static void Process_spi_initiation(void)
     else if ((time_1ms_spi >= 50U) && (time_1us_motor == 0U) && (spi_action_step == 0U))
     {
 
-        // Current_limiting_select(); 
+        // Current_limiting_select();
 
         if (voltage_status_change == OFF)
         {
@@ -3815,7 +3836,7 @@ static void SPI_chk(void)
 {
     switch (spi_action_step)
     {
-        
+
     case 0:
         Process_spi_initiation();
         break;
@@ -3867,7 +3888,7 @@ static void Update_stall_counter(unsigned int low_limit, unsigned int high_limit
     {
         motor_stall_flag = MOTOR_NORMAL;
         stall_cnt = STALL_CNT_DEFAULT;
-        
+
         // [Legacy Comment Preserved]
         // stall_cnt--;
         // if (stall_cnt < STALL_CNT_DEFAULT)
@@ -3955,28 +3976,28 @@ static void Stall_chk(void)
 
 static void CHK_external_factors(void)
 {
-	if ((time_1ms_external_10s_chk >= 10000U) && (fail_safety_1_cycle_flag == OFF))
-	{
-		if ((fail_safety_step == 0) && (antipinch_previous_action == INITIALIZATION))
-		{
-			fail_safety_flag = ON;
-		}
-		else if (fail_safety_step == 1U)
-		{
-			fail_safety_step = 2;
-		}
-		else if (fail_safety_step == 7U)
-		{
-			fail_safety_step = 8;
-		}
-		else if (fail_safety_step == 13U)
-		{
-			fail_safety_step = 14;
-		}
-		else
-		{
-		}
-	}
+    if ((time_1ms_external_10s_chk >= 10000U) && (fail_safety_1_cycle_flag == OFF))
+    {
+        if ((fail_safety_step == 0) && (antipinch_previous_action == INITIALIZATION))
+        {
+            fail_safety_flag = ON;
+        }
+        else if (fail_safety_step == 1U)
+        {
+            fail_safety_step = 2;
+        }
+        else if (fail_safety_step == 7U)
+        {
+            fail_safety_step = 8;
+        }
+        else if (fail_safety_step == 13U)
+        {
+            fail_safety_step = 14;
+        }
+        else
+        {
+        }
+    }
 }
 
 /***********************************************************************************************************************
@@ -4016,9 +4037,9 @@ static void Set_AAF_ID(void)
 static void Fail_safety_init(unsigned int next_step)
 {
     // 1. 공통 초기화
-    DRV_Off();                                    // 모터 드라이버 Off
-    motor_start = OFF;                            // 스텝 생성 중지
-    time_1ms_external_10s_chk_flag = OFF;         
+    DRV_Off();         // 모터 드라이버 Off
+    motor_start = OFF; // 스텝 생성 중지
+    time_1ms_external_10s_chk_flag = OFF;
     time_1ms_external_10s_chk = 0;
     aaf_action = FLAP_STOP;
     aaf_action_complete_chk = FLAP_STOP;
@@ -4030,7 +4051,7 @@ static void Fail_safety_init(unsigned int next_step)
     stall_chk_time_1ms = 0;
     motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE;
 
-    aaf_step = AAF_INITIALIZATION;                // 메인 상태를 초기화 모드로 변경
+    aaf_step = AAF_INITIALIZATION; // 메인 상태를 초기화 모드로 변경
     aaf_init_step = START_INITIALIZATION;
     AAF_Tx_Position = UNKOWN_POSITION;
     AAFx_Position_Status = Unknown_Status;
@@ -4097,7 +4118,7 @@ static void Command_to_action_next_step(unsigned int next_step)
         {
             aaf_action = CLOSE;
         }
-        
+
         motor_stall_flag = MOTOR_NORMAL;
         stall_chk_time_1ms = 0;
         motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE;
@@ -4118,21 +4139,21 @@ static void Command_to_action_next_step(unsigned int next_step)
  ***********************************************************************************************************************/
 static void Action_start_next_step(unsigned int next_step)
 {
-   if ((aaf_action == OPEN) || (aaf_action == CLOSE))
+    if ((aaf_action == OPEN) || (aaf_action == CLOSE))
     {
         if (aaf_action == OPEN)
         {
-            Motor_dir_open(); 
+            Motor_dir_open();
         }
         else
         {
             Motor_dir_close();
         }
 
-        DRV8899_On();           
+        DRV8899_On();
         motor_start = ON;
         time_1ms_init_chk_flag = 1;
-        fail_safety_step = next_step;       
+        fail_safety_step = next_step;
     }
     else
     {
@@ -4156,9 +4177,9 @@ static void Check_stall_stop_next_step(unsigned int next_step)
         motor_start = OFF;
         stall_chk_cnt = 0;
         stall_chk_time_1ms = 0;
-        
+
         fail_safety_step = next_step;
-        
+
         aaf_action = FLAP_STOP;
         time_1ms_init_chk_flag = 0;
         time_1ms_init_chk = 0;
@@ -4195,12 +4216,12 @@ static void Execute_final_recovery_action(void)
     stall_chk_cnt = 0;
     stall_chk_time_1ms = 0;
     motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE;
-    
-    Motor_dir_open(); 
-    DRV8899_On();     
+
+    Motor_dir_open();
+    DRV8899_On();
     motor_start = ON;
     time_1ms_init_chk_flag = 1;
-    
+
     fail_safety_step = 15;
 }
 
@@ -4210,7 +4231,7 @@ static void Execute_final_recovery_action(void)
 
 /***********************************************************************************************************************
  * Function Name: Run_fail_safety_cycle_1
- * Description  : Fail-Safety 1차 사이클 (Step 0 ~ 5) 실행. 
+ * Description  : Fail-Safety 1차 사이클 (Step 0 ~ 5) 실행.
  * 초기화 -> 명령 확인 -> 구동 -> 스톨 감지 -> 3분 대기
  * Called By    : Fail_safety_mode
  * Return Value : void
@@ -4220,7 +4241,7 @@ static void Run_fail_safety_cycle_1(void)
     switch (fail_safety_step)
     {
     case 0:
-        Fail_safety_init(1); 
+        Fail_safety_init(1);
         break;
     case 1:
         Fail_safety_check_init_end();
@@ -4361,7 +4382,6 @@ static void Fail_safety_mode(void)
     }
 }
 
-
 // static void Initialize_variables(void)
 // {
 // 	motor_start = OFF;
@@ -4414,28 +4434,28 @@ static void Fail_safety_mode(void)
 
 static void Lin_bus_chk(void)
 {
-	if ((timer_1ms_lin_bus_inactive >= LIN_BUS_CHK_TIME_4_SEC) && (lin_bus_inactive_flag == OFF) && (LIN_Short_Ok == 0))
-	{
-		lin_bus_inactive_flag = ON;
+    if ((timer_1ms_lin_bus_inactive >= LIN_BUS_CHK_TIME_4_SEC) && (lin_bus_inactive_flag == OFF) && (LIN_Short_Ok == 0))
+    {
+        lin_bus_inactive_flag = ON;
 
-		DRV_Off();							  // drv of
-		motor_start = OFF;					  // step stop
-		time_1ms_external_10s_chk_flag = OFF; // 10s chk timer off
-		time_1ms_external_10s_chk = 0;
-		aaf_action = FLAP_STOP;
-		aaf_action_complete_chk = FLAP_STOP;
-		softstart_complete = OFF;
-		motor_step_value = STEP_TIME_1000RPM;
+        DRV_Off();                            // drv of
+        motor_start = OFF;                    // step stop
+        time_1ms_external_10s_chk_flag = OFF; // 10s chk timer off
+        time_1ms_external_10s_chk = 0;
+        aaf_action = FLAP_STOP;
+        aaf_action_complete_chk = FLAP_STOP;
+        softstart_complete = OFF;
+        motor_step_value = STEP_TIME_1000RPM;
 
-		time_1ms_stall_chk = 0;		 // test
-		time_1ms_stall_chk_flag = 0; // test
+        time_1ms_stall_chk = 0;      // test
+        time_1ms_stall_chk_flag = 0; // test
 
-		lin_sleep_step = 0;
+        lin_sleep_step = 0;
 
-		wake_up_motor_range_init_chk = 0;
+        wake_up_motor_range_init_chk = 0;
 
-		aaf_step = AAF_WAITING;
-	}
+        aaf_step = AAF_WAITING;
+    }
 }
 
 /***********************************************************************************************************************
@@ -4484,11 +4504,11 @@ static void Wait_protection_mode_delay(void)
 static void Start_protection_mode_move(void)
 {
     // if(((adc_avr >= ADC_UNDER_VOLTAGE_7V) && (adc_avr <= ADC_UNDER_VOLTAGE_9V)) || ((adc_avr >= ADC_OVER_VOLTAGE_16V) && (adc_avr <= ADC_OVER_VOLTAGE_18V)) || (AAF_ProtectionMode_Rx == ON))
-    // if(((adc_avr >= ADC_OVER_VOLTAGE_16V) && (adc_avr <= ADC_OVER_VOLTAGE_18V)) || (AAF_ProtectionMode_Rx == ON) && (AAF_Tx_Position != OPEN))   
+    // if(((adc_avr >= ADC_OVER_VOLTAGE_16V) && (adc_avr <= ADC_OVER_VOLTAGE_18V)) || (AAF_ProtectionMode_Rx == ON) && (AAF_Tx_Position != OPEN))  
     if ((AAF_Tx_Position != OPEN))
-	{
-        Motor_dir_open();                    // dir OPEN
-       	DRV8899_On();                        // drv on
+    {
+        Motor_dir_open();                // dir OPEN
+        DRV8899_On();                    // drv on
         motor_start = ON;                // step start
         time_1ms_stall_chk_flag = ON;    // test
         motor_stall_flag = MOTOR_NORMAL; // stall reset
@@ -4605,23 +4625,23 @@ static void Protection_Mode(void)
 
 static void Voltage_chk_current_limit_init(void)
 {
-	if (voltage_status_spi == 0U) //	6 ohm
-	{
-		if (adc_avr <= ADC_VOLTAGE_13_5V)
-		{
-			voltage_status_spi = LOW_VOLTAGE_1ST;
-		}
-		else if (adc_avr >= ADC_VOLTAGE_15V)
-		{
-			voltage_status_spi = HIGH_VOLTAGE_1ST;
-		}
-		else
-		{
-			voltage_status_spi = NORMAL_VOLTAGE;
-		}
+    if (voltage_status_spi == 0U) //	6 ohm
+    {
+        if (adc_avr <= ADC_VOLTAGE_13_5V)
+        {
+            voltage_status_spi = LOW_VOLTAGE_1ST;
+        }
+        else if (adc_avr >= ADC_VOLTAGE_15V)
+        {
+            voltage_status_spi = HIGH_VOLTAGE_1ST;
+        }
+        else
+        {
+            voltage_status_spi = NORMAL_VOLTAGE;
+        }
 
-		voltage_status_change = ON;
-	}
+        voltage_status_change = ON;
+    }
 }
 
 // static void Current_limiting_select(void)
@@ -4684,7 +4704,7 @@ static void Voltage_chk_current_limit_init(void)
 // }
 
 /* =========================================================================================
- * LIN Sleep Mode 
+ * LIN Sleep Mode
  * ========================================================================================= */
 
 /***********************************************************************************************************************
@@ -4711,8 +4731,8 @@ static void Stop_motor_and_reset(void)
  ***********************************************************************************************************************/
 static void Reset_lin_sleep_start(void)
 {
-    Stop_motor_and_reset(); 
-    
+    Stop_motor_and_reset();
+
     // Case 0에만 있는 추가 초기화
     timer_1ms_init_fail_chk_flag = 0;
     timer_1ms_init_fail_chk = 0;
@@ -4760,11 +4780,11 @@ static void Parse_lin_wakeup_command(void)
             DRV8899_Wakeup();
             aaf_action = CLOSE;
         }
-        else 
-        { 
-            //invalid 
+        else
+        {
+            // invalid
         }
-        
+
         lin_sleep_step = 3;
     }
     else if (AAF_LINOut == 0x01U)
@@ -4773,9 +4793,9 @@ static void Parse_lin_wakeup_command(void)
         aaf_action = OPEN;
         lin_sleep_step = 3;
     }
-    else 
-    { 
-        //invalid 
+    else
+    {
+        // invalid
     }
 }
 
@@ -4790,16 +4810,16 @@ static void Process_lin_sleep_prep(void)
 {
     switch (lin_sleep_step)
     {
-    case 0: 
-        Reset_lin_sleep_start();  
+    case 0:
+        Reset_lin_sleep_start();
         break;
-    case 1: 
-        Wait_lin_sleep_delay();   
+    case 1:
+        Wait_lin_sleep_delay();
         break;
-    case 2: 
-        Parse_lin_wakeup_command(); 
+    case 2:
+        Parse_lin_wakeup_command();
         break;
-    default: 
+    default:
         break;
     }
 }
@@ -4816,25 +4836,25 @@ static void Start_lin_motor_move(void)
     if (aaf_action == OPEN)
     {
         Motor_dir_open();
-        DRV_On(); 
+        DRV_On();
         motor_start = ON;
         motor_stall_flag = MOTOR_NORMAL;
         stall_chk_time_1ms = 0;
         motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE;
         time_1ms_spi = 0;
-        
+
         lin_sleep_step = 4;
     }
     else if (aaf_action == CLOSE)
     {
         Motor_dir_close();
-        DRV_On(); 
+        DRV_On();
         motor_start = ON;
         motor_stall_flag = MOTOR_NORMAL;
         stall_chk_time_1ms = 0;
         motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE;
         time_1ms_spi = 0;
-        
+
         lin_sleep_step = 4;
     }
     else
@@ -4856,44 +4876,44 @@ static void Check_lin_motor_completion(void)
     if ((aaf_action == OPEN) && (step_position <= (step_position_open + limit_step_position)))
     {
         Stop_motor_and_reset(); // 공통 정지
-        
+
         AAF_Tx_Position = OPEN;
         AAFx_Position_Status = Open_Status;
         Tx_position_complete_chk();
         aaf_step = FINISHED_OPERATE;
-        
+
         lin_sleep_step = 5;
     }
     // 조건 2: CLOSE 방향 목표 위치 도착
     else if ((aaf_action == CLOSE) && (step_position >= (step_position_close - limit_step_position)))
     {
         Stop_motor_and_reset(); // 공통 정지
-        
+
         AAF_Tx_Position = CLOSE;
         AAFx_Position_Status = Close_Status;
         AAFx_InitStatus = NORMAL_INITIALIZATION;
         Tx_position_complete_chk();
         aaf_step = FINISHED_OPERATE;
-        
+
         lin_sleep_step = 5;
     }
     // 조건 3: 스톨 발생
     else if (motor_stall_flag == MOTOR_STALL)
     {
         Stop_motor_and_reset(); // 공통 정지
-        
+
         aaf_step = AAF_INITIALIZATION;
         aaf_init_step = WAIT_INITIALIZATION;
         AAF_Tx_Position = UNKOWN_POSITION;
         AAFx_Position_Status = Unknown_Status;
         AAFx_InitStatus = DURING_INITIALIZATION;
         motor_stall_flag = MOTOR_NORMAL;
-        
+
         lin_sleep_step = 5;
     }
     else
     {
-        //invalid
+        // invalid
     }
 }
 
@@ -4927,16 +4947,16 @@ static void Process_lin_sleep_move(void)
 {
     switch (lin_sleep_step)
     {
-    case 3: 
-        Start_lin_motor_move(); 
+    case 3:
+        Start_lin_motor_move();
         break;
-    case 4: 
-        Check_lin_motor_completion(); 
+    case 4:
+        Check_lin_motor_completion();
         break;
-    case 5: 
-        Process_final_sleep(); 
+    case 5:
+        Process_final_sleep();
         break;
-    default: 
+    default:
         break;
     }
 }
@@ -4976,31 +4996,31 @@ static void Antipinch_prev_open(void)
     switch (antipinch_step)
     {
     case 0:
-        Motor_Close();                
-        DRV_On();                       
-        motor_start = ON;               
-        time_1ms_init_chk_flag = 1;     
+        Motor_Close();
+        DRV_On();
+        motor_start = ON;
+        time_1ms_init_chk_flag = 1;
 
         aaf_action = CLOSE;
-        AAFx_ErrorStatus = Open_ErrorStatus; 
-        time_1ms_spi = 0;               
-        motor_stall_flag = MOTOR_NORMAL; 
+        AAFx_ErrorStatus = Open_ErrorStatus;
+        time_1ms_spi = 0;
+        motor_stall_flag = MOTOR_NORMAL;
         antipinch_step = 1;
         break;
 
     case 1:
-        if ((motor_stall_flag == MOTOR_STALL) || (time_1ms_init_chk >= 4500U)) 
+        if ((motor_stall_flag == MOTOR_STALL) || (time_1ms_init_chk >= 4500U))
         {
             DRV_Off();
             motor_start = OFF;
             stall_chk_cnt = 0;
-            stall_chk_time_1ms = 0; 
+            stall_chk_time_1ms = 0;
             softstart_complete = OFF;
             motor_step_value = STEP_TIME_1000RPM;
             aaf_action = FLAP_STOP;
             time_1ms_init_chk_flag = 0;
             time_1ms_init_chk = 0;
-            
+
             if (step_position >= step_position_close)
             {
                 step_position = step_position_close;
@@ -5023,17 +5043,17 @@ static void Antipinch_prev_open(void)
         break;
 
     case 3:
-        Motor_Open();    
-        DRV_On();         
-        motor_start = ON; 
+        Motor_Open();
+        DRV_On();
+        motor_start = ON;
 
-        stall_chk_time_1ms = 0;                                           
-        motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE; 
-        motor_stall_flag = MOTOR_NORMAL;                  
+        stall_chk_time_1ms = 0;
+        motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE;
+        motor_stall_flag = MOTOR_NORMAL;
         time_1ms_spi = 0;
         aaf_action = OPEN;
 
-        time_1ms_init_chk_flag = 1; 
+        time_1ms_init_chk_flag = 1;
 
         antipinch_step = 4;
         break;
@@ -5043,7 +5063,7 @@ static void Antipinch_prev_open(void)
         {
             DRV_Off();
             motor_start = OFF;
-            
+
             // 진단 모드 여부에 따른 분기
             if (Diag_Mode != 0)
             {
@@ -5130,23 +5150,23 @@ static void Antipinch_prev_open(void)
  ***********************************************************************************************************************/
 static void Antipinch_prev_close(void)
 {
-    AAFx_InitStatus = DURING_INITIALIZATION; 
+    AAFx_InitStatus = DURING_INITIALIZATION;
 
     switch (antipinch_step)
     {
     case 0:
-        Motor_Open();   
-        DRV_On();       
+        Motor_Open();
+        DRV_On();
 
-        stall_chk_time_1ms = 0; 
+        stall_chk_time_1ms = 0;
 
-        motor_start = ON;                
-        time_1ms_init_chk_flag = 1;      
-        motor_stall_flag = MOTOR_NORMAL; 
+        motor_start = ON;
+        time_1ms_init_chk_flag = 1;
+        motor_stall_flag = MOTOR_NORMAL;
         time_1ms_spi = 0;
 
         aaf_action = OPEN;
-        AAFx_ErrorStatus = Close_ErrorStatus; 
+        AAFx_ErrorStatus = Close_ErrorStatus;
         antipinch_step = 1;
         break;
 
@@ -5156,13 +5176,13 @@ static void Antipinch_prev_close(void)
             DRV_Off();
             motor_start = OFF;
             stall_chk_cnt = 0;
-            stall_chk_time_1ms = 0; 
+            stall_chk_time_1ms = 0;
             softstart_complete = OFF;
             motor_step_value = STEP_TIME_1000RPM;
 
             time_1ms_init_chk_flag = 0;
             time_1ms_init_chk = 0;
-            
+
             if (step_position <= step_position_open)
             {
                 step_position = step_position_open;
@@ -5182,23 +5202,23 @@ static void Antipinch_prev_close(void)
             time_1ms_antipinch = 0;
             antipinch_step = 3;
 
-            time_1ms_init_chk_flag = 0; 
-            time_1ms_init_chk = 0;      
+            time_1ms_init_chk_flag = 0;
+            time_1ms_init_chk = 0;
         }
         break;
 
     case 3:
-        Motor_Close();   
-        DRV_On();        
-        motor_start = ON; 
-        motor_stall_flag = MOTOR_NORMAL; 
+        Motor_Close();
+        DRV_On();
+        motor_start = ON;
+        motor_stall_flag = MOTOR_NORMAL;
 
-        stall_chk_time_1ms = 0;                                           
-        motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE; 
+        stall_chk_time_1ms = 0;
+        motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE;
         time_1ms_spi = 0;
 
         aaf_action = CLOSE;
-        time_1ms_init_chk_flag = 1; 
+        time_1ms_init_chk_flag = 1;
         antipinch_step = 4;
         break;
 
@@ -5270,16 +5290,16 @@ static void Antipinch_prev_close(void)
         break;
 
     case 5:
-        Motor_Open();    
-        DRV_On();         
-        motor_start = ON; 
-        time_1ms_init_chk_flag = 1; 
+        Motor_Open();
+        DRV_On();
+        motor_start = ON;
+        time_1ms_init_chk_flag = 1;
         aaf_action = OPEN;
-        motor_stall_flag = MOTOR_NORMAL; 
+        motor_stall_flag = MOTOR_NORMAL;
         time_1ms_spi = 0;
 
-        stall_chk_time_1ms = 0;                                           
-        motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE; 
+        stall_chk_time_1ms = 0;
+        motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE;
 
         antipinch_step = 6;
         break;
@@ -5290,7 +5310,7 @@ static void Antipinch_prev_close(void)
             DRV_Off();
             motor_start = OFF;
             stall_chk_cnt = 0;
-            stall_chk_time_1ms = 0; 
+            stall_chk_time_1ms = 0;
             softstart_complete = OFF;
             motor_step_value = STEP_TIME_1000RPM;
 
@@ -5305,15 +5325,15 @@ static void Antipinch_prev_close(void)
 
             antipinch_previous_action = INITIALIZATION;
 
-            time_1ms_external_10s_chk_flag = OFF; 
+            time_1ms_external_10s_chk_flag = OFF;
             time_1ms_external_10s_chk = 0;
             aaf_action = FLAP_STOP;
             aaf_action_complete_chk = FLAP_STOP;
 
-            time_1ms_stall_chk = 0;      
-            time_1ms_stall_chk_flag = 0; 
+            time_1ms_stall_chk = 0;
+            time_1ms_stall_chk_flag = 0;
 
-            motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE; 
+            motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE;
 
             if (Diag_Mode != 0)
             {
@@ -5352,7 +5372,7 @@ static void Antipinch_move(void)
         AAFx_Position_Status = Unknown_Status;
         AAF_Tx_Position = UNKOWN_POSITION;
         AAFx_InitStatus = DURING_INITIALIZATION;
-        
+
         if (antipinch_previous_action == OPEN)
         {
             Antipinch_prev_open();
@@ -5370,482 +5390,481 @@ static void Antipinch_move(void)
 
 static void Torque_Test_Mode(void)
 {
-	if ((AAFx_Index == AAF_1) && (ReqRespAAFID == AAF_1))
-	{
-		torque_test_position = AAF1_TargetPosition;
-	}
-	else if ((AAFx_Index == AAF_2) && (ReqRespAAFID == AAF_2))
-	{
-		torque_test_position = AAF2_TargetPosition;
-	}
-	else if ((AAFx_Index == AAF_3) && (ReqRespAAFID == AAF_3))
-	{
-		torque_test_position = AAF3_TargetPosition;
-	}
-	else
-	{
-		torque_test_position = WAITING;
-	}
+    if ((AAFx_Index == AAF_1) && (ReqRespAAFID == AAF_1))
+    {
+        torque_test_position = AAF1_TargetPosition;
+    }
+    else if ((AAFx_Index == AAF_2) && (ReqRespAAFID == AAF_2))
+    {
+        torque_test_position = AAF2_TargetPosition;
+    }
+    else if ((AAFx_Index == AAF_3) && (ReqRespAAFID == AAF_3))
+    {
+        torque_test_position = AAF3_TargetPosition;
+    }
+    else
+    {
+        torque_test_position = WAITING;
+    }
 
-	switch (torque_test_position)
-	{
-	case 0x7F: // STOP
-		DRV_Off();
-		motor_start = OFF;
-		break;
-	case 0x00: // CLOSE
-		Motor_Close();
-		DRV_On();
-		motor_start = ON;
-		break;
-	case 0x64: // OPEN
-		Motor_Open();
-		DRV_On();
-		motor_start = ON;
-		break;
-	default:
-		break;
-	}
+    switch (torque_test_position)
+    {
+    case 0x7F: // STOP
+        DRV_Off();
+        motor_start = OFF;
+        break;
+    case 0x00: // CLOSE
+        Motor_Close();
+        DRV_On();
+        motor_start = ON;
+        break;
+    case 0x64: // OPEN
+        Motor_Open();
+        DRV_On();
+        motor_start = ON;
+        break;
+    default:
+        break;
+    }
 }
 
 static void IGN_On_Memory_read(void)
 {
-	step_position_close = close_memory_read;
-	step_position_open = open_memory_read;
-	step_position = now_step_memory_read;
-	AAF_Tx_Position = position_memory_read;
-	AAFx_Position_Status = position_status_memory_read;
-	AAFx_InitStatus = AAFx_InitStatus_memory_read;
-	limit_step_position = limit_memory_read;
-	evrdy_on_flag = Initial_memory_read;
-	DTC_Status |= DTC_memory_read;
-	power_chk = power_chk_memory_read;
-	First_Powerchk = First_Powerchk_memory_read;
+    step_position_close = close_memory_read;
+    step_position_open = open_memory_read;
+    step_position = now_step_memory_read;
+    AAF_Tx_Position = position_memory_read;
+    AAFx_Position_Status = position_status_memory_read;
+    AAFx_InitStatus = AAFx_InitStatus_memory_read;
+    limit_step_position = limit_memory_read;
+    evrdy_on_flag = Initial_memory_read;
+    DTC_Status |= DTC_memory_read;
+    power_chk = power_chk_memory_read;
+    First_Powerchk = First_Powerchk_memory_read;
 }
 /*static void Init_direction(void)
 {
-	if ((AAFx_Type == EXTERNAL_TYPE) && ((init_move_step == 0) || (init_move_step == 9)))
-	{
-		Motor_Open();	  // dir CLOSE
-	}
-	else if ((AAFx_Type == EXTERNAL_TYPE) && ((init_move_step == 6) || (init_move_step == 13)))
-	{
-		Motor_Close();
-	}
-	else if ((AAFx_Type == INTERNAL_TYPE) && ((init_move_step == 0) || (init_move_step == 9)))
-	{
-		Motor_Close();
-	}
-	else if ((AAFx_Type == INTERNAL_TYPE) && ((init_move_step == 6) || (init_move_step == 13)))
-	{
-		Motor_Open();
-	}
-	else
-	{
+    if ((AAFx_Type == EXTERNAL_TYPE) && ((init_move_step == 0) || (init_move_step == 9)))
+    {
+        Motor_Open();	  // dir CLOSE
+    }
+    else if ((AAFx_Type == EXTERNAL_TYPE) && ((init_move_step == 6) || (init_move_step == 13)))
+    {
+        Motor_Close();
+    }
+    else if ((AAFx_Type == INTERNAL_TYPE) && ((init_move_step == 0) || (init_move_step == 9)))
+    {
+        Motor_Close();
+    }
+    else if ((AAFx_Type == INTERNAL_TYPE) && ((init_move_step == 6) || (init_move_step == 13)))
+    {
+        Motor_Open();
+    }
+    else
+    {
 
-	}
+    }
 }*/
 static void LIMP_HOME(void)
 {
 
-	if ((LIMP_HOME_Count < 80) && (AAF_LIN_ChkSum_CHK == PASS) && (LIMP_HOME_step == 2))
-	{
-		LIMP_HOME_Count = 0;
-		LIMP_HOME_step = 0;
-		Re_Init();
-	}
-	switch (LIMP_HOME_step)
-	{
-	case 0:
-		if ((LIMP_HOME_Count >= 80))
-		{
-			if ((AAF_Tx_Position != OPEN))
-			{
-				Motor_Open();					 // dir OPEN
-				DRV_On();						 // drv on
-				motor_start = ON;				 // step start
-				time_1ms_stall_chk_flag = ON;	 // test
-				motor_stall_flag = MOTOR_NORMAL; // stall reset
-				stall_chk_time_1ms = 0;			 // stall reset
-				LIMP_HOME_step = 1;
-				time_1ms_init_chk_flag = 1; // test
-			}
-			else
-			{
-				LIMP_HOME_step = 1;
-			}
-		}
-		break;
-	case 1:
-		if ((step_position <= (step_position_open + limit_step_position)) || (motor_stall_flag == MOTOR_STALL)) //
-		{
-			DRV_Off();
-			motor_start = OFF;
-			stall_chk_cnt = 0;
-			stall_chk_time_1ms = 0; // stall reset
-			time_1ms_init_chk_flag = 0;
-			time_1ms_init_chk = 0;
-			AAF_Tx_Position = UNKOWN_POSITION;
-			AAFx_Position_Status = Unknown_Status;
-			AAFx_InitStatus = DURING_INITIALIZATION;
-			aaf_step = FINISHED_OPERATE;
+    if ((LIMP_HOME_Count < 80) && (AAF_LIN_ChkSum_CHK == PASS) && (LIMP_HOME_step == 2))
+    {
+        LIMP_HOME_Count = 0;
+        LIMP_HOME_step = 0;
+        Re_Init();
+    }
+    switch (LIMP_HOME_step)
+    {
+    case 0:
+        if ((LIMP_HOME_Count >= 80))
+        {
+            if ((AAF_Tx_Position != OPEN))
+            {
+                Motor_Open();                    // dir OPEN
+                DRV_On();                        // drv on
+                motor_start = ON;                // step start
+                time_1ms_stall_chk_flag = ON;    // test
+                motor_stall_flag = MOTOR_NORMAL; // stall reset
+                stall_chk_time_1ms = 0;          // stall reset
+                LIMP_HOME_step = 1;
+                time_1ms_init_chk_flag = 1; // test
+            }
+            else
+            {
+                LIMP_HOME_step = 1;
+            }
+        }
+        break;
+    case 1:
+        if ((step_position <= (step_position_open + limit_step_position)) || (motor_stall_flag == MOTOR_STALL)) //
+        {
+            DRV_Off();
+            motor_start = OFF;
+            stall_chk_cnt = 0;
+            stall_chk_time_1ms = 0; // stall reset
+            time_1ms_init_chk_flag = 0;
+            time_1ms_init_chk = 0;
+            AAF_Tx_Position = UNKOWN_POSITION;
+            AAFx_Position_Status = Unknown_Status;
+            AAFx_InitStatus = DURING_INITIALIZATION;
+            aaf_step = FINISHED_OPERATE;
 
-			LIMP_HOME_step = 2;
-		}
-		else if ((AAF_Tx_Position == OPEN) && (AAFx_Position_Status == Open_Status))
-		{
-			AAF_Tx_Position = UNKOWN_POSITION;
-			AAFx_Position_Status = Unknown_Status;
-			AAFx_InitStatus = DURING_INITIALIZATION;
-			aaf_step = FINISHED_OPERATE;
-			LIMP_HOME_step = 2;
-		}
-		else
-		{
-		}
-		break;
-	case 2:
-		if (AAFx_Position_Status == Open_Status)
-		{
-			Flash_memory_write();
-		}
+            LIMP_HOME_step = 2;
+        }
+        else if ((AAF_Tx_Position == OPEN) && (AAFx_Position_Status == Open_Status))
+        {
+            AAF_Tx_Position = UNKOWN_POSITION;
+            AAFx_Position_Status = Unknown_Status;
+            AAFx_InitStatus = DURING_INITIALIZATION;
+            aaf_step = FINISHED_OPERATE;
+            LIMP_HOME_step = 2;
+        }
+        else
+        {
+        }
+        break;
+    case 2:
+        if (AAFx_Position_Status == Open_Status)
+        {
+            Flash_memory_write();
+        }
 
-		break;
+        break;
 
-	default:
-		break;
-	}
+    default:
+        break;
+    }
 }
 
 static void step_check(void)
 {
-	if (((step_position_close - step_position_open) <= STEP_POSITION_MINIMUM_RANGE) || ((step_position_close - step_position_open) > STEP_POSITION_MAXIMUM_RANGE) || (step_position == REFERENCE_POSITION) || (step_position < (step_position_open + limit_step_position)) || (step_position > (step_position_close - limit_step_position)) || (step_position_close == 0) || (step_position_open == 0) || (limit_step_position == 0) || (evrdy_on_flag == OFF) || (step_position > POSITION_MAXIMUM_RANGE) || (step_position_open > POSITION_MAXIMUM_RANGE) || (step_position_close > POSITION_MAXIMUM_RANGE) || (limit_step_position > LIMITSTEP_MAXIMUM_RANGE) || (AAF_Tx_Position == UNKOWN_POSITION) || (AAFx_InitStatus == ABNORMAL_FINISHED_INITIALIZATION) || (AAFx_Position_Status == FlapMoving_Status) || (AAFx_Position_Status == Unknown_Status) || (power_chk == Shutdown_Check))
-	{
-		Re_Init();
-	}
-	else
-	{
-		if (AAFx_Position_Status == Open_Status)
-		{
-			aaf_step = AAF_WAITING;
-			aaf_init_step = NORMAL_INITIALIZATION;
-			AAF_Tx_Position = OPEN;
-			// AAFx_Position_Status = Open_Status;
-			AAFx_InitStatus = NORMAL_FINISHED_INITIALIZATION;
-			evrdy_on_flag = ON;
-			aaf_action_complete_chk = FLAP_STOP;
-			antipinch_previous_action = ANTIWAIT;
-		}
-		else if (AAFx_Position_Status == Close_Status)
-		{
-			aaf_step = AAF_WAITING;
-			aaf_init_step = NORMAL_INITIALIZATION;
-			AAF_Tx_Position = CLOSE;
-			// AAFx_Position_Status = Close_Status;
-			AAFx_InitStatus = NORMAL_FINISHED_INITIALIZATION;
-			evrdy_on_flag = ON;
-			aaf_action_complete_chk = FLAP_STOP;
-			antipinch_previous_action = ANTIWAIT;
-		}
-		else
-		{
-		}
-	}
+    if (((step_position_close - step_position_open) <= STEP_POSITION_MINIMUM_RANGE) || ((step_position_close - step_position_open) > STEP_POSITION_MAXIMUM_RANGE) || (step_position == REFERENCE_POSITION) || (step_position < (step_position_open + limit_step_position)) || (step_position > (step_position_close - limit_step_position)) || (step_position_close == 0) || (step_position_open == 0) || (limit_step_position == 0) || (evrdy_on_flag == OFF) || (step_position > POSITION_MAXIMUM_RANGE) || (step_position_open > POSITION_MAXIMUM_RANGE) || (step_position_close > POSITION_MAXIMUM_RANGE) || (limit_step_position > LIMITSTEP_MAXIMUM_RANGE) || (AAF_Tx_Position == UNKOWN_POSITION) || (AAFx_InitStatus == ABNORMAL_FINISHED_INITIALIZATION) || (AAFx_Position_Status == FlapMoving_Status) || (AAFx_Position_Status == Unknown_Status) || (power_chk == Shutdown_Check))
+    {
+        Re_Init();
+    }
+    else
+    {
+        if (AAFx_Position_Status == Open_Status)
+        {
+            aaf_step = AAF_WAITING;
+            aaf_init_step = NORMAL_INITIALIZATION;
+            AAF_Tx_Position = OPEN;
+            // AAFx_Position_Status = Open_Status;
+            AAFx_InitStatus = NORMAL_FINISHED_INITIALIZATION;
+            evrdy_on_flag = ON;
+            aaf_action_complete_chk = FLAP_STOP;
+            antipinch_previous_action = ANTIWAIT;
+        }
+        else if (AAFx_Position_Status == Close_Status)
+        {
+            aaf_step = AAF_WAITING;
+            aaf_init_step = NORMAL_INITIALIZATION;
+            AAF_Tx_Position = CLOSE;
+            // AAFx_Position_Status = Close_Status;
+            AAFx_InitStatus = NORMAL_FINISHED_INITIALIZATION;
+            evrdy_on_flag = ON;
+            aaf_action_complete_chk = FLAP_STOP;
+            antipinch_previous_action = ANTIWAIT;
+        }
+        else
+        {
+        }
+    }
 }
 
 static void LIN_Short_Chk(void)
 {
-	Short_chk = PORT.PPR8 & _PORT_Pn1_OUTPUT_HIGH;
+    Short_chk = PORT.PPR8 & _PORT_Pn1_OUTPUT_HIGH;
 
-	if (Short_chk == 0)
-	{
-		if (time_1ms_LIN_GndShort_flag == 0U)
-		{
-			time_1ms_LIN_GndShort = 0U;
-			time_1ms_LIN_GndShort_flag = 1U;
-		}
-	}
-	else
-	{
-		time_1ms_LIN_GndShort = 0U;
-		time_1ms_LIN_GndShort_flag = 0U;
-	}
+    if (Short_chk == 0)
+    {
+        if (time_1ms_LIN_GndShort_flag == 0U)
+        {
+            time_1ms_LIN_GndShort = 0U;
+            time_1ms_LIN_GndShort_flag = 1U;
+        }
+    }
+    else
+    {
+        time_1ms_LIN_GndShort = 0U;
+        time_1ms_LIN_GndShort_flag = 0U;
+    }
 
-	if (time_1ms_LIN_GndShort >= 4000)
-	{
-		LIN_Short_Ok = 1U;
-	}
+    if (time_1ms_LIN_GndShort >= 4000)
+    {
+        LIN_Short_Ok = 1U;
+    }
 
-	if (LIN_Short_Ok == 1U)
-	{
-		switch (LIN_Short_Sleep)
-		{
-		case 0:
-			aaf_action = OPEN;
-			LIN_Short_Sleep = 1;
-			break;
-		case 1:
-			Motor_Open();	  // dir CLOSE
-			DRV_On();		  // drv on
-			motor_start = ON; // step start
+    if (LIN_Short_Ok == 1U)
+    {
+        switch (LIN_Short_Sleep)
+        {
+        case 0:
+            aaf_action = OPEN;
+            LIN_Short_Sleep = 1;
+            break;
+        case 1:
+            Motor_Open();     // dir CLOSE
+            DRV_On();         // drv on
+            motor_start = ON; // step start
 
-			motor_stall_flag = MOTOR_NORMAL;				  // stall reset
-			stall_chk_time_1ms = 0;							  // stall reset
-			motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE; // stall reset
-			time_1ms_spi = 0;
-			LIN_Short_Sleep = 2;
-			break;
-		case 2:
-			if (((aaf_action == OPEN) && (step_position <= (step_position_open + limit_step_position)))) //
-			{
-				DRV_Off();
-				motor_start = OFF;
-				stall_chk_cnt = 0;
-				stall_chk_time_1ms = 0; // stall reset
-				softstart_complete = OFF;
-				motor_step_value = STEP_TIME_1000RPM;
-				AAF_Tx_Position = OPEN;
-				AAFx_Position_Status = Open_Status;
-				Tx_position_complete_chk();
-				aaf_step = FINISHED_OPERATE;
-				LIN_Short_Sleep = 3;
-			}
-			else if ((motor_stall_flag == MOTOR_STALL))
-			{
-				DRV_Off();
-				motor_start = OFF;
-				stall_chk_cnt = 0;
-				stall_chk_time_1ms = 0; // stall reset
-				softstart_complete = OFF;
-				motor_step_value = STEP_TIME_1000RPM;
-				AAF_Tx_Position = UNKOWN_POSITION;
-				AAFx_Position_Status = Unknown_Status;
-				Tx_position_complete_chk();
-				aaf_step = FINISHED_OPERATE;
-				LIN_Short_Sleep = 3;
-			}
-			else
-			{
-			}
-			break;
-		case 3:
-			MCU_sleep();
-			LIN_Short_Sleep = 4;
-			break;
+            motor_stall_flag = MOTOR_NORMAL;                  // stall reset
+            stall_chk_time_1ms = 0;                           // stall reset
+            motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE; // stall reset
+            time_1ms_spi = 0;
+            LIN_Short_Sleep = 2;
+            break;
+        case 2:
+            if (((aaf_action == OPEN) && (step_position <= (step_position_open + limit_step_position)))) //
+            {
+                DRV_Off();
+                motor_start = OFF;
+                stall_chk_cnt = 0;
+                stall_chk_time_1ms = 0; // stall reset
+                softstart_complete = OFF;
+                motor_step_value = STEP_TIME_1000RPM;
+                AAF_Tx_Position = OPEN;
+                AAFx_Position_Status = Open_Status;
+                Tx_position_complete_chk();
+                aaf_step = FINISHED_OPERATE;
+                LIN_Short_Sleep = 3;
+            }
+            else if ((motor_stall_flag == MOTOR_STALL))
+            {
+                DRV_Off();
+                motor_start = OFF;
+                stall_chk_cnt = 0;
+                stall_chk_time_1ms = 0; // stall reset
+                softstart_complete = OFF;
+                motor_step_value = STEP_TIME_1000RPM;
+                AAF_Tx_Position = UNKOWN_POSITION;
+                AAFx_Position_Status = Unknown_Status;
+                Tx_position_complete_chk();
+                aaf_step = FINISHED_OPERATE;
+                LIN_Short_Sleep = 3;
+            }
+            else
+            {
+            }
+            break;
+        case 3:
+            MCU_sleep();
+            LIN_Short_Sleep = 4;
+            break;
 
-		default:
-			break;
-		}
-	}
+        default:
+            break;
+        }
+    }
 }
 
 static void Error_FaultClear(void)
 {
-	PORT.P8 &= ~_PORT_Pn0_OUTPUT_HIGH;
+    PORT.P8 &= ~_PORT_Pn0_OUTPUT_HIGH;
 
-	R_Config_CSIH0_Send_Receive(&fault_clear[0], 1, &rx_16bit_spi[9], _CSIH_SELECT_CHIP_0);
+    R_Config_CSIH0_Send_Receive(&fault_clear[0], 1, &rx_16bit_spi[9], _CSIH_SELECT_CHIP_0);
 
-	while (1)
-	{
-		if ((spi_receive_flag == 1U) && (spi_send_flag == 1U))
-		{
-			spi_receive_flag = 0;
-			spi_send_flag = 0;
-			time_1ms_spi_error_chk = 0;
-			time_1ms_spi_error_chk_flag = 0;
-			break;
-		}
-	}
+    while (1)
+    {
+        if ((spi_receive_flag == 1U) && (spi_send_flag == 1U))
+        {
+            spi_receive_flag = 0;
+            spi_send_flag = 0;
+            time_1ms_spi_error_chk = 0;
+            time_1ms_spi_error_chk_flag = 0;
+            break;
+        }
+    }
 
-	PORT.P8 |= _PORT_Pn0_OUTPUT_HIGH;
+    PORT.P8 |= _PORT_Pn0_OUTPUT_HIGH;
 
-	time_1us_spi_flag = 1;
+    time_1us_spi_flag = 1;
 
-	while (1)
-	{
-		if (time_1us_spi >= 10U)
-		{
-			time_1us_spi_flag = 0;
-			time_1us_spi = 0;
-			break;
-		}
-	}
+    while (1)
+    {
+        if (time_1us_spi >= 10U)
+        {
+            time_1us_spi_flag = 0;
+            time_1us_spi = 0;
+            break;
+        }
+    }
 
-	PORT.P8 &= ~_PORT_Pn0_OUTPUT_HIGH;
+    PORT.P8 &= ~_PORT_Pn0_OUTPUT_HIGH;
 
-	R_Config_CSIH0_Send_Receive(&rx_16bit_spi_id[9], 1, &rx_16bit_spi[9], _CSIH_SELECT_CHIP_0);
+    R_Config_CSIH0_Send_Receive(&rx_16bit_spi_id[9], 1, &rx_16bit_spi[9], _CSIH_SELECT_CHIP_0);
 
-	while (1)
-	{
-		if ((spi_receive_flag == 1U) && (spi_send_flag == 1U))
-		{
-			spi_receive_flag = 0;
-			spi_send_flag = 0;
-			time_1ms_spi_error_chk = 0;
-			time_1ms_spi_error_chk_flag = 0;
-			break;
-		}
-	}
+    while (1)
+    {
+        if ((spi_receive_flag == 1U) && (spi_send_flag == 1U))
+        {
+            spi_receive_flag = 0;
+            spi_send_flag = 0;
+            time_1ms_spi_error_chk = 0;
+            time_1ms_spi_error_chk_flag = 0;
+            break;
+        }
+    }
 
-	PORT.P8 |= _PORT_Pn0_OUTPUT_HIGH;
+    PORT.P8 |= _PORT_Pn0_OUTPUT_HIGH;
 
-	time_1us_spi_flag = 1;
+    time_1us_spi_flag = 1;
 
-	while (1)
-	{
-		if (time_1us_spi >= 10U)
-		{
-			time_1us_spi_flag = 0;
-			time_1us_spi = 0;
-			break;
-		}
-	}
+    while (1)
+    {
+        if (time_1us_spi >= 10U)
+        {
+            time_1us_spi_flag = 0;
+            time_1us_spi = 0;
+            break;
+        }
+    }
 }
 
 static void Motor_SPI_Init(void)
 {
-	for (int i = 0; i < 11; i++)
-	{
-		PORT.P8 &= ~_PORT_Pn0_OUTPUT_HIGH;
+    for (int i = 0; i < 11; i++)
+    {
+        PORT.P8 &= ~_PORT_Pn0_OUTPUT_HIGH;
 
-		R_Config_CSIH0_Send_Receive(&tx_16bit_spi[i], 1, &rx_16bit_spi[i], _CSIH_SELECT_CHIP_0);
+        R_Config_CSIH0_Send_Receive(&tx_16bit_spi[i], 1, &rx_16bit_spi[i], _CSIH_SELECT_CHIP_0);
 
-		time_1ms_spi_error_chk_flag = 1;
+        time_1ms_spi_error_chk_flag = 1;
 
-		while (1)
-		{
-			if ((spi_receive_flag == 1U) && (spi_send_flag == 1U))
-			{
-				spi_receive_flag = 0;
-				spi_send_flag = 0;
-				time_1ms_spi_error_chk = 0;
-				time_1ms_spi_error_chk_flag = 0;
-				break;
-			}
+        while (1)
+        {
+            if ((spi_receive_flag == 1U) && (spi_send_flag == 1U))
+            {
+                spi_receive_flag = 0;
+                spi_send_flag = 0;
+                time_1ms_spi_error_chk = 0;
+                time_1ms_spi_error_chk_flag = 0;
+                break;
+            }
 
-			if (time_1ms_spi_error_chk >= 100U)
-			{
-				time_1ms_spi_error_chk = 0;
-				time_1ms_spi_error_chk_flag = 0;
-				// spi_fail = 1;
-				break;
-			}
-		}
+            if (time_1ms_spi_error_chk >= 100U)
+            {
+                time_1ms_spi_error_chk = 0;
+                time_1ms_spi_error_chk_flag = 0;
+                // spi_fail = 1;
+                break;
+            }
+        }
 
-		PORT.P8 |= _PORT_Pn0_OUTPUT_HIGH;
+        PORT.P8 |= _PORT_Pn0_OUTPUT_HIGH;
 
-		time_1us_spi_flag = 1;
+        time_1us_spi_flag = 1;
 
-		while (1)
-		{
-			if (time_1us_spi >= 2U)
-			{
-				time_1us_spi_flag = 0;
-				time_1us_spi = 0;
-				break;
-			}
-		}
-	}
+        while (1)
+        {
+            if (time_1us_spi >= 2U)
+            {
+                time_1us_spi_flag = 0;
+                time_1us_spi = 0;
+                break;
+            }
+        }
+    }
 
-	for (int i = 0; i < 11; i++)
-	{
-		PORT.P8 &= ~_PORT_Pn0_OUTPUT_HIGH;
+    for (int i = 0; i < 11; i++)
+    {
+        PORT.P8 &= ~_PORT_Pn0_OUTPUT_HIGH;
 
-		R_Config_CSIH0_Send_Receive(&rx_16bit_spi_id[i], 1, &rx_16bit_spi[i], _CSIH_SELECT_CHIP_0);
+        R_Config_CSIH0_Send_Receive(&rx_16bit_spi_id[i], 1, &rx_16bit_spi[i], _CSIH_SELECT_CHIP_0);
 
-		time_1ms_spi_error_chk_flag = 1;
+        time_1ms_spi_error_chk_flag = 1;
 
-		while (1)
-		{
-			if ((spi_receive_flag == 1U) && (spi_send_flag == 1U))
-			{
-				spi_receive_flag = 0;
-				spi_send_flag = 0;
-				time_1ms_spi_error_chk = 0;
-				time_1ms_spi_error_chk_flag = 0;
-				break;
-			}
+        while (1)
+        {
+            if ((spi_receive_flag == 1U) && (spi_send_flag == 1U))
+            {
+                spi_receive_flag = 0;
+                spi_send_flag = 0;
+                time_1ms_spi_error_chk = 0;
+                time_1ms_spi_error_chk_flag = 0;
+                break;
+            }
 
-			if (time_1ms_spi_error_chk >= 100U)
-			{
-				time_1ms_spi_error_chk = 0;
-				time_1ms_spi_error_chk_flag = 0;
-				// spi_fail = 1;
-				break;
-			}
-		}
+            if (time_1ms_spi_error_chk >= 100U)
+            {
+                time_1ms_spi_error_chk = 0;
+                time_1ms_spi_error_chk_flag = 0;
+                // spi_fail = 1;
+                break;
+            }
+        }
 
-		PORT.P8 |= _PORT_Pn0_OUTPUT_HIGH;
+        PORT.P8 |= _PORT_Pn0_OUTPUT_HIGH;
 
-		time_1us_spi_flag = 1;
+        time_1us_spi_flag = 1;
 
-		while (1)
-		{
-			if (time_1us_spi >= 2U)
-			{
-				time_1us_spi_flag = 0;
-				time_1us_spi = 0;
-				break;
-			}
-		}
-	}
+        while (1)
+        {
+            if (time_1us_spi >= 2U)
+            {
+                time_1us_spi_flag = 0;
+                time_1us_spi = 0;
+                break;
+            }
+        }
+    }
 }
 
 static void LIN_Diag_Rx(void)
 {
-	if (Slave_RxSwData1[0] == 0x26)
-	{
-		if ((Slave_RxSwData1[1] == 0x06) && (Slave_RxSwData1[2] == 0xB2) && (Slave_RxSwData1[3] == 0x01) && (Slave_RxSwData1[4] == 0x0A) && (Slave_RxSwData1[5] == 0x00) && (Slave_RxSwData1[6] == 0x0B) && (Slave_RxSwData1[7] == 0x00))
-		{
-			SW_Chk = 1U; // SW VER
-		}
-		else
-		{
-			SW_Chk = 3U;
-		}
-	}
-	else if ((Slave_RxSwData1[0] == 0x00) && (Slave_RxSwData1[1] == 0xFF) && (Slave_RxSwData1[2] == 0xFF) && (Slave_RxSwData1[3] == 0xFF) && (Slave_RxSwData1[4] == 0xFF) && (Slave_RxSwData1[5] == 0xFF) && (Slave_RxSwData1[6] == 0xFF) && (Slave_RxSwData1[7] == 0xFF))
-	{
-		SW_Chk = 2U; // GO TO SLEEP
-	}
-	else
-	{
-		SW_Chk = 0U;
-	}
+    if (Slave_RxSwData1[0] == 0x26)
+    {
+        if ((Slave_RxSwData1[1] == 0x06) && (Slave_RxSwData1[2] == 0xB2) && (Slave_RxSwData1[3] == 0x01) && (Slave_RxSwData1[4] == 0x0A) && (Slave_RxSwData1[5] == 0x00) && (Slave_RxSwData1[6] == 0x0B) && (Slave_RxSwData1[7] == 0x00))
+        {
+            SW_Chk = 1U; // SW VER
+        }
+        else
+        {
+            SW_Chk = 3U;
+        }
+    }
+    else if ((Slave_RxSwData1[0] == 0x00) && (Slave_RxSwData1[1] == 0xFF) && (Slave_RxSwData1[2] == 0xFF) && (Slave_RxSwData1[3] == 0xFF) && (Slave_RxSwData1[4] == 0xFF) && (Slave_RxSwData1[5] == 0xFF) && (Slave_RxSwData1[6] == 0xFF) && (Slave_RxSwData1[7] == 0xFF))
+    {
+        SW_Chk = 2U; // GO TO SLEEP
+    }
+    else
+    {
+        SW_Chk = 0U;
+    }
 }
 static void LIN_Diag_Action(void)
 {
-	if (SW_Chk == 1U)
-	{
-		Slave_SwData[0] = (uint8_t)(0x26);
-		Slave_SwData[1] = (uint8_t)(0x05);
-		Slave_SwData[2] = (uint8_t)(0xF2);
-		Slave_SwData[3] = (uint8_t)(0x01); // VECHILE
-		Slave_SwData[4] = (uint8_t)(0x11); // ENGINE, MODEL
-		Slave_SwData[5] = (uint8_t)(0x13);
-		Slave_SwData[6] = (uint8_t)(0x61);
-		Slave_SwData[7] = (uint8_t)(0xFF);
-	}
-	else if (SW_Chk == 2U)
-	{
-		MCU_sleep();
-	}
-	else if (SW_Chk == 3U)
-	{
-		Slave_SwData[0] = (uint8_t)(0x26);
-		Slave_SwData[1] = (uint8_t)(0x03);
-		Slave_SwData[2] = (uint8_t)(0x7F);
-		Slave_SwData[3] = (uint8_t)(0xB2);
-		Slave_SwData[4] = (uint8_t)(0x12);
-		Slave_SwData[5] = (uint8_t)(0xFF);
-		Slave_SwData[6] = (uint8_t)(0xFF);
-		Slave_SwData[7] = (uint8_t)(0xFF);
-	}
-	else
-	{
-		// invalid
-	}
+    if (SW_Chk == 1U)
+    {
+        Slave_SwData[0] = (uint8_t)(0x26);
+        Slave_SwData[1] = (uint8_t)(0x05);
+        Slave_SwData[2] = (uint8_t)(0xF2);
+        Slave_SwData[3] = (uint8_t)(0x01); // VECHILE
+        Slave_SwData[4] = (uint8_t)(0x11); // ENGINE, MODEL
+        Slave_SwData[5] = (uint8_t)(0x13);
+        Slave_SwData[6] = (uint8_t)(0x61);
+        Slave_SwData[7] = (uint8_t)(0xFF);
+    }
+    else if (SW_Chk == 2U)
+    {
+        MCU_sleep();
+    }
+    else if (SW_Chk == 3U)
+    {
+        Slave_SwData[0] = (uint8_t)(0x26);
+        Slave_SwData[1] = (uint8_t)(0x03);
+        Slave_SwData[2] = (uint8_t)(0x7F);
+        Slave_SwData[3] = (uint8_t)(0xB2);
+        Slave_SwData[4] = (uint8_t)(0x12);
+        Slave_SwData[5] = (uint8_t)(0xFF);
+        Slave_SwData[6] = (uint8_t)(0xFF);
+        Slave_SwData[7] = (uint8_t)(0xFF);
+    }
+    else
+    {
+        // invalid
+    }
 }
-
 
 /* End user code. Do not edit comment generated here */
