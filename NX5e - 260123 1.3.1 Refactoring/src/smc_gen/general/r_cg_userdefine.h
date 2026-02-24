@@ -159,7 +159,7 @@ Global functions
 
 #define STEP_POSITION_MINIMUM_RANGE 12000U // 12000//11000-18500 AAF3 // 8000-13000 AAF1,2
 // #define STEP_POSITION_MINIMUM_RANGE 130U //12000
-#define STEP_POSITION_MAXIMUM_RANGE 15500U // Close - Open = 11628 30% margin
+#define STEP_POSITION_MAXIMUM_RANGE 15600U // Close - Open = 11628 30% margin
 
 // #define POSITION_MAXIMUM_RANGE 55000U
 // #define LIMITSTEP_MAXIMUM_RANGE 1700U
@@ -226,9 +226,12 @@ Global functions
 #define ADC_UNDER_VOLTAGE_7V 1262U // AAF V1.2 260123 ADC CHECK PCB VER
 #define ADC_UNDER_VOLTAGE_8_5V 1566U
 #define ADC_UNDER_VOLTAGE_9V 1667U
-#define ADC_OVER_VOLTAGE_16V 3087U
-#define ADC_OVER_VOLTAGE_16_5V 3188U
-#define ADC_OVER_VOLTAGE_18V 3490U
+#define ADC_OVER_VOLTAGE_16V 3070U
+#define ADC_OVER_VOLTAGE_16_5V 3170U
+#define ADC_OVER_VOLTAGE_18V 3480U
+
+#define ADC_VOLTAGE_10V 1850U	// slew change
+#define ADC_VOLTAGE_10_5V 1950U // slew change
 
 // #define ADC_VOLTAGE_9_5V 1769U
 // #define ADC_VOLTAGE_10V 1868U
@@ -236,16 +239,16 @@ Global functions
 // #define ADC_VOLTAGE_11V 2069U
 // #define ADC_VOLTAGE_11_5V 2171U
 // #define ADC_VOLTAGE_12V 2273U
-#define ADC_VOLTAGE_13_5V 2587U
-#define ADC_VOLTAGE_13_7V 2627U
+// #define ADC_VOLTAGE_13_5V 2587U
+// #define ADC_VOLTAGE_13_7V 2627U
 // #define ADC_VOLTAGE_13_8V 2641U
 // #define ADC_VOLTAGE_14V 2681U
 // #define ADC_VOLTAGE_14_4V 2761U
 // #define ADC_VOLTAGE_14_5V 2781U
 // #define ADC_VOLTAGE_14_6V 2801U
 // #define ADC_VOLTAGE_14_7V 2821U
-#define ADC_VOLTAGE_14_8V 2847U
-#define ADC_VOLTAGE_15V 2887U
+// #define ADC_VOLTAGE_14_8V 2847U
+// #define ADC_VOLTAGE_15V 2887U
 
 #define LOW_VOLTAGE_1ST 1U
 #define LOW_VOLTAGE_2ND 2U
@@ -273,7 +276,7 @@ Global functions
 #define MOTOR_CCW_STALL_CHK_VALUE_HIGH_VOLTAGE_1ST 50U // 145   600 PPS 160
 
 #define STALL_CNT_DEFAULT 30000U
-#define STALL_CNT_COMPARISON_VAL 5U // 15default
+#define STALL_CNT_COMPARISON_VAL 7U // 15default
 #define STALL_CHK_WAIT_TIME 250U // 250
 
 #define MOTOR_NORMAL 0U
@@ -338,6 +341,9 @@ Global functions
 
 #define Shutdown_Check 0U
 #define Normal_Shutdown 1U
+
+#define Memory_Range_Init 0U
+#define Memory_Range_Break 15U
 
 /* End user code. Do not edit comment generated here */
 #endif

@@ -72,7 +72,7 @@ static uint16_t tx_16bit_spi[11] = {
     0x4000, // [0] (R) FAULT Status
     0x4200, // [1] (R) DIAG Status 1
     0x4400, // [2] (R) DIAG Status 2
-    0x0691, // [3] ?  瑜섏젣?
+    0x0690, // [3] ?  瑜섏젣?
     0x080F, // [4] (RW)CTRL 2
     0x0A05, // [5] (RW)CTRL 3
     0x0C3E, // [6] (RW)CTRL 4   3E (open load on) 0C36 0C3A
@@ -80,6 +80,11 @@ static uint16_t tx_16bit_spi[11] = {
     0x1000, // [8] (RW)CTRL 6   stall threshold
     0x5200, // [9] (R) CTRL 7   stall count
     0x5400  // [10](R) CTRL 8
+};
+
+static uint16_t tx_16bit_spi_slew_change[2] = {
+	0x0690,
+	0x0691
 };
 
 static uint16_t tx_16bit_spi_current_limit[16] = {
@@ -92,7 +97,7 @@ static uint16_t tx_16bit_spi_current_limit[16] = {
     0x0661,
     0x0671,
     0x0681,
-    0x0691,
+    0x0690,
     0x06A1,
     0x06B1,
     0x06C1,
@@ -362,6 +367,20 @@ unsigned int time_1ms_adc_1s_chk_flag = 0U;
 unsigned int time_1ms_IGN_chk = 0U;
 unsigned int time_1ms_IGN_chk_flag = 0U;
 
+/* ADD 1.4 ver  */
+static unsigned int AAF_Init_Flag = 0;
+static unsigned int AAF_Init_Flag_tog = 0;
+static unsigned int AAF_Flap_Fixation_Test_Mode = 0;
+static unsigned int AAF_Flap_Fixation_Test_Mode_tog = 0;
+static unsigned int AAF_Maximum_Torque_Test_Mode_tog = 0;
+static unsigned int Open_Min_Limit = 0U;
+static unsigned int Open_Max_Limit = 0U;
+static unsigned int Close_Min_Limit = 0U;
+static unsigned int Close_Max_Limit = 0U;
+static unsigned int Operating_flag = 0U;
+static unsigned int adc_fail = 0;
+static unsigned int step_check_ok = 0U;
+
 //development
 static unsigned int SW_Chk = 0U;
 // static unsigned int Open_Min_Limit = 0U;
@@ -429,7 +448,7 @@ static void LIMP_HOME(void);          // V
 static void Init_move(void);
 static void step_check(void);         // V
 static void Re_Init(void);            // V
-static void LIN_Short_Chk(void);
+// static void LIN_Short_Chk(void);
 static void Error_FaultClear(void);
 static void ERROR_chk(void);
 static void Tx_position_complete_chk(void);
@@ -742,11 +761,11 @@ static void AAF_Init(void)
 
 	// AAFx_Type = INTERNAL_TYPE; //  NX5e AAF3 INTERNAL_TYPE(LOWER)
 
-	// AAFx_Index = AAF_1;			 //
-	// AAF_location_type = LH_TYPE; // CW
+	AAFx_Index = AAF_1;			 //
+	AAF_location_type = LH_TYPE; // CW
 
-	AAFx_Index = AAF_2;			 //
-	AAF_location_type = RH_TYPE; // CCW
+	// AAFx_Index = AAF_2;			 //
+	// AAF_location_type = RH_TYPE; // CCW
 
 	// AAFx_Index = AAF_3;			 //
 	// AAF_location_type = LH_TYPE; // CW
@@ -1775,7 +1794,8 @@ static void Init_move_10_to_15(void)
         break;
     case 15:
         time_1ms_init_move_flag = 1;
-        if (time_1ms_init_move >= 100U)
+
+        if (time_1ms_init_move >= 500U) // 100 -> 500
         {
 			wake_up_motor_range_init_chk = COMPLETE;
 			time_1ms_init_move_flag = 0;
@@ -2095,7 +2115,7 @@ static void Check_short_error(void)
 		//invalid
 	}
 
-	LIN_Short_Chk();
+	//LIN_Short_Chk();
 
 }
 
@@ -2349,6 +2369,15 @@ static void Flash_memory_read(void)
 
 	power_chk_memory_read = (unsigned int)(r_buff[3] >> 16) & 0xF;
 	First_Powerchk_memory_read = (unsigned int)(r_buff[4]) & 0xF;
+
+    if (position_status_memory_read >= Memory_Range_Break)
+	{
+		position_status_memory_read = Memory_Range_Init;
+	}
+	if (AAFx_InitStatus_memory_read >= Memory_Range_Break)
+	{
+		AAFx_InitStatus_memory_read = Memory_Range_Init;
+	}
 }
 
 void Re_Init(void)
@@ -2923,6 +2952,7 @@ static void Process_operating_finish(void)
 	stall_chk_cnt = 0;								  // stall reset
 	stall_chk_time_1ms = 0;							  // stall reset
 	motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE; // stall reset
+    Operating_flag = 0U;
 	if (aaf_action == DIAG_MODE_AUTO)
 	{
 		if (time_1ms_diag_auto >= 5000U)
@@ -2962,6 +2992,8 @@ static void Operating_mode(void)
 		break;
 
 	case AAF_OPERATE:
+
+        Operating_flag = 1U;
 
 		Process_operating_operate();
 
@@ -5553,91 +5585,91 @@ static void step_check(void)
 	}
 }
 
-static void LIN_Short_Chk(void)
-{
-	Short_chk = PORT.PPR8 & _PORT_Pn1_OUTPUT_HIGH;
+// static void LIN_Short_Chk(void)
+// {
+// 	Short_chk = PORT.PPR8 & _PORT_Pn1_OUTPUT_HIGH;
 
-	if (Short_chk == 0)
-	{
-		if (time_1ms_LIN_GndShort_flag == 0U)
-		{
-			time_1ms_LIN_GndShort = 0U;
-			time_1ms_LIN_GndShort_flag = 1U;
-		}
-	}
-	else
-	{
-		time_1ms_LIN_GndShort = 0U;
-		time_1ms_LIN_GndShort_flag = 0U;
-	}
+// 	if (Short_chk == 0)
+// 	{
+// 		if (time_1ms_LIN_GndShort_flag == 0U)
+// 		{
+// 			time_1ms_LIN_GndShort = 0U;
+// 			time_1ms_LIN_GndShort_flag = 1U;
+// 		}
+// 	}
+// 	else
+// 	{
+// 		time_1ms_LIN_GndShort = 0U;
+// 		time_1ms_LIN_GndShort_flag = 0U;
+// 	}
 
-	if (time_1ms_LIN_GndShort >= 4000)
-	{
-		LIN_Short_Ok = 1U;
-	}
+// 	if (time_1ms_LIN_GndShort >= 4000)
+// 	{
+// 		LIN_Short_Ok = 1U;
+// 	}
 
-	if (LIN_Short_Ok == 1U)
-	{
-		switch (LIN_Short_Sleep)
-		{
-		case 0:
-			aaf_action = OPEN;
-			LIN_Short_Sleep = 1;
-			break;
-		case 1:
-			Motor_Open();	  // dir CLOSE
-			DRV_On();		  // drv on
-			motor_start = ON; // step start
+// 	if (LIN_Short_Ok == 1U)
+// 	{
+// 		switch (LIN_Short_Sleep)
+// 		{
+// 		case 0:
+// 			aaf_action = OPEN;
+// 			LIN_Short_Sleep = 1;
+// 			break;
+// 		case 1:
+// 			Motor_Open();	  // dir CLOSE
+// 			DRV_On();		  // drv on
+// 			motor_start = ON; // step start
 
-			motor_stall_flag = MOTOR_NORMAL;				  // stall reset
-			stall_chk_time_1ms = 0;							  // stall reset
-			motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE; // stall reset
-			time_1ms_spi = 0;
-			LIN_Short_Sleep = 2;
-			break;
-		case 2:
-			if (((aaf_action == OPEN) && (step_position <= (step_position_open + limit_step_position)))) //
-			{
-				DRV_Off();
-				motor_start = OFF;
-				stall_chk_cnt = 0;
-				stall_chk_time_1ms = 0; // stall reset
-				softstart_complete = OFF;
-				motor_step_value = STEP_TIME_1000RPM;
-				AAF_Tx_Position = OPEN;
-				AAFx_Position_Status = Open_Status;
-				Tx_position_complete_chk();
-				aaf_step = FINISHED_OPERATE;
-				LIN_Short_Sleep = 3;
-			}
-			else if ((motor_stall_flag == MOTOR_STALL))
-			{
-				DRV_Off();
-				motor_start = OFF;
-				stall_chk_cnt = 0;
-				stall_chk_time_1ms = 0; // stall reset
-				softstart_complete = OFF;
-				motor_step_value = STEP_TIME_1000RPM;
-				AAF_Tx_Position = UNKOWN_POSITION;
-				AAFx_Position_Status = Unknown_Status;
-				Tx_position_complete_chk();
-				aaf_step = FINISHED_OPERATE;
-				LIN_Short_Sleep = 3;
-			}
-			else
-			{
-			}
-			break;
-		case 3:
-			MCU_sleep();
-			LIN_Short_Sleep = 4;
-			break;
+// 			motor_stall_flag = MOTOR_NORMAL;				  // stall reset
+// 			stall_chk_time_1ms = 0;							  // stall reset
+// 			motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE; // stall reset
+// 			time_1ms_spi = 0;
+// 			LIN_Short_Sleep = 2;
+// 			break;
+// 		case 2:
+// 			if (((aaf_action == OPEN) && (step_position <= (step_position_open + limit_step_position)))) //
+// 			{
+// 				DRV_Off();
+// 				motor_start = OFF;
+// 				stall_chk_cnt = 0;
+// 				stall_chk_time_1ms = 0; // stall reset
+// 				softstart_complete = OFF;
+// 				motor_step_value = STEP_TIME_1000RPM;
+// 				AAF_Tx_Position = OPEN;
+// 				AAFx_Position_Status = Open_Status;
+// 				Tx_position_complete_chk();
+// 				aaf_step = FINISHED_OPERATE;
+// 				LIN_Short_Sleep = 3;
+// 			}
+// 			else if ((motor_stall_flag == MOTOR_STALL))
+// 			{
+// 				DRV_Off();
+// 				motor_start = OFF;
+// 				stall_chk_cnt = 0;
+// 				stall_chk_time_1ms = 0; // stall reset
+// 				softstart_complete = OFF;
+// 				motor_step_value = STEP_TIME_1000RPM;
+// 				AAF_Tx_Position = UNKOWN_POSITION;
+// 				AAFx_Position_Status = Unknown_Status;
+// 				Tx_position_complete_chk();
+// 				aaf_step = FINISHED_OPERATE;
+// 				LIN_Short_Sleep = 3;
+// 			}
+// 			else
+// 			{
+// 			}
+// 			break;
+// 		case 3:
+// 			MCU_sleep();
+// 			LIN_Short_Sleep = 4;
+// 			break;
 
-		default:
-			break;
-		}
-	}
-}
+// 		default:
+// 			break;
+// 		}
+// 	}
+// }
 
 static void Error_FaultClear(void)
 {
