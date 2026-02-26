@@ -417,7 +417,7 @@ static void VDC_adc(void);
 static void Flash_memory_write(void);
 static void Flash_memory_read(void);
 static void IGN_On_Memory_read(void);
-
+static void Current_limiting_select(void);
 /* 3.2 Communication Functions (LIN / SPI) */
 void RLIN3_slave_init(void);
 static void Lin_Transceiver_On(void);
@@ -3677,13 +3677,13 @@ static void Execute_voltage_change_spi(void)
     }
     else if (voltage_status_spi == NORMAL_VOLTAGE)
     {
-        R_Config_CSIH0_Send_Receive(&tx_16bit_spi_current_limit[9], 1, &rx_16bit_spi[3], _CSIH_SELECT_CHIP_0);
+        R_Config_CSIH0_Send_Receive(&tx_16bit_spi_slew_change[0], 1, &rx_16bit_spi[3], _CSIH_SELECT_CHIP_0);
         motor_cw_stall_value = MOTOR_CW_STALL_CHK_VALUE_NORMAL_VOLTAGE;
         motor_ccw_stall_value = MOTOR_CCW_STALL_CHK_VALUE_NORMAL_VOLTAGE;
     }
     else if (voltage_status_spi == LOW_VOLTAGE_1ST)
     {
-        R_Config_CSIH0_Send_Receive(&tx_16bit_spi_current_limit[9], 1, &rx_16bit_spi[3], _CSIH_SELECT_CHIP_0);
+        R_Config_CSIH0_Send_Receive(&tx_16bit_spi_slew_change[1], 1, &rx_16bit_spi[3], _CSIH_SELECT_CHIP_0);
         motor_cw_stall_value = MOTOR_CW_STALL_CHK_VALUE_LOW_VOLTAGE_1ST;
         motor_ccw_stall_value = MOTOR_CCW_STALL_CHK_VALUE_LOW_VOLTAGE_1ST;
     }
@@ -3822,7 +3822,7 @@ static void Process_spi_initiation(void)
     else if ((time_1ms_spi >= 50U) && (time_1us_motor == 0U) && (spi_action_step == 0U))
     {
 
-        // Current_limiting_select(); 
+        Current_limiting_select(); 
 
         if (voltage_status_change == OFF)
         {
@@ -4446,7 +4446,7 @@ static void Fail_safety_mode(void)
 
 static void Lin_bus_chk(void)
 {
-	if ((timer_1ms_lin_bus_inactive >= LIN_BUS_CHK_TIME_4_SEC) && (lin_bus_inactive_flag == OFF) && (LIN_Short_Ok == 0))
+	if ((timer_1ms_lin_bus_inactive >= LIN_BUS_CHK_TIME_4_SEC) && (lin_bus_inactive_flag == OFF))
 	{
 		lin_bus_inactive_flag = ON;
 
@@ -4639,14 +4639,14 @@ static void Voltage_chk_current_limit_init(void)
 {
 	if (voltage_status_spi == 0U) //	6 ohm
 	{
-		if (adc_avr <= ADC_VOLTAGE_13_5V)
+		if ((bat_adc > 1000) && (adc_avr <= ADC_VOLTAGE_10V) && (Operating_flag == 0))
 		{
 			voltage_status_spi = LOW_VOLTAGE_1ST;
 		}
-		else if (adc_avr >= ADC_VOLTAGE_15V)
-		{
-			voltage_status_spi = HIGH_VOLTAGE_1ST;
-		}
+		// else if (adc_avr >= ADC_VOLTAGE_15V)
+		// {
+		// 	voltage_status_spi = HIGH_VOLTAGE_1ST;
+		// }
 		else
 		{
 			voltage_status_spi = NORMAL_VOLTAGE;
@@ -4656,64 +4656,58 @@ static void Voltage_chk_current_limit_init(void)
 	}
 }
 
-// static void Current_limiting_select(void)
-// {
-// 	if (voltage_status_spi == LOW_VOLTAGE_1ST)
-// 	{
-// 		if (adc_avr >= ADC_VOLTAGE_15V)
-// 		{
-// 			voltage_status_spi = HIGH_VOLTAGE_1ST;
-// 			voltage_status_change = ON;
-// 		}
-// 		else if (adc_avr >= ADC_VOLTAGE_13_7V)
-// 		{
-// 			voltage_status_spi = NORMAL_VOLTAGE;
-// 			voltage_status_change = ON;
-// 		}
-// 		else
-// 		{
-// 			//invalid
-// 		}
-// 	}
-// 	else if (voltage_status_spi == NORMAL_VOLTAGE)
-// 	{
-// 		if (adc_avr <= ADC_VOLTAGE_13_5V)
-// 		{
-// 			voltage_status_spi = LOW_VOLTAGE_1ST;
-// 			voltage_status_change = ON;
-// 		}
-// 		else if (adc_avr >= ADC_VOLTAGE_15V)
-// 		{
-// 			voltage_status_spi = HIGH_VOLTAGE_1ST;
-// 			voltage_status_change = ON;
-// 		}
-// 		else
-// 		{
-// 			//invalid
-// 		}
-// 	}
-// 	else if (voltage_status_spi == HIGH_VOLTAGE_1ST)
-// 	{
-// 		if (adc_avr <= ADC_VOLTAGE_13_7V)
-// 		{
-// 			voltage_status_spi = LOW_VOLTAGE_1ST;
-// 			voltage_status_change = ON;
-// 		}
-// 		else if (adc_avr <= ADC_VOLTAGE_14_8V)
-// 		{
-// 			voltage_status_spi = NORMAL_VOLTAGE;
-// 			voltage_status_change = ON;
-// 		}
-// 		else
-// 		{
-// 			//invalid
-// 		}
-// 	}
-// 	else
-// 	{
-// 		//invalid
-// 	}
-// }
+static void Current_limiting_select(void)
+{
+	if ((voltage_status_spi == LOW_VOLTAGE_1ST) && (Operating_flag == 0))
+	{
+		// if (adc_avr >= ADC_VOLTAGE_15V)
+		// {
+		// 	voltage_status_spi = HIGH_VOLTAGE_1ST;
+		// 	voltage_status_change = ON;
+		// }
+		if (adc_avr >= ADC_VOLTAGE_10_5V)
+		{
+			voltage_status_spi = NORMAL_VOLTAGE;
+			voltage_status_change = ON;
+		}
+	}
+	else if ((voltage_status_spi == NORMAL_VOLTAGE) && (Operating_flag == 0))
+	{
+		if (adc_avr <= ADC_VOLTAGE_10V)
+		{
+			voltage_status_spi = LOW_VOLTAGE_1ST;
+			voltage_status_change = ON;
+		}
+		// else if (adc_avr >= ADC_VOLTAGE_15V)
+		// {
+		// 	voltage_status_spi = HIGH_VOLTAGE_1ST;
+		// 	voltage_status_change = ON;
+		// }
+		// else
+		// {
+		// }
+	}
+	// else if (voltage_status_spi == HIGH_VOLTAGE_1ST)
+	// {
+	// 	if (adc_avr <= ADC_VOLTAGE_13_7V)
+	// 	{
+	// 		voltage_status_spi = LOW_VOLTAGE_1ST;
+	// 		voltage_status_change = ON;
+	// 	}
+	// 	else if (adc_avr <= ADC_VOLTAGE_14_8V)
+	// 	{
+	// 		voltage_status_spi = NORMAL_VOLTAGE;
+	// 		voltage_status_change = ON;
+	// 	}
+	// 	else
+	// 	{
+	// 	}
+	// }
+	else
+	{
+        //invalid
+	}
+}
 
 /* =========================================================================================
  * LIN Sleep Mode 
@@ -5534,6 +5528,7 @@ static void LIMP_HOME(void)
 		}
 		else
 		{
+            //invaild
 		}
 		break;
 	case 2:
@@ -5551,7 +5546,7 @@ static void LIMP_HOME(void)
 
 static void step_check(void)
 {
-	if (((step_position_close - step_position_open) <= STEP_POSITION_MINIMUM_RANGE) || ((step_position_close - step_position_open) > STEP_POSITION_MAXIMUM_RANGE) || (step_position == REFERENCE_POSITION) || (step_position < (step_position_open + limit_step_position)) || (step_position > (step_position_close - limit_step_position)) || (step_position_close == 0) || (step_position_open == 0) || (limit_step_position == 0) || (evrdy_on_flag == OFF) || (step_position > POSITION_MAXIMUM_RANGE) || (step_position_open > POSITION_MAXIMUM_RANGE) || (step_position_close > POSITION_MAXIMUM_RANGE) || (limit_step_position > LIMITSTEP_MAXIMUM_RANGE) || (AAF_Tx_Position == UNKOWN_POSITION) || (AAFx_InitStatus == ABNORMAL_FINISHED_INITIALIZATION) || (AAFx_Position_Status == FlapMoving_Status) || (AAFx_Position_Status == Unknown_Status) || (power_chk == Shutdown_Check))
+	if (((step_position_close - step_position_open) <= STEP_POSITION_MINIMUM_RANGE) || ((step_position_close - step_position_open) >= STEP_POSITION_MAXIMUM_RANGE) || (step_position == REFERENCE_POSITION) || (step_position < (step_position_open + limit_step_position)) || (step_position > (step_position_close - limit_step_position)) || (step_position_close == 0) || (step_position_open == 0) || (limit_step_position == 0) || (evrdy_on_flag == OFF) || (step_position >= POSITION_MAXIMUM_RANGE) || (step_position_open >= POSITION_MAXIMUM_RANGE) || (step_position_close >= POSITION_MAXIMUM_RANGE) || (limit_step_position >= LIMITSTEP_MAXIMUM_RANGE) || (AAF_Tx_Position == UNKOWN_POSITION) || (AAFx_InitStatus == ABNORMAL_FINISHED_INITIALIZATION) || (AAFx_Position_Status == FlapMoving_Status) || (AAFx_Position_Status == Unknown_Status) || (power_chk == Shutdown_Check))
 	{
 		Re_Init();
 	}
@@ -5581,6 +5576,7 @@ static void step_check(void)
 		}
 		else
 		{
+            //invaild
 		}
 	}
 }
