@@ -157,9 +157,9 @@ Global functions
 // init action
 #define INIT_ACTION_POSITION 1450U
 
-#define STEP_POSITION_MINIMUM_RANGE 12000U // 12000//11000-18500 AAF3 // 8000-13000 AAF1,2
+#define STEP_POSITION_MINIMUM_RANGE 9000U // 12000
 // #define STEP_POSITION_MINIMUM_RANGE 130U //12000
-#define STEP_POSITION_MAXIMUM_RANGE 15600U // Close - Open = 11628 30% margin
+#define STEP_POSITION_MAXIMUM_RANGE 14000U // Close - Open = 11628 30% margin
 
 // #define POSITION_MAXIMUM_RANGE 55000U
 // #define LIMITSTEP_MAXIMUM_RANGE 1700U
@@ -223,15 +223,15 @@ Global functions
 
 */
 
-#define ADC_UNDER_VOLTAGE_7V 1262U // AAF V1.2 260123 ADC CHECK PCB VER
-#define ADC_UNDER_VOLTAGE_8_5V 1566U
-#define ADC_UNDER_VOLTAGE_9V 1667U
-#define ADC_OVER_VOLTAGE_16V 3070U
-#define ADC_OVER_VOLTAGE_16_5V 3170U
-#define ADC_OVER_VOLTAGE_18V 3480U
+#define ADC_UNDER_VOLTAGE_7V 1271U	 // chk 1267 ~ 1271
+#define ADC_UNDER_VOLTAGE_8_5V 1570U // chk 1576 ~ 1578
+#define ADC_UNDER_VOLTAGE_9V 1681U	 // chk 1679 ~ 1681
+#define ADC_OVER_VOLTAGE_16V 3112U	 // chk 3112 ~ 3115
+#define ADC_OVER_VOLTAGE_16_5V 3215U // chk 3215 ~ 3217
+#define ADC_OVER_VOLTAGE_18V 3521U	 // chk 3521 ~ 3524
 
-#define ADC_VOLTAGE_10V 1850U	// slew change
-#define ADC_VOLTAGE_10_5V 1950U // slew change
+#define ADC_VOLTAGE_10V 1840U	// slew change
+#define ADC_VOLTAGE_10_5V 1940U // slew change
 
 // #define ADC_VOLTAGE_9_5V 1769U
 // #define ADC_VOLTAGE_10V 1868U
@@ -287,7 +287,7 @@ Global functions
  * 7. AAF Specifics
 ***********************************************************************************************************************/
 #define AAF_ERROR_ANGLE 5U // V
-#define AAF_FULL_ANGLE 90U
+#define AAF_FULL_ANGLE 68U //SX3K
 #define AAF_1ST_OPEN_ANGLE 65U
 #define AAF_2ST_OPEN_ANGLE 45U
 
@@ -344,6 +344,32 @@ Global functions
 
 #define Memory_Range_Init 0U
 #define Memory_Range_Break 15U
+
+/***********************************************************************************************************************
+ * 9. OBD Sensor
+***********************************************************************************************************************/
+#define OBD_tolerance 5U // 5%
+#define OBD_ADC_MAX_LIMIT 3550U
+#define OBD_ADC_MIN_LIMIT 500U
+
+#define OBD_BAT_SHORT_LIMIT 4000U
+#define OBD_GND_SHORT_LIMIT 10U
+#define OBD_Open_MIN_LIMIT 10U
+#define OBD_Open_LIMIT 50U
+
+#define POSITION_CLOSE_THRESHOLD 50U
+#define POSITION_OPEN_THRESHOLD 55U
+#define POSITION_OFFSET 5U
+
+#define NO_SNSR1 0U
+#define USE_SNSR1 1U
+#define SNSR1_Open 1U
+#define SNSR1_Close 2U
+
+#define NO_SNSR2 0U
+#define USE_SNSR2 1U
+#define SNSR2_Open 1U
+#define SNSR2_Close 2U
 
 /* End user code. Do not edit comment generated here */
 #endif

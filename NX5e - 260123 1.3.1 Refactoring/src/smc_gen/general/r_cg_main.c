@@ -57,7 +57,7 @@ static uint8_t Slave_TxData[8] = {
 static uint8_t ID_chk_rxdata[11] = {
     0,
 };
-static uint8_t w_buff[18] = {
+static uint8_t w_buff[26] = {
     0,
 };
 static uint32_t r_buff[5] = {
@@ -231,7 +231,7 @@ static unsigned int adc_sum = 0;
 static unsigned int adc_avr = 0;
 static unsigned int adc_chk_ok_flag = 0;
 static unsigned int adc_chk_ready = 0;
-uint16_t scan_results[3];
+uint16_t scan_results[6];
 
 static unsigned int voltage_status_spi = 0;
 static unsigned int voltage_status_change = 0;
@@ -381,6 +381,69 @@ static unsigned int Operating_flag = 0U;
 static unsigned int adc_fail = 0;
 static unsigned int step_check_ok = 0U;
 
+/* 2.10 OBD Sensor */
+static unsigned int OBD1_Close_Check_memory_write = 0;
+static unsigned int OBD1_Close_Check_memory_read = 0;
+static unsigned int OBD1_Open_Check_memory_write = 0;
+static unsigned int OBD1_Open_Check_memory_read = 0;
+
+static unsigned int OBD2_Close_Check_memory_write = 0;
+static unsigned int OBD2_Close_Check_memory_read = 0;
+static unsigned int OBD2_Open_Check_memory_write = 0;
+static unsigned int OBD2_Open_Check_memory_read = 0;
+
+static uint16_t OBD1_adc;
+static uint16_t OBD2_adc;
+static uint16_t OBD3_adc;
+static uint16_t OBD4_adc;
+
+static uint16_t ADC_Stability;
+
+static unsigned int middle_step_position = 0U;
+static unsigned int SNSR_Position_Ok = 0U;
+static unsigned int SNSR2_Position_Ok = 0U;
+
+static unsigned int OBD1_Open_Check = 0U;
+static unsigned int OBD1_Close_Check = 0U;
+static unsigned int OBD2_Open_Check = 0U;
+static unsigned int OBD2_Close_Check = 0U;
+static unsigned int SNSR1_Check = 0U;
+static unsigned int SNSR2_Check = 0U;
+static unsigned int OBD1_Open_tolerance = 0U;
+static unsigned int OBD2_Open_tolerance = 0U;
+static unsigned int OBD1_Close_tolerance = 0U;
+static unsigned int OBD2_Close_tolerance = 0U;
+
+static unsigned int OBD1_position_percent = 0U;
+static unsigned int OBD2_position_percent = 0U;
+
+/* 2.11 OBD Sensor Timer */
+unsigned int time_1ms_OBD_GndShort = 0U;
+unsigned int time_1ms_OBD_GndShort_flag = 0U;
+
+unsigned int time_1ms_OBD_BatShort = 0U;
+unsigned int time_1ms_OBD_BatShort_flag = 0U;
+
+unsigned int time_1ms_OBD_Open_Circuit = 0U;
+unsigned int time_1ms_OBD_Open_Circuit_flag = 0U;
+
+unsigned int time_1ms_OBD_Recovery_chk = 0U;
+unsigned int time_1ms_OBD_Recovery_chk_flag = 0U;
+/* 2.12 OBD Sensor Circuit */
+static unsigned int OBD_Error_check_flag = 0U;
+static unsigned int OBD_Error_flag = 0U;
+static unsigned int OBD2_Error_flag = 0U;
+static unsigned int OBD_Short_Bat = 0U;
+static unsigned int OBD_Short_Gnd = 0U;
+static unsigned int OBD_Open_Circuit = 0U;
+
+static unsigned int init_range_fail = 0U;
+static unsigned int init_stall_fail = 0U;
+static unsigned int High_Temperature_flag = 0U;
+static unsigned int High_Temperature = 0U;
+
+static unsigned int OBD_Error_move = 0U;
+
 //development
 static unsigned int SW_Chk = 0U;
 // static unsigned int Open_Min_Limit = 0U;
@@ -463,6 +526,10 @@ void RLIN30_interrupt(void);
 void RLIN30_transmit_interrupt(void);
 void RLIN30_receive_complete_interrupt(void);
 void RLIN30_status_interrupt(void);
+
+/* 3.6 OBD Sensor */
+static void OBD_Position_Status(void);
+static void OBD_Diag_Status_Chk(void);
 
 /* End user code. Do not edit comment generated here */
 void r_main_userinit(void);
@@ -757,22 +824,19 @@ static void AAF_Init(void)
 	Lin_Transceiver_On();
 	DRV8899_Init();
 
-	AAFx_Type = EXTERNAL_TYPE; // NX5e AAF1, 2 EXTERNAL_TYPE
+	AAFx_Type = EXTERNAL_TYPE; // SX3k ALL EXTERNAL_TYPE
 
-	// AAFx_Type = INTERNAL_TYPE; //  NX5e AAF3 INTERNAL_TYPE(LOWER)
+	AAFx_Index = AAF_1; // SX3k
+	AAF_location_type = LH_TYPE;
 
-	AAFx_Index = AAF_1;			 //
-	AAF_location_type = LH_TYPE; // CW
+    // AAFx_Index = AAF_2; // number 1 aaf
+	// AAF_location_type = RH_TYPE;
 
-	// AAFx_Index = AAF_2;			 //
-	// AAF_location_type = RH_TYPE; // CCW
+	TotalNumOfAAF = AAFx2; // SX3k ICE
 
-	// AAFx_Index = AAF_3;			 //
-	// AAF_location_type = LH_TYPE; // CW
-
-	TotalNumOfAAF = AAFx3; // aaf 3 ea
-
-	TotalNumOfAAFSensor = 0;
+							   // TotalNumOfAAF = AAFx3; // SX3k HEV
+						   // TotalNumOfAAFSensor = SENSOR_X1;
+	TotalNumOfAAFSensor = SENSOR_X2;
 
 	aaf_step = AAF_INITIALIZATION;
 	aaf_init_step = WAIT_INITIALIZATION;
@@ -851,6 +915,8 @@ static void Process_monitoring_hw_signal(void)
     Process_IGN_Error_Check();
 
     VDC_adc();
+
+    OBD_Position_Status();
 }
 
 /***********************************************************************************************************************
@@ -1597,8 +1663,23 @@ static void Check_stall_and_move(uint8_t next_step, uint8_t retry_step, uint8_t 
         DRV8899_Off();
         motor_start = OFF;
         
-        if (dir == CLOSE) step_position_close = step_position;
-        else              step_position_open = step_position;
+        if (dir == CLOSE) {
+            step_position_close = step_position;
+            // OBD1 계산
+            OBD1_Close_tolerance = (OBD1_adc * OBD_tolerance) / 100;
+            OBD1_Close_Check = (OBD1_adc - OBD1_Close_tolerance);
+            // OBD2 계산 
+            OBD2_Close_tolerance = (OBD2_adc * OBD_tolerance) / 100;
+            OBD2_Close_Check = (OBD2_adc - OBD2_Close_tolerance);
+        } else {
+            step_position_open = step_position;
+            // OBD1 계산
+            OBD1_Open_tolerance = (OBD1_adc * OBD_tolerance) / 100;
+            OBD1_Open_Check = (OBD1_adc + OBD1_Open_tolerance);
+            // OBD2 계산 
+            OBD2_Open_tolerance = (OBD2_adc * OBD_tolerance) / 100;
+            OBD2_Open_Check = (OBD2_adc + OBD2_Open_tolerance);
+        }         
 
         stall_chk_cnt = 0;
         stall_chk_time_1ms = 0;
@@ -1686,9 +1767,11 @@ static void Move_to_limit_position(void)
  ***********************************************************************************************************************/
 static void Check_limit_arrival(void)
 {
-	if (((motor_stall_flag == MOTOR_STALL) || ((step_position_close - step_position_open) <= STEP_POSITION_MINIMUM_RANGE)) && (stall_test_mode == 0U))
+	if ((((motor_stall_flag == MOTOR_STALL) || ((step_position_close - step_position_open) <= STEP_POSITION_MINIMUM_RANGE)) && (stall_test_mode == 0U)) || 
+        (((OBD1_Open_Check >= 3700U) || (OBD1_Close_Check >= 3700U)) && (SNSR1_Check == USE_SNSR1)) || 
+        (((OBD2_Open_Check >= 3700U) || (OBD2_Close_Check >= 3700U)) && (SNSR2_Check == USE_SNSR2)))
 	{
-		DRV8899_Off();
+        DRV8899_Off();
 		motor_start = OFF;
 		fail_safety_1_cycle_flag = OFF;
 		softstart_complete = OFF;
@@ -1801,6 +1884,8 @@ static void Init_move_10_to_15(void)
 			time_1ms_init_move_flag = 0;
 			time_1ms_init_move = 0;
 			evrdy_on_flag = ON;
+            Open_fault_check = 0;
+			Short_fault_check = 0;
 			motor_Short_chk_count = 0U;
 			motor_Open_chk_count = 0U;
 			init_move_step = 19;
@@ -1882,10 +1967,16 @@ static void VDC_adc(void)
 	if (adc_chk_ready == 1U)
 	{
 		INTC1.ICADCA0I0.BIT.RFADCA0I0 = 0;
-		// R_Config_ADCA0_ScanGroup1_GetResult(&bat_adc, 8);
-		R_Config_ADCA0_ScanGroup1_GetResult(scan_results, 1);
-		bat_adc = scan_results[0];
-		adc_sum = 0;
+        
+        R_Config_ADCA0_ScanGroup1_GetResult(&scan_results, 6);
+		ADC_Stability = scan_results[0];
+		//OBD1_adc = scan_results[1];
+		//OBD2_adc = scan_results[2];
+		OBD1_adc = scan_results[3];
+		OBD2_adc = scan_results[4];
+		bat_adc = scan_results[5];
+		
+        adc_sum = 0;
 
 		for (int i = 8; i >= 0; i--)
 		{
@@ -2209,6 +2300,8 @@ static void ERROR_chk(void)
         // 3. 쇼트 체크
         Check_short_error();
 
+        OBD_Diag_Status_Chk();
+
         // 4. 오픈 체크 (내부 AAFx_Motor_Fault 리턴 포함)
         Check_open_error();
 
@@ -2225,7 +2318,17 @@ static void ERROR_chk(void)
                 AAFx_Circuit_Open = NO_ERROR;
             }
         }
+
         LIMP_HOME();
+
+        if (High_Temperature_flag != 0)
+		{
+			High_Temperature = 1U;
+		}
+		else
+		{
+			High_Temperature = 0U;
+		}
     }
 }
 
@@ -2265,6 +2368,11 @@ static void Flash_memory_write(void)
 	power_chk_memory_write = power_chk;
 	First_Powerchk_memory_write = First_Powerchk;
 
+    OBD1_Close_Check_memory_write = OBD1_Close_Check;
+	OBD1_Open_Check_memory_write = OBD1_Open_Check;
+	OBD2_Close_Check_memory_write = OBD2_Close_Check;
+	OBD2_Open_Check_memory_write = OBD2_Open_Check;
+
 	w_buff[0] = close_memory_write & 0x00FFU; // write 2byte read 4byte ?븯?쐞
 	w_buff[1] = (close_memory_write & 0xFF00U) >> 8U;
 
@@ -2292,6 +2400,18 @@ static void Flash_memory_write(void)
 	w_buff[16] = First_Powerchk_memory_write & 0x00FFU; // write 2byte read 4byte limitstep
 	w_buff[17] = (First_Powerchk_memory_write & 0xFF00U) >> 8U;
 
+	w_buff[18] = OBD1_Close_Check_memory_write & 0x00FFU; // write 2byte read 4byte limitstep
+	w_buff[19] = (OBD1_Close_Check_memory_write & 0xFF00U) >> 8U;
+
+	w_buff[20] = OBD1_Open_Check_memory_write & 0x00FFU; // write 2byte read 4byte limitstep
+	w_buff[21] = (OBD1_Open_Check_memory_write & 0xFF00U) >> 8U;
+
+	w_buff[22] = OBD2_Close_Check_memory_write & 0x00FFU; // write 2byte read 4byte limitstep
+	w_buff[23] = (OBD2_Close_Check_memory_write & 0xFF00U) >> 8U;
+
+	w_buff[24] = OBD2_Open_Check_memory_write & 0x00FFU; // write 2byte read 4byte limitstep
+	w_buff[25] = (OBD2_Open_Check_memory_write & 0xFF00U) >> 8U;
+
 	ret = function_FDL_erease(0, 1);
 
 	time_1ms_fdl_error_chk_flag = 1;
@@ -2308,7 +2428,7 @@ static void Flash_memory_write(void)
 		}
 	}
 
-	ret = function_FDL_write(w_buff, 0, 9); // size = word(2byte)
+	ret = function_FDL_write(w_buff, 0, 13); // size = word(2byte)
 
 	time_1ms_fdl_error_chk_flag = 1;
 
@@ -2331,11 +2451,11 @@ static void Flash_memory_write(void)
 static void Flash_memory_read(void)
 {
 
-	ret = function_FDL_read(r_buff, 0, 9); // size = word(2byte) read 4byte
+	ret = function_FDL_read(r_buff, 0, 13); // size = word(2byte) read 4byte
 
 	time_1ms_fdl_error_chk_flag = 1;
 
-	if (ret < (char)0) // error
+	if (ret < 0) // error
 	{
 		while (1)
 		{
@@ -2350,27 +2470,31 @@ static void Flash_memory_read(void)
 	time_1ms_fdl_error_chk_flag = 0;
 	time_1ms_fdl_error_chk = 0;
 
-	close_memory_read = (unsigned int)r_buff[0] & 0xFFFF;		 // 4byte 源뚯?
-	open_memory_read = (unsigned int)(r_buff[0] >> 16) & 0xFFFF; // 4byte 源뚯?
+	close_memory_read = (unsigned int)r_buff[0] & 0xFFFF;
+	open_memory_read = (unsigned int)(r_buff[0] >> 16) & 0xFFFF;
 
-	now_step_memory_read = (unsigned int)r_buff[1] & 0xFFFF; // 4byte 源뚯?
+	now_step_memory_read = (unsigned int)r_buff[1] & 0xFFFF;
 
-	position_Initial_combined_read = (unsigned int)(r_buff[1] >> 16) & 0xFFFF;		  // position_memory_read+Initial_memory_read
-	position_memory_read = (unsigned int)position_Initial_combined_read & 0xFF;		  // 4byte 源뚯?
-	Initial_memory_read = (unsigned int)(position_Initial_combined_read >> 8) & 0xFF; // 4byte 源뚯?
+	position_Initial_combined_read = (unsigned int)(r_buff[1] >> 16) & 0xFFFF; // position_memory_read+Initial_memory_read
+	position_memory_read = (unsigned int)position_Initial_combined_read & 0xFF;
+	Initial_memory_read = (unsigned int)(position_Initial_combined_read >> 8) & 0xFF;
 
 	limit_memory_read = (unsigned int)r_buff[2] & 0xFFFF;
 
 	position_Initstatus_combined_read = (unsigned int)(r_buff[2] >> 16) & 0xFFFF;
-	position_status_memory_read = (unsigned int)position_Initstatus_combined_read & 0xFF;
-	AAFx_InitStatus_memory_read = (unsigned int)(position_Initstatus_combined_read >> 8) & 0xFF;
+	position_status_memory_read = (unsigned int)position_Initstatus_combined_read & 0x0F;
+	AAFx_InitStatus_memory_read = (unsigned int)(position_Initstatus_combined_read >> 8) & 0x0F;
 
 	DTC_memory_read = (unsigned int)(r_buff[3]) & 0xFFFF;
 
 	power_chk_memory_read = (unsigned int)(r_buff[3] >> 16) & 0xF;
 	First_Powerchk_memory_read = (unsigned int)(r_buff[4]) & 0xF;
 
-    if (position_status_memory_read >= Memory_Range_Break)
+	OBD1_Close_Check_memory_read = (unsigned int)(r_buff[4] >> 16) & 0xFFFF;
+	OBD1_Open_Check_memory_read = (unsigned int)(r_buff[5]) & 0xFFFF;
+	OBD2_Close_Check_memory_read = (unsigned int)(r_buff[5] >> 16) & 0xFFFF;
+	OBD2_Open_Check_memory_read = (unsigned int)(r_buff[6]) & 0xFFFF;
+	if (position_status_memory_read >= Memory_Range_Break)
 	{
 		position_status_memory_read = Memory_Range_Init;
 	}
@@ -2382,21 +2506,6 @@ static void Flash_memory_read(void)
 
 void Re_Init(void)
 {
-	/*DRV_Off();							  // drv of
-	motor_start = OFF;					  // step stop
-	time_1ms_external_10s_chk_flag = OFF; // 10s chk timer off
-	time_1ms_external_10s_chk = 0;
-	aaf_action = FLAP_STOP;
-	aaf_action_complete_chk = FLAP_STOP;
-	time_1ms_init_chk = 0;
-	time_1ms_init_chk_flag = 0;	 // test
-	time_1ms_stall_chk = 0;		 // test
-	time_1ms_stall_chk_flag = 0; // test
-
-	stall_chk_cnt = 0;		// stall reset
-	stall_chk_time_1ms = 0; // stall reset
-
-	motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE; // stall reset*/
 	time_1ms_diag_auto = 0;
 	time_1ms_diag_auto_flag = OFF;
 	diag_mode_auto_action = OFF;
@@ -2415,6 +2524,9 @@ void Re_Init(void)
 	Diag_Mode = 0;
 	Diag_Mode_chk = 0;
 	evrdy_on_flag = OFF;
+    
+    AAFx_SNSR1_Position = Initial_Value;
+	AAFx_SNSR2_Position = Initial_Value;
 }
 
 /***********************************************************************************************************************
@@ -2937,6 +3049,8 @@ static void Process_operating_finish(void)
 	else if ((AAF_Tx_Position == DIAG_MODE_OPEN) || (AAF_Tx_Position == DIAG_MODE_CLOSE) || (AAF_Tx_Position == DIAG_MODE_AUTO))
 	{
 		AAFx_Position_Status = Unknown_Status;
+        AAFx_SNSR1_Position = Initial_Value;
+		AAFx_SNSR2_Position = Initial_Value;
 	}
 	else
 	{
@@ -5447,6 +5561,11 @@ static void IGN_On_Memory_read(void)
 	DTC_Status |= DTC_memory_read;
 	power_chk = power_chk_memory_read;
 	First_Powerchk = First_Powerchk_memory_read;
+    
+    OBD1_Close_Check = OBD1_Close_Check_memory_read;
+	OBD1_Open_Check = OBD1_Open_Check_memory_read;
+	OBD2_Close_Check = OBD2_Close_Check_memory_read;
+	OBD2_Open_Check = OBD2_Open_Check_memory_read;
 }
 /*static void Init_direction(void)
 {
@@ -5471,6 +5590,7 @@ static void IGN_On_Memory_read(void)
 
 	}
 }*/
+
 static void LIMP_HOME(void)
 {
 
@@ -5514,6 +5634,8 @@ static void LIMP_HOME(void)
 			AAF_Tx_Position = UNKOWN_POSITION;
 			AAFx_Position_Status = Unknown_Status;
 			AAFx_InitStatus = DURING_INITIALIZATION;
+			AAFx_SNSR1_Position = Initial_Value;
+			AAFx_SNSR2_Position = Initial_Value;
 			aaf_step = FINISHED_OPERATE;
 
 			LIMP_HOME_step = 2;
@@ -5523,12 +5645,13 @@ static void LIMP_HOME(void)
 			AAF_Tx_Position = UNKOWN_POSITION;
 			AAFx_Position_Status = Unknown_Status;
 			AAFx_InitStatus = DURING_INITIALIZATION;
+			AAFx_SNSR1_Position = Initial_Value;
+			AAFx_SNSR2_Position = Initial_Value;
 			aaf_step = FINISHED_OPERATE;
 			LIMP_HOME_step = 2;
 		}
 		else
 		{
-            //invaild
 		}
 		break;
 	case 2:
@@ -5546,7 +5669,26 @@ static void LIMP_HOME(void)
 
 static void step_check(void)
 {
-	if (((step_position_close - step_position_open) <= STEP_POSITION_MINIMUM_RANGE) || ((step_position_close - step_position_open) >= STEP_POSITION_MAXIMUM_RANGE) || (step_position == REFERENCE_POSITION) || (step_position < (step_position_open + limit_step_position)) || (step_position > (step_position_close - limit_step_position)) || (step_position_close == 0) || (step_position_open == 0) || (limit_step_position == 0) || (evrdy_on_flag == OFF) || (step_position >= POSITION_MAXIMUM_RANGE) || (step_position_open >= POSITION_MAXIMUM_RANGE) || (step_position_close >= POSITION_MAXIMUM_RANGE) || (limit_step_position >= LIMITSTEP_MAXIMUM_RANGE) || (AAF_Tx_Position == UNKOWN_POSITION) || (AAFx_InitStatus == ABNORMAL_FINISHED_INITIALIZATION) || (AAFx_Position_Status == FlapMoving_Status) || (AAFx_Position_Status == Unknown_Status) || (power_chk == Shutdown_Check))
+    if (((step_position_close - step_position_open) <= STEP_POSITION_MINIMUM_RANGE)
+        || ((step_position_close - step_position_open) > STEP_POSITION_MAXIMUM_RANGE)
+        || (step_position == REFERENCE_POSITION)
+        || (step_position < (step_position_open + limit_step_position))
+        || (step_position > (step_position_close - limit_step_position))
+        || (step_position_close == 0) 
+        || (step_position_open == 0)
+        || (limit_step_position == 0)
+        || (evrdy_on_flag == OFF)
+        || (step_position > POSITION_MAXIMUM_RANGE)
+        || (step_position_open > POSITION_MAXIMUM_RANGE)
+        || (step_position_close > POSITION_MAXIMUM_RANGE)
+        || (limit_step_position > LIMITSTEP_MAXIMUM_RANGE)
+        || (AAF_Tx_Position == UNKOWN_POSITION)
+        || (AAFx_InitStatus == ABNORMAL_FINISHED_INITIALIZATION)
+        || (AAFx_Position_Status == FlapMoving_Status)
+        || (AAFx_Position_Status == Unknown_Status)
+        || (OBD1_Close_Check >= OBD1_Open_Check)
+        || (OBD2_Close_Check >= OBD2_Open_Check)
+        || (power_chk == Shutdown_Check) )
 	{
 		Re_Init();
 	}
@@ -5666,6 +5808,447 @@ static void step_check(void)
 // 		}
 // 	}
 // }
+
+void OBD_Diag_Status_Chk(void) // HW 0.2
+{
+	if (TotalNumOfAAFSensor == SENSOR_X1)
+	{
+		if ((OBD1_adc < OBD_GND_SHORT_LIMIT) && (AAFx_SNSR_OC == NO_ERROR))
+		{
+			time_1ms_OBD_GndShort_flag = 1;
+
+			if (time_1ms_OBD_GndShort >= 10000)
+			{
+				time_1ms_OBD_GndShort = 10000;
+				time_1ms_OBD_GndShort_flag = 0;
+				AAFx_SNSR_SCG = 1;
+				OBD_Short_Gnd = 1;
+				OBD_Error_flag = 1;
+			}
+		}
+		else if (OBD1_adc >= OBD_BAT_SHORT_LIMIT)
+		{
+			time_1ms_OBD_BatShort_flag = 1;
+
+			if (time_1ms_OBD_BatShort >= 10000)
+			{
+				time_1ms_OBD_BatShort = 10000;
+				time_1ms_OBD_BatShort_flag = 0;
+				AAFx_SNSR_SCB = 1;
+				OBD_Short_Bat = 1;
+				OBD_Error_flag = 1;
+			}
+		}
+		else if ((OBD1_adc >= OBD_Open_MIN_LIMIT) && (OBD1_adc <= OBD_Open_LIMIT) && (AAFx_SNSR_SCG == NO_ERROR))
+		{
+			time_1ms_OBD_Open_Circuit_flag = 1;
+
+			if (time_1ms_OBD_Open_Circuit >= 10000)
+			{
+				time_1ms_OBD_Open_Circuit = 10000;
+				time_1ms_OBD_Open_Circuit_flag = 0;
+				AAFx_SNSR_OC = 1;
+				OBD_Open_Circuit = 1;
+				OBD_Error_flag = 1;
+			}
+		}
+		else
+		{
+			time_1ms_OBD_BatShort = 0;
+			time_1ms_OBD_BatShort_flag = 0;
+			time_1ms_OBD_GndShort = 0;
+			time_1ms_OBD_GndShort_flag = 0;
+			time_1ms_OBD_Open_Circuit = 0;
+			time_1ms_OBD_Open_Circuit_flag = 0;
+
+			OBD_Short_Gnd = NO_ERROR;
+			OBD_Short_Bat = NO_ERROR;
+			OBD_Open_Circuit = NO_ERROR;
+			AAFx_SNSR_SCB = NO_ERROR;
+			AAFx_SNSR_SCG = NO_ERROR;
+			AAFx_SNSR_OC = NO_ERROR;
+		}
+	}
+	else if (TotalNumOfAAFSensor == SENSOR_X2)
+	{
+		if ((OBD1_adc >= OBD_BAT_SHORT_LIMIT) || (OBD2_adc >= OBD_BAT_SHORT_LIMIT))
+		{
+			time_1ms_OBD_BatShort_flag = 1;
+			if (time_1ms_OBD_BatShort >= 10000)
+			{
+				time_1ms_OBD_BatShort = 10000;
+				time_1ms_OBD_BatShort_flag = 0;
+				AAFx_SNSR_SCB = 1;
+				OBD_Short_Bat = 1;
+			}
+		}
+		else if (((OBD1_adc <= OBD_GND_SHORT_LIMIT) || (OBD2_adc <= OBD_GND_SHORT_LIMIT)) && (AAFx_SNSR_OC == NO_ERROR))
+		{
+			time_1ms_OBD_GndShort_flag = 1;
+			// time_1ms_OBD_Open_Circuit = 0;
+			// time_1ms_OBD_Open_Circuit_flag = 0;
+			if (time_1ms_OBD_GndShort >= 10000)
+			{
+				time_1ms_OBD_GndShort = 10000;
+				time_1ms_OBD_GndShort_flag = 0;
+				AAFx_SNSR_SCG = 1;
+				OBD_Short_Gnd = 1;
+
+				if ((OBD1_adc >= OBD_ADC_MAX_LIMIT) || (OBD1_adc <= OBD_ADC_MIN_LIMIT))
+				{
+					OBD_Error_flag = 1;
+				}
+				else if ((OBD2_adc >= OBD_ADC_MAX_LIMIT) || (OBD2_adc <= OBD_ADC_MIN_LIMIT))
+				{
+					OBD2_Error_flag = 1;
+				}
+				else
+				{
+					// OBD_Error_flag = 0;
+					// OBD2_Error_flag = 0;
+				}
+			}
+		}
+		// else if ((((OBD1_adc > OBD_GND_SHORT_LIMIT)&&(OBD1_adc <= OBD_Open_LIMIT)) || (((OBD2_adc > OBD_GND_SHORT_LIMIT))&&(OBD2_adc <= OBD_Open_LIMIT))) && (AAFx_SNSR_SCG == NO_ERROR))
+		// {
+		// 	time_1ms_OBD_Open_Circuit_flag = 1;
+		// 	// time_1ms_OBD_GndShort = 0;
+		// 	// time_1ms_OBD_GndShort_flag = 0;
+		// 	if (time_1ms_OBD_Open_Circuit >= 10000)
+		// 	{
+		// 		time_1ms_OBD_Open_Circuit = 10000;
+		// 		time_1ms_OBD_Open_Circuit_flag = 0;
+		// 		AAFx_SNSR_OC = 1;
+		// 		OBD_Open_Circuit = 1;
+
+		// 		if ((OBD1_adc >= OBD_ADC_MAX_LIMIT) || (OBD1_adc <= OBD_ADC_MIN_LIMIT))
+		// 		{
+		// 			OBD_Error_flag = 1;
+		// 		}
+		// 		else if ((OBD2_adc >= OBD_ADC_MAX_LIMIT) || (OBD2_adc <= OBD_ADC_MIN_LIMIT))
+		// 		{
+		// 			OBD2_Error_flag = 1;
+		// 		}
+		// 		else
+		// 		{
+		// 			// OBD_Error_flag = 0;
+		// 			// OBD2_Error_flag = 0;
+		// 		}
+		// 	}
+		// }
+		else
+		{
+			time_1ms_OBD_BatShort = 0;
+			time_1ms_OBD_BatShort_flag = 0;
+			time_1ms_OBD_GndShort = 0;
+			time_1ms_OBD_GndShort_flag = 0;
+			time_1ms_OBD_Open_Circuit = 0;
+			time_1ms_OBD_Open_Circuit_flag = 0;
+
+			OBD_Short_Gnd = NO_ERROR;
+			OBD_Short_Bat = NO_ERROR;
+			OBD_Open_Circuit = NO_ERROR;
+			AAFx_SNSR_SCB = NO_ERROR;
+			AAFx_SNSR_SCG = NO_ERROR;
+			AAFx_SNSR_OC = NO_ERROR;
+		}
+	}
+
+	if (((OBD_Short_Gnd == ERROR) || (OBD_Short_Bat == ERROR) || (OBD_Open_Circuit == ERROR)) && (OBD_Error_check_flag == 0))
+	{
+		switch (OBD_Error_move)
+		{
+		case 0:
+			OBD_Error_move = 1;
+			break;
+		case 1:
+			Motor_Open();	  // dir CLOSE
+			DRV_On();		  // drv on
+			motor_start = ON; // step start
+			aaf_action = OPEN;
+			motor_stall_flag = MOTOR_NORMAL;				  // stall reset
+			stall_chk_time_1ms = 0;							  // stall reset
+			motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE; // stall reset
+			time_1ms_spi = 0;
+			OBD_Error_move = 2;
+			break;
+		case 2:
+			if (((aaf_action == OPEN) && (step_position <= (step_position_open + limit_step_position)))) //
+			{
+				DRV_Off();
+				motor_start = OFF;
+				stall_chk_cnt = 0;
+				stall_chk_time_1ms = 0; // stall reset
+				softstart_complete = OFF;
+				motor_step_value = STEP_TIME_1000RPM;
+				AAF_Tx_Position = UNKOWN_POSITION;
+				AAFx_Position_Status = Unknown_Status;
+				AAFx_InitStatus = DURING_INITIALIZATION;
+				AAFx_SNSR1_Position = Initial_Value;
+				AAFx_SNSR2_Position = Initial_Value;
+				aaf_step = FINISHED_OPERATE;
+				OBD_Error_move = 3;
+			}
+			else if ((motor_stall_flag == MOTOR_STALL))
+			{
+				DRV_Off();
+				motor_start = OFF;
+				stall_chk_cnt = 0;
+				stall_chk_time_1ms = 0; // stall reset
+				softstart_complete = OFF;
+				motor_step_value = STEP_TIME_1000RPM;
+				AAF_Tx_Position = UNKOWN_POSITION;
+				AAFx_Position_Status = Unknown_Status;
+				AAFx_InitStatus = DURING_INITIALIZATION;
+				AAFx_SNSR1_Position = Initial_Value;
+				AAFx_SNSR2_Position = Initial_Value;
+				aaf_step = FINISHED_OPERATE;
+				OBD_Error_move = 3;
+			}
+			else
+			{
+			}
+			break;
+		case 3:
+			// PORT.P10 &= ~_PORT_Pn2_OUTPUT_HIGH; // MCU_DRV_SLEEP_MODE
+			OBD_Error_check_flag = 1;
+			break;
+
+		default:
+			break;
+		}
+	}
+	else if ((OBD_Error_flag == 1) && (OBD2_Error_flag == 1))
+	{
+		if ((SNSR1_Check == USE_SNSR1) && (SNSR2_Check == USE_SNSR2))
+		{
+			time_1ms_OBD_Recovery_chk_flag = 1;
+			if (time_1ms_OBD_Recovery_chk >= 1000)
+			{
+				OBD_Short_Gnd = 0;
+				OBD_Short_Bat = 0;
+				OBD_Open_Circuit = 0;
+				AAFx_SNSR_SCB = 0;
+				AAFx_SNSR_SCG = 0;
+				AAFx_SNSR_OC = 0;
+				OBD_Error_flag = 0;
+				OBD2_Error_flag = 0;
+				OBD_Error_move = 0;
+				OBD_Error_check_flag = 0;
+				Re_Init();
+				time_1ms_OBD_Recovery_chk = 0U;
+				time_1ms_OBD_Recovery_chk_flag = 0U;
+			}
+		}
+	}
+	else if ((OBD_Error_flag == 1) || (OBD2_Error_flag == 1))
+	{
+		if ((SNSR1_Check == USE_SNSR1) && (OBD_Error_flag == 1) && (OBD2_Error_flag == 0))
+		{
+			time_1ms_OBD_Recovery_chk_flag = 1;
+			if (time_1ms_OBD_Recovery_chk >= 1000)
+			{
+				OBD_Short_Gnd = 0;
+				OBD_Short_Bat = 0;
+				OBD_Open_Circuit = 0;
+				AAFx_SNSR_SCB = 0;
+				AAFx_SNSR_SCG = 0;
+				AAFx_SNSR_OC = 0;
+				OBD_Error_flag = 0;
+				OBD_Error_move = 0;
+				OBD_Error_check_flag = 0;
+				Re_Init();
+				time_1ms_OBD_Recovery_chk = 0U;
+				time_1ms_OBD_Recovery_chk_flag = 0U;
+			}
+		}
+		else if ((SNSR2_Check == USE_SNSR2) && (OBD2_Error_flag == 1) && (OBD_Error_flag == 0))
+		{
+			time_1ms_OBD_Recovery_chk_flag = 1;
+			if (time_1ms_OBD_Recovery_chk >= 1000)
+			{
+				OBD_Short_Gnd = 0;
+				OBD_Short_Bat = 0;
+				OBD_Open_Circuit = 0;
+				AAFx_SNSR_SCB = 0;
+				AAFx_SNSR_SCG = 0;
+				AAFx_SNSR_OC = 0;
+				OBD2_Error_flag = 0;
+				OBD_Error_move = 0;
+				OBD_Error_check_flag = 0;
+				Re_Init();
+				time_1ms_OBD_Recovery_chk = 0U;
+				time_1ms_OBD_Recovery_chk_flag = 0U;
+			}
+		}
+		else
+		{
+			time_1ms_OBD_Recovery_chk = 0U;
+			time_1ms_OBD_Recovery_chk_flag = 0U;
+		}
+	}
+	else
+	{
+	}
+}
+
+void OBD_Position_Status(void) // 0.8v 1100 1.6v 1700
+{
+
+	OBD1_position_percent = (((OBD1_adc - OBD1_Close_Check) * 100) / (OBD1_Open_Check - OBD1_Close_Check)) + POSITION_OFFSET;
+	OBD2_position_percent = (((OBD2_adc - OBD2_Close_Check) * 100) / (OBD2_Open_Check - OBD2_Close_Check)) + POSITION_OFFSET;
+
+	if (TotalNumOfAAFSensor == SENSOR_X1)
+	{
+		if (((OBD1_adc) >= OBD_ADC_MAX_LIMIT) || ((OBD1_adc) <= OBD_ADC_MIN_LIMIT))
+		{
+			SNSR1_Check = NO_SNSR1;
+		}
+		else
+		{
+			SNSR1_Check = USE_SNSR1;
+		}
+	}
+	else if (TotalNumOfAAFSensor == SENSOR_X2)
+	{
+		if (((OBD1_adc) >= OBD_ADC_MAX_LIMIT) || ((OBD1_adc) <= OBD_ADC_MIN_LIMIT))
+		{
+			SNSR1_Check = NO_SNSR1;
+		}
+		else
+		{
+			SNSR1_Check = USE_SNSR1;
+		}
+		if (((OBD2_adc) >= OBD_ADC_MAX_LIMIT) || ((OBD2_adc) <= OBD_ADC_MIN_LIMIT))
+		{
+			SNSR2_Check = NO_SNSR2;
+		}
+		else
+		{
+			SNSR2_Check = USE_SNSR2;
+		}
+	}
+	if (SNSR1_Check == NO_SNSR1)
+	{
+		AAFx_SNSR1_Position = Initial_Value;
+	}
+	if (SNSR2_Check == NO_SNSR2)
+	{
+		AAFx_SNSR2_Position = Initial_Value;
+	}
+
+	if (AAFx_InitStatus != NORMAL_FINISHED_INITIALIZATION)
+	{
+		AAFx_SNSR1_Position = Initial_Value;
+		AAFx_SNSR2_Position = Initial_Value;
+		step_check_ok = 0;
+	}
+	else if (AAFx_InitStatus == NORMAL_FINISHED_INITIALIZATION)
+	{
+		if (step_check_ok == 0)
+		{
+			if ((SNSR1_Check == USE_SNSR1))
+			{
+				// AAFx_SNSR1_Position = SNSR1_Moving;
+
+				if ((OBD1_position_percent <= POSITION_CLOSE_THRESHOLD))
+				{
+					AAFx_SNSR1_Position = SNSR1_Close;
+				}
+				else if (OBD1_position_percent >= POSITION_OPEN_THRESHOLD)
+				{
+					AAFx_SNSR1_Position = SNSR1_Open;
+				}
+				else
+				{
+					AAFx_SNSR1_Position = Initial_Value;
+				}
+			}
+			if ((SNSR2_Check == USE_SNSR2))
+			{
+				// AAFx_SNSR1_Position = SNSR1_Moving;
+
+				if (OBD2_position_percent <= POSITION_CLOSE_THRESHOLD)
+				{
+					AAFx_SNSR2_Position = SNSR2_Close;
+				}
+				else if (OBD2_position_percent >= POSITION_OPEN_THRESHOLD)
+				{
+					AAFx_SNSR2_Position = SNSR2_Open;
+				}
+				else
+				{
+					AAFx_SNSR2_Position = Initial_Value;
+				}
+			}
+			step_check_ok = 1;
+		}
+	}
+
+	if ((AAFx_Position_Status == FlapMoving_Status) && (SNSR_Position_Ok == 0) && (SNSR1_Check == USE_SNSR1))
+	{
+		// AAFx_SNSR1_Position = SNSR1_Moving;
+
+		if ((OBD1_position_percent <= POSITION_CLOSE_THRESHOLD) && (AAFx_SNSR1_Position != SNSR1_Close))
+		{
+			AAFx_SNSR1_Position = SNSR1_Close;
+			SNSR_Position_Ok = 1;
+		}
+		else if ((OBD1_position_percent >= POSITION_OPEN_THRESHOLD) && (AAFx_SNSR1_Position != SNSR1_Open))
+		{
+			AAFx_SNSR1_Position = SNSR1_Open;
+			SNSR_Position_Ok = 1;
+		}
+	}
+	else if (((AAFx_Position_Status == Open_Status) || (AAFx_Position_Status == Close_Status)) && (SNSR_Position_Ok == 1) && (SNSR1_Check == USE_SNSR1))
+	{
+		if (AAF_Tx_Position == OPEN)
+		{
+			AAFx_SNSR1_Position = SNSR1_Open;
+			SNSR_Position_Ok = 0;
+		}
+		else if (AAF_Tx_Position == CLOSE)
+		{
+			AAFx_SNSR1_Position = SNSR1_Close;
+			SNSR_Position_Ok = 0;
+		}
+	}
+	else
+	{
+	}
+
+	if ((AAFx_Position_Status == FlapMoving_Status) && (SNSR2_Position_Ok == 0) && (SNSR2_Check == USE_SNSR2))
+	{
+		// AAFx_SNSR2_Position = SNSR2_Moving;
+
+		if ((OBD2_position_percent <= POSITION_CLOSE_THRESHOLD) && (AAFx_SNSR2_Position != SNSR2_Close))
+		{
+			AAFx_SNSR2_Position = SNSR2_Close;
+			SNSR2_Position_Ok = 1;
+		}
+		else if ((OBD2_position_percent >= POSITION_OPEN_THRESHOLD) && (AAFx_SNSR2_Position != SNSR2_Open))
+		{
+			AAFx_SNSR2_Position = SNSR2_Open;
+			SNSR2_Position_Ok = 1;
+		}
+	}
+	else if (((AAFx_Position_Status == Open_Status) || (AAFx_Position_Status == Close_Status)) && (SNSR2_Position_Ok == 1))
+	{
+		if (AAF_Tx_Position == OPEN)
+		{
+			AAFx_SNSR2_Position = SNSR2_Open;
+			SNSR2_Position_Ok = 0;
+		}
+		else if (AAF_Tx_Position == CLOSE)
+		{
+			AAFx_SNSR2_Position = SNSR2_Close;
+			SNSR2_Position_Ok = 0;
+		}
+	}
+	else
+	{
+	}
+}
 
 static void Error_FaultClear(void)
 {
