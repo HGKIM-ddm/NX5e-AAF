@@ -89,12 +89,6 @@ extern unsigned int time_1ms_step_chk_flag;
 extern unsigned int time_1ms_wdg_chk;
 extern unsigned int time_1ms_wdg_chk_flag;
 
-extern unsigned int time_1ms_LIN_GndShort;
-extern unsigned int time_1ms_LIN_GndShort_flag;
-
-extern unsigned int time_1ms_LIN_BatShort;
-extern unsigned int time_1ms_LIN_BatShort_flag;
-
 extern unsigned int time_1ms_Error_chk;
 extern unsigned int time_1ms_Error_chk_flag;
 
@@ -104,8 +98,8 @@ extern unsigned int time_1ms_motor_Short_chk_flag;
 extern unsigned int time_1ms_motor_Open_chk;
 extern unsigned int time_1ms_motor_Open_chk_flag;
 
-extern unsigned int time_1ms_IGN_chk;
-extern unsigned int time_1ms_IGN_chk_flag;
+extern unsigned int time_1ms_IGN_Error_Chk;
+extern unsigned int time_1ms_IGN_Error_Chk_flag;
 
 /* End user code. Do not edit comment generated here */
 
@@ -272,14 +266,7 @@ void r_Config_TAUD0_3_interrupt(void)
     {
 	time_1ms_wdg_chk++;
     }
-    if(time_1ms_LIN_GndShort_flag == 1)
-    {
-	time_1ms_LIN_GndShort++;
-    }
-    if(time_1ms_LIN_BatShort_flag == 1)
-    {
-	time_1ms_LIN_BatShort++;
-    }
+
     
     if(time_1ms_Error_chk_flag==1)
     {
@@ -298,9 +285,9 @@ void r_Config_TAUD0_3_interrupt(void)
     {
        time_1ms_adc_1s_chk++;
     }
-    if(time_1ms_IGN_chk_flag==1)
+    if(time_1ms_IGN_Error_Chk_flag==1)
     {
-       time_1ms_IGN_chk++;
+       time_1ms_IGN_Error_Chk++;
     }
 
     /* End user code. Do not edit comment generated here */

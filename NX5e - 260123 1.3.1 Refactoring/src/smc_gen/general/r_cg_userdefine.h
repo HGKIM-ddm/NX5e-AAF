@@ -145,7 +145,7 @@ Global functions
 // PPS = RPM * (360 / step angle) / 60 >> RPM = PPS * (ANGLE / 360) * 60
 // #define STEP_TIME_1125RPM 28U // 450PPS
 #define STEP_TIME_1250RPM 25U // 500PPS(4000) = 25, 450PPS(3600) = 27~28
-#define STEP_TIME_1000RPM 41U
+#define STEP_TIME_1000RPM 25U
 
 #define REFERENCE_POSITION 30000U // 30000
 #define LIMIT_POSITION 1800U
@@ -157,9 +157,7 @@ Global functions
 // init action
 #define INIT_ACTION_POSITION 1450U
 
-#define STEP_POSITION_MINIMUM_RANGE 12000U // 12000//11000-18500 AAF3 // 8000-13000 AAF1,2
-// #define STEP_POSITION_MINIMUM_RANGE 130U //12000
-#define STEP_POSITION_MAXIMUM_RANGE 15600U // Close - Open = 11628 30% margin
+
 
 // #define POSITION_MAXIMUM_RANGE 55000U
 // #define LIMITSTEP_MAXIMUM_RANGE 1700U
@@ -167,7 +165,7 @@ Global functions
 #define LIMITSTEP_MAXIMUM_RANGE 3000U
 
 #define MOTOR_WAIT_TIME 50U // 30default
-#define MINUTE_3 180U // test DEFAULT 180 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#define MINUTE_3 18U // test DEFAULT 180 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #define LIN_BUS_CHK_TIME_4_SEC 4000U
 
 /***********************************************************************************************************************
@@ -222,20 +220,36 @@ Global functions
 4.9	4003
 
 */
+// AAF V1.2 260123 ADC CHECK PCB VER
+//ADC_UNDER_VOLTAGE
+// #define ADC_UNDER_VOLTAGE_7V 1262U 
+// #define ADC_UNDER_VOLTAGE_8_5V 1566U
+// #define ADC_UNDER_VOLTAGE_9V 1667U
 
-#define ADC_UNDER_VOLTAGE_7V 1262U // AAF V1.2 260123 ADC CHECK PCB VER
-#define ADC_UNDER_VOLTAGE_8_5V 1566U
-#define ADC_UNDER_VOLTAGE_9V 1667U
-#define ADC_OVER_VOLTAGE_16V 3070U
-#define ADC_OVER_VOLTAGE_16_5V 3170U
-#define ADC_OVER_VOLTAGE_18V 3480U
+// //ADC_OVER_VOLTAGE
+// #define ADC_OVER_VOLTAGE_16V 3070U
+// #define ADC_OVER_VOLTAGE_16_5V 3170U
+// #define ADC_OVER_VOLTAGE_18V 3480U
 
-#define ADC_VOLTAGE_10V 1850U	// slew change
-#define ADC_VOLTAGE_10_5V 1950U // slew change
+// //ADC_VOLTAGE
+// #define ADC_VOLTAGE_10V 1850U	// slew change
+// #define ADC_VOLTAGE_10_5V 1950U // slew change
+
+// HW 1.2 ADC START
+#define ADC_UNDER_VOLTAGE_7V 618U	 // chk 1267 ~ 1271
+#define ADC_UNDER_VOLTAGE_8_5V 764U	 // chk 1576 ~ 1578
+#define ADC_UNDER_VOLTAGE_9V 814U	 // chk 1679 ~ 1681
+#define ADC_OVER_VOLTAGE_16V 1512U	 // chk 3112 ~ 3115
+#define ADC_OVER_VOLTAGE_16_5V 1561U // chk 3215 ~ 3217
+#define ADC_OVER_VOLTAGE_18V 1710U	 // chk 3521 ~ 3524
+
+#define ADC_VOLTAGE_10V 914U   // slew change
+#define ADC_VOLTAGE_10_5V 964U // slew change
+
+
+
 
 // #define ADC_VOLTAGE_9_5V 1769U
-// #define ADC_VOLTAGE_10V 1868U
-// #define ADC_VOLTAGE_10_5V 1969U
 // #define ADC_VOLTAGE_11V 2069U
 // #define ADC_VOLTAGE_11_5V 2171U
 // #define ADC_VOLTAGE_12V 2273U
@@ -255,6 +269,8 @@ Global functions
 #define NORMAL_VOLTAGE 3U
 #define HIGH_VOLTAGE_1ST 4U
 #define HIGH_VOLTAGE_2ND 5U
+
+#define ADC_Detect_LIMIT 3000U
 
 /***********************************************************************************************************************
  * 6. Stall Check & Motor Faults
@@ -287,9 +303,12 @@ Global functions
  * 7. AAF Specifics
 ***********************************************************************************************************************/
 #define AAF_ERROR_ANGLE 5U // V
-#define AAF_FULL_ANGLE 90U
+#define AAF_FULL_ANGLE 90U //변경사항
 #define AAF_1ST_OPEN_ANGLE 65U
 #define AAF_2ST_OPEN_ANGLE 45U
+
+#define STEP_POSITION_MINIMUM_RANGE 12000U // 12000//11000-18500 AAF3 // 8000-13000 AAF1,2
+#define STEP_POSITION_MAXIMUM_RANGE 15500U // Close - Open = 11628 30% margin
 
 #define AAF_WAITING 0U
 #define AAF_OPERATE 1U
