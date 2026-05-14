@@ -1,0 +1,184 @@
+#include "Re_Init.h"
+#include "Service.h"
+
+static void Step_LoadData(void)
+{
+	step_position_close = close_memory_read;
+	step_position_open = open_memory_read;
+	step_position = now_step_memory_read;
+	AAF_Tx_Position = position_memory_read;
+	AAFx_Position_Status = position_status_memory_read;
+	AAFx_InitStatus = AAFx_InitStatus_memory_read;
+	limit_step_position = limit_memory_read;
+	evrdy_on_flag = Initial_memory_read;
+	DTC_Status |= DTC_memory_read;
+	power_chk = power_chk_memory_read;
+	First_Powerchk = First_Powerchk_memory_read;
+	// only sx3k
+	OBD1_Close_Check = OBD1_Close_Check_memory_read;
+	OBD1_Open_Check = OBD1_Open_Check_memory_read;
+	OBD2_Close_Check = OBD2_Close_Check_memory_read;
+	OBD2_Open_Check = OBD2_Open_Check_memory_read;
+	OBD3_Close_Check = OBD3_Close_Check_memory_read;
+	OBD3_Open_Check = OBD3_Open_Check_memory_read;
+	OBD_Init();
+}
+
+static void Step_Check(void)
+{
+	unsigned int step_range = close_memory_read - open_memory_read;
+	unsigned int reinit_required;
+
+	reinit_required = (
+						  /* 1. 이동 범위(Range) 및 마진(Limit) 체크 */
+						  (step_range <= STEP_POSITION_MINIMUM_RANGE) ||
+						  (step_range > STEP_POSITION_MAXIMUM_RANGE) ||
+						  (now_step_memory_read == REFERENCE_POSITION) ||
+						  (now_step_memory_read < open_memory_read + limit_memory_read) ||
+						  (now_step_memory_read > close_memory_read - limit_memory_read) ||
+
+						  /* 2. 초기화 실패(Zero) 체크 */
+						  (close_memory_read == 0U) ||
+						  (open_memory_read == 0U) ||
+						  (limit_memory_read == 0U) ||
+
+						  /* 3. 하드웨어 최대 한계치(Max Range) 이탈 체크 */
+						  (now_step_memory_read > POSITION_MAXIMUM_RANGE) ||
+						  (open_memory_read > POSITION_MAXIMUM_RANGE) ||
+						  (close_memory_read > POSITION_MAXIMUM_RANGE) ||
+						  (limit_memory_read > LIMITSTEP_MAXIMUM_RANGE) ||
+
+						  /* 4. 시스템 상태 및 통신 에러 플래그 체크 */
+						  (Initial_memory_read == OFF) ||
+						  (position_memory_read == UNKOWN_POSITION) ||
+						  (AAFx_InitStatus_memory_read == ABNORMAL_FINISHED_INITIALIZATION) ||
+						  (position_status_memory_read == FlapMoving_Status) ||
+						  (position_status_memory_read == Unknown_Status) ||
+						  (power_chk_memory_read == Shutdown_Check))
+						  ? 1U
+						  : 0U;
+
+	if (reinit_required == 1U)
+	{
+		Re_Init();
+	}
+	else
+	{
+		Step_LoadData();
+		if (AAFx_Position_Status == Open_Status)
+		{
+			aaf_step = AAF_WAITING;
+			aaf_init_step = NORMAL_INITIALIZATION;
+			AAF_Tx_Position = OPEN;
+			// AAFx_Position_Status = Open_Status;
+			AAFx_InitStatus = NORMAL_FINISHED_INITIALIZATION;
+			evrdy_on_flag = ON;
+			aaf_action_complete_chk = FLAP_STOP;
+			antipinch_previous_action = ANTIWAIT;
+		}
+		else if (AAFx_Position_Status == Close_Status)
+		{
+			aaf_step = AAF_WAITING;
+			aaf_init_step = NORMAL_INITIALIZATION;
+			AAF_Tx_Position = CLOSE;
+			// AAFx_Position_Status = Close_Status;
+			AAFx_InitStatus = NORMAL_FINISHED_INITIALIZATION;
+			evrdy_on_flag = ON;
+			aaf_action_complete_chk = FLAP_STOP;
+			antipinch_previous_action = ANTIWAIT;
+		}
+		else
+		{
+			// invaild
+		}
+	}
+}
+
+void Re_Init(void)
+{
+	G_Timer1ms.DiagAutoMode = 0U;
+	G_Timer1msFlag.DiagAutoModeFlag = OFF;
+	diag_mode_auto_action = OFF;
+	aaf_action = 0U;
+	motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE; // stall reset
+	aaf_step = AAF_INITIALIZATION;					  // MCU is reset, AAF is initialized.
+	aaf_init_step = START_INITIALIZATION;			  // MCU is reset, AAF is initialized.
+	AAFx_Position_Status = Unknown_Status;
+	AAF_Tx_Position = UNKOWN_POSITION;
+	init_move_step = 0U;
+	AAFx_ErrorStatus = No_ErrorStatus;
+	step_position = REFERENCE_POSITION;
+	step_position_open = 0U;
+	step_position_close = 0U;
+	lin_aaf_command = OPEN;
+	Diag_Mode = 0U;
+	Diag_Mode_chk = 0U;
+	evrdy_on_flag = OFF;
+	// only sx3k
+	AAFx_SNSR1_Position = Initial_Value;
+	AAFx_SNSR2_Position = Initial_Value;
+	AAFx_SNSR3_Position = Initial_Value;
+	AAFx_SNSR4_Position = Initial_Value;
+}
+
+/***********************************************************************************************************************
+ * Function Name: Step_InitAndCheck
+ * Description  : Handles step position initialization and flash memory sync upon Ignition ON.
+ * Called By    : App_SwLogic
+ ***********************************************************************************************************************/
+void Step_InitAndCheck(void)
+{
+	if ((step_check_flag == 0U) && ((EngRunSta == 0x01u) || (HevRdy == 0x01u)))
+	{
+		FDL_Read();
+		// Step_LoadData();
+		IGN_Chk = 1U;
+
+		G_Timer1msFlag.MotorStepCheckFlag = 1U;
+
+		if ((G_Timer1ms.MotorStepCheck >= 50U))
+		{
+			Step_Check();
+			G_Timer1msFlag.MotorStepCheckFlag = 0U;
+			G_Timer1ms.MotorStepCheck = 50U;
+			step_check_flag = 1U;
+		}
+	}
+
+	if ((step_check_flag == 1U) && (AAFx_InitStatus == NORMAL_FINISHED_INITIALIZATION))
+	{
+		power_chk = Shutdown_Check;
+		FDL_Write();
+		step_check_flag = 2U;
+	}
+	if ((IGN_Chk == 1U) && (EngRunSta == 0x00U) && (HevRdy == 0x00U))
+	{
+		G_Timer1msFlag.IGNOffCheckFlag = 1U;
+		if (G_Timer1ms.IGNOffCheck >= 600U)
+		{
+			G_Timer1msFlag.IGNOffCheckFlag = 0U;
+			G_Timer1ms.IGNOffCheck = 600U;
+			if ((motor_start == OFF) && (AAFx_Position_Status != FlapMoving_Status) && (AAFx_InitStatus != DURING_INITIALIZATION))
+			{
+				Position_Temporary_write();
+				AAF_Tx_Position = UNKOWN_POSITION;
+				AAFx_Position_Status = Unknown_Status;
+				AAFx_InitStatus = DURING_INITIALIZATION;
+				IGN_Chk = 2U;
+			}
+		}
+	}
+	else if ((IGN_Chk == 1U) && ((EngRunSta == 0x01U) || (HevRdy == 0x01U)))
+	{
+		G_Timer1msFlag.IGNOffCheckFlag = 0U;
+		G_Timer1ms.IGNOffCheck = 0U;
+	}
+
+	if ((IGN_Chk == 2U) && ((EngRunSta == 0x01U) || (HevRdy == 0x01U)))
+	{
+		Position_Temporary_read();
+		G_Timer1msFlag.IGNOffCheckFlag = 0U;
+		G_Timer1ms.IGNOffCheck = 0U;
+		IGN_Chk = 1U;
+	}
+}

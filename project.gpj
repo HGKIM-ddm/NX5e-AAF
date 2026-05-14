@@ -1,0 +1,12 @@
+#!gbuild
+[Program]
+	-e _RESET
+	{optgroup=GhsCommonOptions} -o ./bin/project.out
+	:postexec='gsrec project -o project.src¡®
+	:postexec='gsize -ram -rom ./bin/project.out'
+	-init_ram_at_startup
+	-gsize
+sc_file.gpj
+device\deviceheader.gpj
+lowsrc\lowinit.gpj
+FDL\fdl.gpj
