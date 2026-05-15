@@ -542,6 +542,7 @@ void Lin_TxCheck(void)
 
 	Slave_TxData[6U] = (uint8_t)((Req_ChkSum_Tx << 4U) | Req_Alive_Tx);
 	Lin_DiagAction();
+	Lin_Error_Status();
 
 	lin_rx_pass_flag = WAITING;
 }
@@ -569,5 +570,21 @@ void Lin_BusCheck(void)
 		// wake_up_motor_range_init_chk = 0U;
 
 		aaf_step = AAF_WAITING;
+	}
+}
+
+void Lin_Error_Status(void)
+{
+	if ((antipinch_previous_action == OPEN) && (antipinch_action_on == ON))
+	{
+		AAFx_ErrorStatus = Open_ErrorStatus;
+	}
+	else if ((antipinch_previous_action == CLOSE) && (antipinch_action_on == ON))
+	{
+		AAFx_ErrorStatus = Close_ErrorStatus;
+	}
+	else
+	{
+		AAFx_ErrorStatus = No_ErrorStatus;
 	}
 }

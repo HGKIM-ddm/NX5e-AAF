@@ -20,7 +20,7 @@ static void Antipinch_PrevOpen(void)
         G_Timer1msFlag.InitCheckFlag = 1U;
 
         aaf_action = CLOSE;
-        AAFx_ErrorStatus = Open_ErrorStatus;
+        // AAFx_ErrorStatus = Open_ErrorStatus;
         G_Timer1ms.Spi = 0U;
         motor_stall_flag = MOTOR_NORMAL;
         antipinch_step = 1U;
@@ -88,7 +88,7 @@ static void Antipinch_PrevOpen(void)
                 {
                     aaf_action = DIAG_MODE_OPEN;
                     aaf_step = AAF_WAITING;
-                    AAFx_ErrorStatus = No_ErrorStatus;
+                    //AAFx_ErrorStatus = No_ErrorStatus;
                     AAFx_InitStatus = NORMAL_FINISHED_INITIALIZATION;
                     Operate_SelectTxPostion();
                 }
@@ -96,7 +96,7 @@ static void Antipinch_PrevOpen(void)
                 {
                     aaf_action = DIAG_MODE_AUTO;
                     aaf_step = AAF_WAITING;
-                    AAFx_ErrorStatus = No_ErrorStatus;
+                   // AAFx_ErrorStatus = No_ErrorStatus;
                     AAFx_InitStatus = NORMAL_FINISHED_INITIALIZATION;
                     Operate_SelectTxPostion();
                 }
@@ -108,8 +108,9 @@ static void Antipinch_PrevOpen(void)
             else
             {
                 AAF_Tx_Position = OPEN;
+                AAFx_Position_Status = Open_Status;
                 AAFx_InitStatus = NORMAL_FINISHED_INITIALIZATION;
-                AAFx_ErrorStatus = No_ErrorStatus;
+                //AAFx_ErrorStatus = No_ErrorStatus;
                 Operate_SelectTxPostion();
             }
 
@@ -193,7 +194,7 @@ static void Antipinch_PrevClose(void)
         G_Timer1ms.Spi = 0U;
 
         aaf_action = OPEN;
-        AAFx_ErrorStatus = Close_ErrorStatus;
+        // AAFx_ErrorStatus = Close_ErrorStatus;
         antipinch_step = 1U;
         break;
 
@@ -260,7 +261,7 @@ static void Antipinch_PrevClose(void)
                 {
                     aaf_action = DIAG_MODE_CLOSE;
                     aaf_step = AAF_WAITING;
-                    AAFx_ErrorStatus = No_ErrorStatus;
+                    //AAFx_ErrorStatus = No_ErrorStatus;
                     AAFx_InitStatus = NORMAL_FINISHED_INITIALIZATION;
                     Operate_SelectTxPostion();
                 }
@@ -268,7 +269,7 @@ static void Antipinch_PrevClose(void)
                 {
                     aaf_action = DIAG_MODE_AUTO;
                     aaf_step = AAF_WAITING;
-                    AAFx_ErrorStatus = No_ErrorStatus;
+                    //AAFx_ErrorStatus = No_ErrorStatus;
                     AAFx_InitStatus = NORMAL_FINISHED_INITIALIZATION;
                     Operate_SelectTxPostion();
                 }
@@ -280,8 +281,9 @@ static void Antipinch_PrevClose(void)
             else
             {
                 AAF_Tx_Position = CLOSE;
+                AAFx_Position_Status = Close_Status;
                 AAFx_InitStatus = NORMAL_FINISHED_INITIALIZATION;
-                AAFx_ErrorStatus = No_ErrorStatus;
+                //AAFx_ErrorStatus = No_ErrorStatus;
                 Operate_SelectTxPostion();
             }
 
@@ -416,7 +418,6 @@ void Antipinch_Move(void)
         }
         else
         {
-            // invalid
         }
     }
 }

@@ -628,10 +628,7 @@ static void Operate_Finish(void)
 	G_Timer1ms.StallTime = 0U;						  // stall reset
 	motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE; // stall reset
 	Operating_flag = 0U;
-	if (antipinch_action_on == OFF)
-	{
-		AAFx_ErrorStatus = No_ErrorStatus;
-	}
+
 	if (aaf_action == DIAG_MODE_AUTO)
 	{
 		if (G_Timer1ms.DiagAutoMode >= 5000U)

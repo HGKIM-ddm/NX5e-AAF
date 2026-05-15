@@ -211,19 +211,10 @@ static void LinSleep_CheckCompletion(void)
     {
         LinSleep_StopMotorAndReset(); // 공통 정지
 
-        if ((EngRunSta == 0x00U) && (HevRdy == 0x00U))
-        {
-            AAF_Tx_Position = OPEN;
-            AAFx_Position_Status = Open_Status;
-            AAFx_InitStatus = NORMAL_FINISHED_INITIALIZATION;
-            Position_Temporary_write();
-        }
-        else
-        {
-            AAF_Tx_Position = OPEN;
-            AAFx_Position_Status = Open_Status;
-            AAFx_InitStatus = NORMAL_FINISHED_INITIALIZATION;
-        }
+        AAF_Tx_Position = OPEN;
+        AAFx_Position_Status = Open_Status;
+        AAFx_InitStatus = NORMAL_FINISHED_INITIALIZATION;
+
         Operate_SelectTxPostion();
         aaf_step = FINISHED_OPERATE;
 
@@ -243,19 +234,11 @@ static void LinSleep_CheckCompletion(void)
     else if ((Last_aaf_action == CLOSE) && (step_position >= (step_position_close - limit_step_position)) && (AAFx_Type == INTERNAL_TYPE))
     {
         LinSleep_StopMotorAndReset(); // 공통 정지
-        if ((EngRunSta == 0x00U) && (HevRdy == 0x00U))
-        {
-            AAF_Tx_Position = CLOSE;
-            AAFx_Position_Status = Close_Status;
-            AAFx_InitStatus = NORMAL_FINISHED_INITIALIZATION;
-            Position_Temporary_write();
-        }
-        else
-        {
-            AAF_Tx_Position = CLOSE;
-            AAFx_Position_Status = Close_Status;
-            AAFx_InitStatus = NORMAL_FINISHED_INITIALIZATION;
-        }
+
+        AAF_Tx_Position = CLOSE;
+        AAFx_Position_Status = Close_Status;
+        AAFx_InitStatus = NORMAL_FINISHED_INITIALIZATION;
+
         motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE;
         motor_stall_flag = MOTOR_NORMAL;
         lin_sleep_step = 8U;
@@ -365,21 +348,12 @@ static void LinSleep_Stall_Stop(void)
     else if ((step_position <= (step_position_close - limit_step_position)) && (Sleep_Stall == OFF))
     {
         LinSleep_StopMotorAndReset(); // 공통 정지
-        if ((EngRunSta == 0x00U) && (HevRdy == 0x00U))
-        {
-            AAF_Tx_Position = CLOSE;
-            AAFx_Position_Status = Close_Status;
-            AAFx_InitStatus = NORMAL_FINISHED_INITIALIZATION;
-            Position_Temporary_write();
-        }
-        else
-        {
-            AAF_Tx_Position = CLOSE;
-            AAFx_Position_Status = Close_Status;
-            AAFx_InitStatus = NORMAL_FINISHED_INITIALIZATION;
-        }
 
-        // Operate_SelectTxPostion();
+        AAF_Tx_Position = CLOSE;
+        AAFx_Position_Status = Close_Status;
+        AAFx_InitStatus = NORMAL_FINISHED_INITIALIZATION;
+
+        Operate_SelectTxPostion();
         aaf_step = FINISHED_OPERATE;
         G_Timer1ms.Spi = 0;
         lin_sleep_step = 8;
@@ -404,6 +378,7 @@ static void LinSleep_Final(void)
     //     AAFx_Position_Status = Unknown_Status;
     //     AAFx_InitStatus = DURING_INITIALIZATION;
     // }
+
     if (G_Timer1ms.LinBusInactive >= LIN_BUS_CHK_TIME_4_SEC)
     {
         MCU_Sleep();
