@@ -59,22 +59,15 @@ void ADC_GetStatus(void)
 	if (adc_chk_ready == 1U)
 	{
 		INTC1.ICADCA0I0.BIT.RFADCA0I0 = 0U;
-		// R_Config_ADCA0_ScanGroup1_GetResult(&bat_adc, 8);
-		R_Config_ADCA0_ScanGroup1_GetResult(scan_results, 6U);
-		ADC_Stability = scan_results[0];
-		OBD1_adc = scan_results[1];
-		OBD2_adc = scan_results[2];
-		OBD3_adc = scan_results[3];
-		OBD4_adc = scan_results[4];
-		bat_adc = scan_results[5];
-
+		R_Config_ADCA0_ScanGroup1_GetResult(scan_results, 1U);
+		bat_adc = scan_results[0]; // KR
 		adc_sum = 0U;
 
-		for (uint8_t i = 9U; i > 0U; i--) 
-        {
-            adc_chk[i] = adc_chk[i - 1U]; 
-            adc_sum += adc_chk[i];
-        }
+		for (uint8_t i = 9U; i > 0U; i--)
+		{
+			adc_chk[i] = adc_chk[i - 1U];
+			adc_sum += adc_chk[i];
+		}
 
 		adc_chk[0] = bat_adc;
 
@@ -109,7 +102,7 @@ void ADC_GetStatus(void)
 	}
 	else
 	{
-        //invaild
+		// invaild
 	}
 
 	if ((G_Timer1ms.VoltStatChangeDelay >= 10U) && (motor_start == OFF))
@@ -136,5 +129,3 @@ void ADC_UpdateVoltStat(void)
 		voltage_status_change = ON;
 	}
 }
-
-

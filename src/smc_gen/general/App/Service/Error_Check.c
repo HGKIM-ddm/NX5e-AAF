@@ -348,7 +348,7 @@ void Error_Check(void)
                     }
                 }
                 Limp_Home(); 
-                Obd_DiagStatCheck();
+                //Obd_DiagStatCheck();
                 error_step = 0U;
                 break;
 

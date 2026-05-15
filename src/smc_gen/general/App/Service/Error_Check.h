@@ -6,7 +6,7 @@
 void Error_CheckAfterIGN(void);
 void Error_Check(void);
 void Error_UnknownStatus(void);
-void Obd_DiagStatCheck(void);
+//void Obd_DiagStatCheck(void);
 
 #endif
 

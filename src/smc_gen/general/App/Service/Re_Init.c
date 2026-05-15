@@ -15,13 +15,13 @@ static void Step_LoadData(void)
 	power_chk = power_chk_memory_read;
 	First_Powerchk = First_Powerchk_memory_read;
 	// only sx3k
-	OBD1_Close_Check = OBD1_Close_Check_memory_read;
-	OBD1_Open_Check = OBD1_Open_Check_memory_read;
-	OBD2_Close_Check = OBD2_Close_Check_memory_read;
-	OBD2_Open_Check = OBD2_Open_Check_memory_read;
-	OBD3_Close_Check = OBD3_Close_Check_memory_read;
-	OBD3_Open_Check = OBD3_Open_Check_memory_read;
-	OBD_Init();
+	// OBD1_Close_Check = OBD1_Close_Check_memory_read;
+	// OBD1_Open_Check = OBD1_Open_Check_memory_read;
+	// OBD2_Close_Check = OBD2_Close_Check_memory_read;
+	// OBD2_Open_Check = OBD2_Open_Check_memory_read;
+	// OBD3_Close_Check = OBD3_Close_Check_memory_read;
+	// OBD3_Open_Check = OBD3_Open_Check_memory_read;
+	// OBD_Init();
 }
 
 static void Step_Check(void)
@@ -163,9 +163,7 @@ void Step_InitAndCheck(void)
 			if (((motor_start == OFF) && (AAFx_Position_Status != FlapMoving_Status) && (AAFx_InitStatus != DURING_INITIALIZATION)))
 			{
 				Position_Temporary_write();
-				AAF_Tx_Position = UNKOWN_POSITION;
-				AAFx_Position_Status = Unknown_Status;
-				AAFx_InitStatus = DURING_INITIALIZATION;
+
 				IGN_Chk = 2U;
 			}
 		}

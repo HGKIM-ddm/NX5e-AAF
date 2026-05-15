@@ -11,25 +11,25 @@ static void Mode_Check(void)
     {
         Operating_Mode();
 
-        if (Obd_Position_Turn == 0U)
-        {
-            Obd_PositionStat1();
-        }
-        else if (Obd_Position_Turn == 1000U)
-        {
-            Obd_PositionStat2();
-        }
-        else if (Obd_Position_Turn == 2000U)
-        {
-            Obd_PositionStat3();
-        }
+        // if (Obd_Position_Turn == 0U)
+        // {
+        //     Obd_PositionStat1();
+        // }
+        // else if (Obd_Position_Turn == 1000U)
+        // {
+        //     Obd_PositionStat2();
+        // }
+        // else if (Obd_Position_Turn == 2000U)
+        // {
+        //     Obd_PositionStat3();
+        // }
 
-        Obd_Position_Turn++;
+        // Obd_Position_Turn++;
 
-        if (Obd_Position_Turn >= 3000U)
-        {
-            Obd_Position_Turn = 0U;
-        }
+        // if (Obd_Position_Turn >= 3000U)
+        // {
+        //     Obd_Position_Turn = 0U;
+        // }
     }
     else if (AAF_Maximum_Torque_Test_Mode == ON)
     {

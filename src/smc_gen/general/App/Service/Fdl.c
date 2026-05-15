@@ -51,12 +51,12 @@ void FDL_Write(void)
 	power_chk_memory_write = power_chk;
 	First_Powerchk_memory_write = First_Powerchk;
 	// only sx3k
-	OBD1_Close_Check_memory_write = OBD1_Close_Check;
-	OBD1_Open_Check_memory_write = OBD1_Open_Check;
-	OBD2_Close_Check_memory_write = OBD2_Close_Check;
-	OBD2_Open_Check_memory_write = OBD2_Open_Check;
-	OBD3_Close_Check_memory_write = OBD3_Close_Check;
-	OBD3_Open_Check_memory_write = OBD3_Open_Check;
+	// OBD1_Close_Check_memory_write = OBD1_Close_Check;
+	// OBD1_Open_Check_memory_write = OBD1_Open_Check;
+	// OBD2_Close_Check_memory_write = OBD2_Close_Check;
+	// OBD2_Open_Check_memory_write = OBD2_Open_Check;
+	// OBD3_Close_Check_memory_write = OBD3_Close_Check;
+	// OBD3_Open_Check_memory_write = OBD3_Open_Check;
 
 	// w_buff[0] = close_memory_write & 0x00FFU; // write 2byte read 4byte ?븯?쐞
 	// w_buff[1] = (close_memory_write & 0xFF00U) >> 8U;
@@ -144,23 +144,23 @@ void FDL_Write(void)
 	w_buff[22] = First_Powerchk_memory_write & 0x00FFU;
 	w_buff[23] = (First_Powerchk_memory_write & 0xFF00U) >> 8U;
 
-	w_buff[24] = OBD1_Close_Check_memory_write & 0x00FFU;
-	w_buff[25] = (OBD1_Close_Check_memory_write & 0xFF00U) >> 8U;
+	// w_buff[24] = OBD1_Close_Check_memory_write & 0x00FFU;
+	// w_buff[25] = (OBD1_Close_Check_memory_write & 0xFF00U) >> 8U;
 
-	w_buff[26] = OBD1_Open_Check_memory_write & 0x00FFU;
-	w_buff[27] = (OBD1_Open_Check_memory_write & 0xFF00U) >> 8U;
+	// w_buff[26] = OBD1_Open_Check_memory_write & 0x00FFU;
+	// w_buff[27] = (OBD1_Open_Check_memory_write & 0xFF00U) >> 8U;
 
-	w_buff[28] = OBD2_Close_Check_memory_write & 0x00FFU;
-	w_buff[29] = (OBD2_Close_Check_memory_write & 0xFF00U) >> 8U;
+	// w_buff[28] = OBD2_Close_Check_memory_write & 0x00FFU;
+	// w_buff[29] = (OBD2_Close_Check_memory_write & 0xFF00U) >> 8U;
 
-	w_buff[30] = OBD2_Open_Check_memory_write & 0x00FFU;
-	w_buff[31] = (OBD2_Open_Check_memory_write & 0xFF00U) >> 8U;
+	// w_buff[30] = OBD2_Open_Check_memory_write & 0x00FFU;
+	// w_buff[31] = (OBD2_Open_Check_memory_write & 0xFF00U) >> 8U;
 
-	w_buff[32] = OBD3_Close_Check_memory_write & 0x00FFU;
-	w_buff[33] = (OBD3_Close_Check_memory_write & 0xFF00U) >> 8U;
+	// w_buff[32] = OBD3_Close_Check_memory_write & 0x00FFU;
+	// w_buff[33] = (OBD3_Close_Check_memory_write & 0xFF00U) >> 8U;
 
-	w_buff[34] = OBD3_Open_Check_memory_write & 0x00FFU;
-	w_buff[35] = (OBD3_Open_Check_memory_write & 0xFF00U) >> 8U;
+	// w_buff[34] = OBD3_Open_Check_memory_write & 0x00FFU;
+	// w_buff[35] = (OBD3_Open_Check_memory_write & 0xFF00U) >> 8U;
 
 	ret = function_FDL_erease(0U, 1U);
 
@@ -178,7 +178,7 @@ void FDL_Write(void)
 		}
 	}
 
-	ret = function_FDL_write(w_buff, 0, 18); // size = word(2byte)
+	ret = function_FDL_write(w_buff, 0, 12); // size = word(2byte)
 
 	G_Timer1msFlag.FdlErrorCheckFlag = 1;
 
@@ -201,7 +201,7 @@ void FDL_Write(void)
 void FDL_Read(void)
 {
 
-	ret = function_FDL_read(r_buff, 0U, 18U);
+	ret = function_FDL_read(r_buff, 0U, 12U);
 
 	G_Timer1msFlag.FdlErrorCheckFlag = 1U;
 
@@ -281,17 +281,17 @@ void FDL_Read(void)
 	/* OBD data                      */
 	/* ============================= */
 
-	OBD1_Close_Check_memory_read = (uint32_t)r_buff[6U] & 0xFFFFU;
+	// OBD1_Close_Check_memory_read = (uint32_t)r_buff[6U] & 0xFFFFU;
 
-	OBD1_Open_Check_memory_read = (uint32_t)(r_buff[6U] >> 16) & 0xFFFFU;
+	// OBD1_Open_Check_memory_read = (uint32_t)(r_buff[6U] >> 16) & 0xFFFFU;
 
-	OBD2_Close_Check_memory_read = (uint32_t)r_buff[7U] & 0xFFFFU;
+	// OBD2_Close_Check_memory_read = (uint32_t)r_buff[7U] & 0xFFFFU;
 
-	OBD2_Open_Check_memory_read = (uint32_t)(r_buff[7U] >> 16) & 0xFFFFU;
+	// OBD2_Open_Check_memory_read = (uint32_t)(r_buff[7U] >> 16) & 0xFFFFU;
 
-	OBD3_Close_Check_memory_read = (uint32_t)r_buff[8U] & 0xFFFFU;
+	// OBD3_Close_Check_memory_read = (uint32_t)r_buff[8U] & 0xFFFFU;
 
-	OBD3_Open_Check_memory_read = (uint32_t)(r_buff[8U] >> 16) & 0xFFFFU;
+	// OBD3_Open_Check_memory_read = (uint32_t)(r_buff[8U] >> 16) & 0xFFFFU;
 	if (position_status_memory_read >= Memory_Range_Break)
 	{
 		position_status_memory_read = Memory_Range_Init;
@@ -306,6 +306,10 @@ void Position_Temporary_write(void)
 	AAF_Tx_Position_Temporary = AAF_Tx_Position;
 	AAFx_Position_Status_Temporary = AAFx_Position_Status;
 	AAFx_InitStatus_Temporary = AAFx_InitStatus;
+
+	AAF_Tx_Position = UNKOWN_POSITION;
+	AAFx_Position_Status = Unknown_Status;
+	AAFx_InitStatus = DURING_INITIALIZATION;
 }
 void Position_Temporary_read(void)
 {

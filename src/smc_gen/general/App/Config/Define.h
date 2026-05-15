@@ -664,33 +664,33 @@
 /***********************************************************************************************************************
  * 9. Only SX3k (OBD Sensor...etc)
  ***********************************************************************************************************************/
-#define ADC_Recovery_Time 500U
-#define OBD_tolerance 5U // 5%
-#define OBD_ADC_MAX_LIMIT 3550U
-#define OBD_ADC_MIN_LIMIT 500U
+// #define ADC_Recovery_Time 500U
+// #define OBD_tolerance 5U // 5%
+// #define OBD_ADC_MAX_LIMIT 3550U
+// #define OBD_ADC_MIN_LIMIT 500U
 
-#define OBD_BAT_SHORT_LIMIT 3900U
-#define OBD_GND_SHORT_LIMIT 10U
-#define OBD_Open_MIN_LIMIT 1U
-#define OBD_Open_LIMIT 400U
+// #define OBD_BAT_SHORT_LIMIT 3900U
+// #define OBD_GND_SHORT_LIMIT 10U
+// #define OBD_Open_MIN_LIMIT 1U
+// #define OBD_Open_LIMIT 400U
 
-#define POSITION_CLOSE_THRESHOLD 45U
-#define POSITION_OPEN_THRESHOLD 55U
-#define POSITION_OFFSET 5U
+// #define POSITION_CLOSE_THRESHOLD 45U
+// #define POSITION_OPEN_THRESHOLD 55U
+// #define POSITION_OFFSET 5U
 
-#define NO_SNSR1 0U
-#define USE_SNSR1 1U
-#define SNSR1_Open 1U
-#define SNSR1_Close 2U
+// #define NO_SNSR1 0U
+// #define USE_SNSR1 1U
+// #define SNSR1_Open 1U
+// #define SNSR1_Close 2U
 
-#define NO_SNSR2 0U
-#define USE_SNSR2 1U
-#define SNSR2_Open 1U
-#define SNSR2_Close 2U
+// #define NO_SNSR2 0U
+// #define USE_SNSR2 1U
+// #define SNSR2_Open 1U
+// #define SNSR2_Close 2U
 
-#define NO_SNSR3 0U
-#define USE_SNSR3 1U
-#define SNSR3_Open 1U
-#define SNSR3_Close 2U
+// #define NO_SNSR3 0U
+// #define USE_SNSR3 1U
+// #define SNSR3_Open 1U
+// #define SNSR3_Close 2U
 
 #endif

@@ -77,7 +77,6 @@ void main(void)
 	Lin_SlaveInit();
 	R_Config_WDT0_Create();
 	R_Config_WDT0_Restart();
-	R_Config_TAUJ1_Start();
 	AAF_Init();
 
 	while (1)
