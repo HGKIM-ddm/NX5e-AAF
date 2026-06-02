@@ -101,9 +101,9 @@ static void SpiCheck_Delay(void)
     {
         spi_action_step = 2U;
         // DRV_Off();
-        
-        // spi_fail = 1; 
-        
+
+        // spi_fail = 1;
+
         G_Timer1ms.SpiErrorCheck = 0U;
         G_Timer1msFlag.SpiErrorCheckFlag = 0U;
     }
@@ -171,7 +171,7 @@ static void SpiCheck_Init(void)
         SpiCheck_ExecuteVoltageChange();
     }
     // Condition 2: Motor ON (Fast Polling)
-    else if ((motor_start == ON) && (G_Timer1ms.Spi >= 2U) && (G_Timer1us.Motor <= (STEP_TIME_1250RPM / 2U)) && (spi_action_step == 0U))
+    else if ((motor_start == ON) && (G_Timer1ms.Spi >= 2U) && (spi_action_step == 0U))
     {
         SpiCheck_SendCommand();
     }
@@ -179,7 +179,7 @@ static void SpiCheck_Init(void)
     else if ((G_Timer1ms.Spi >= 50U) && (G_Timer1us.Motor == 0U) && (spi_action_step == 0U))
     {
 
-        SpiCheck_CurrentLimitingSelect(); 
+        SpiCheck_CurrentLimitingSelect();
 
         if (voltage_status_change == OFF)
         {
@@ -194,26 +194,26 @@ static void SpiCheck_Init(void)
 
 static void SpiCheck_CurrentLimitingSelect(void)
 {
-	if ((voltage_status_spi == LOW_VOLTAGE_1ST) && (Operating_flag == 0U))
-	{
-		if (adc_avr >= ADC_VOLTAGE_10_5V)
-		{
-			voltage_status_spi = NORMAL_VOLTAGE;
-			voltage_status_change = ON;
-		}
-	}
-	else if ((voltage_status_spi == NORMAL_VOLTAGE) && (Operating_flag == 0U))
-	{
-		if (adc_avr <= ADC_VOLTAGE_10V)
-		{
-			voltage_status_spi = LOW_VOLTAGE_1ST;
-			voltage_status_change = ON;
-		}
-	}
-	else
-	{
-		//invaild
-	}
+    if ((voltage_status_spi == LOW_VOLTAGE_1ST) && (Operating_flag == 0U))
+    {
+        if (adc_avr >= ADC_VOLTAGE_10_5V)
+        {
+            voltage_status_spi = NORMAL_VOLTAGE;
+            voltage_status_change = ON;
+        }
+    }
+    else if ((voltage_status_spi == NORMAL_VOLTAGE) && (Operating_flag == 0U))
+    {
+        if (adc_avr <= ADC_VOLTAGE_10V)
+        {
+            voltage_status_spi = LOW_VOLTAGE_1ST;
+            voltage_status_change = ON;
+        }
+    }
+    else
+    {
+        // invaild
+    }
 }
 
 /***********************************************************************************************************************
@@ -228,7 +228,7 @@ void Spi_Check(void)
 {
     switch (spi_action_step)
     {
-        
+
     case 0:
         SpiCheck_Init();
         break;
@@ -250,5 +250,3 @@ void Spi_Check(void)
         break;
     }
 }
-
-

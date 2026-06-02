@@ -32,7 +32,7 @@ static void LinSleep_Reset(void)
     // Case 0에만 있는 추가 초기화
     G_Timer1msFlag.InitFailCheckFlag = 0U;
     G_Timer1ms.InitFailCheck = 0U;
-
+    LIN_Recover = 0U;
     lin_sleep_step = 1U;
 }
 
@@ -211,13 +211,12 @@ static void LinSleep_CheckCompletion(void)
     {
         LinSleep_StopMotorAndReset(); // 공통 정지
 
+        // Operate_SelectTxPostion();
+
         AAF_Tx_Position = OPEN;
         AAFx_Position_Status = Open_Status;
         AAFx_InitStatus = NORMAL_FINISHED_INITIALIZATION;
-
-        Operate_SelectTxPostion();
         aaf_step = FINISHED_OPERATE;
-
         lin_sleep_step = 8U;
     }
     // 조건 2: 외장형 CLOSE 방향 Stopper 도착
@@ -234,13 +233,12 @@ static void LinSleep_CheckCompletion(void)
     else if ((Last_aaf_action == CLOSE) && (step_position >= (step_position_close - limit_step_position)) && (AAFx_Type == INTERNAL_TYPE))
     {
         LinSleep_StopMotorAndReset(); // 공통 정지
-
         AAF_Tx_Position = CLOSE;
         AAFx_Position_Status = Close_Status;
         AAFx_InitStatus = NORMAL_FINISHED_INITIALIZATION;
-
         motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE;
         motor_stall_flag = MOTOR_NORMAL;
+
         lin_sleep_step = 8U;
     }
     // 조건 4: 스톨 발생
@@ -322,7 +320,7 @@ static void LinSleep_Stall_Open(void)
     motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE;
     G_Timer1ms.Spi = 0U;
 
-    lin_sleep_step = 7;
+    lin_sleep_step = 7U;
 }
 /***********************************************************************************************************************
  * Function Name: LinSleep_Stall_Stop
@@ -343,20 +341,30 @@ static void LinSleep_Stall_Stop(void)
         AAFx_SNSR2_Position = Initial_Value;
         AAFx_SNSR3_Position = Initial_Value;
         AAFx_SNSR4_Position = Initial_Value;
-        lin_sleep_step = 8;
+        lin_sleep_step = 8U;
     }
     else if ((step_position <= (step_position_close - limit_step_position)) && (Sleep_Stall == OFF))
     {
         LinSleep_StopMotorAndReset(); // 공통 정지
+        if ((EngRunSta == 0x00U) && (HevRdy == 0x00U) && (AAF_LINOut == 0x00U))
+        {
+            AAF_Tx_Position_Temporary = CLOSE;
+            AAFx_Position_Status_Temporary = Close_Status;
+            AAFx_InitStatus_Temporary = NORMAL_FINISHED_INITIALIZATION;
 
-        AAF_Tx_Position = CLOSE;
-        AAFx_Position_Status = Close_Status;
-        AAFx_InitStatus = NORMAL_FINISHED_INITIALIZATION;
+            IGN_Chk = 2U;
+        }
+        else
+        {
+            AAF_Tx_Position = CLOSE;
+            AAFx_Position_Status = Close_Status;
+            AAFx_InitStatus = NORMAL_FINISHED_INITIALIZATION;
+        }
 
-        Operate_SelectTxPostion();
-        aaf_step = FINISHED_OPERATE;
+        // Operate_SelectTxPostion();
+        // aaf_step = FINISHED_OPERATE;
         G_Timer1ms.Spi = 0;
-        lin_sleep_step = 8;
+        lin_sleep_step = 8U;
     }
     else
     {

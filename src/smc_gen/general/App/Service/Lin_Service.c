@@ -52,10 +52,13 @@ static void Lin_Wakeup(void)
             }
         }
     }
-    if ((LIN_Recover == 1U) && (aaf_step == CHECK_AAF_CONDITION) && ((EngRunSta == 0x01U) || (HevRdy == 0x01U)))
+    if (((LIN_Recover == 1U) || (Sleep_Stall == ON)) && ((EngRunSta == 0x01U) || (HevRdy == 0x01U)))
     {
-        fail_safety_flag = ON;
-        fail_safety_step = 2U;
+        // fail_safety_flag = ON;
+        // fail_safety_step = 2U;
+        Re_Init();
+        LIN_Recover = 0U;
+        Sleep_Stall = OFF;
     }
 }
 
@@ -171,7 +174,7 @@ void Lin_CalculateVerifyChecksum(uint8_t is_response_received)
     if ((is_response_received == 0x02U) && (AAF_LIN_ChkSum_CHK_value == Req_ChkSum_Rx))
     {
         AAF_LIN_ChkSum_CHK = PASS;
-        if (G_Timer1ms.IgnCheck >= 500U)
+        if ((G_Timer1ms.IgnCheck >= 500U) && ((EngRunSta == 0x01u) || (HevRdy == 0x01u)))
         {
             if (LIMP_HOME_Count >= 4U)
                 LIMP_HOME_Count -= 4U;
@@ -182,7 +185,7 @@ void Lin_CalculateVerifyChecksum(uint8_t is_response_received)
     else if ((is_response_received == 0x02U) && (AAF_LIN_ChkSum_CHK_value != Req_ChkSum_Rx))
     {
         AAF_LIN_ChkSum_CHK = FAIL;
-        if (G_Timer1ms.IgnCheck >= 500U)
+        if ((G_Timer1ms.IgnCheck >= 500U) && ((EngRunSta == 0x01u) || (HevRdy == 0x01u)))
         {
             if (LIMP_HOME_Count <= 158U)
                 LIMP_HOME_Count += 2U;

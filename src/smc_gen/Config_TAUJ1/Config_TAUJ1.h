@@ -54,5 +54,7 @@ void R_Config_TAUJ1_Start(void);
 void R_Config_TAUJ1_Stop(void);
 void R_Config_TAUJ1_Create_UserInit(void);
 /* Start user code for function. Do not edit comment generated here */
+// 1/32STEP 4.5RPM 0x0000056CUL, 0x000002B7UL    1/8STEP 5RPM 0x00001387UL, 0x000009C4UL
+// 1/8STEP 4.5RPM 0x000015B3UL, 0x00000ADAUL 1/64STEP 4.5RPM 0x000002B5UL, 0x0000015BUL
 /* End user code. Do not edit comment generated here */
 #endif

@@ -28,11 +28,11 @@ uint16_t tx_16bit_spi[11] = {
 	0x4000, // [0] (R) FAULT Status
 	0x4200, // [1] (R) DIAG Status 1
 	0x4400, // [2] (R) DIAG Status 2
-	0x06A0, // [3] ?  瑜섏젣?
+	0x0690, // [3] ?  瑜섏젣?
 	0x080F, // [4] (RW)CTRL 2
 	0x0A07, // [5] (RW)CTRL 3
 	0x0C3E, // [6] (RW)CTRL 4	3E (open load on) 0C36 0C3A
-	0x0E10, // [7] (RW)CTRL 5
+	0x0E00, // [7] (RW)CTRL 5
 	0x1000, // [8] (RW)CTRL 6	stall threshold
 	0x5200, // [9] (R) CTRL 7	stall count
 	0x5400	// [10](R) CTRL 8
@@ -48,7 +48,7 @@ uint16_t tx_16bit_spi_current_limit[16] = {
 	0x0661,
 	0x0671,
 	0x0681,
-	0x06A0,
+	0x0690,
 	0x06A1,
 	0x06B1,
 	0x06C1,
@@ -57,8 +57,8 @@ uint16_t tx_16bit_spi_current_limit[16] = {
 	0x06F1};
 
 uint16_t tx_16bit_spi_slew_change[2] = {
-	0x06A0,
-	0x06A1};
+	0x0690,
+	0x06C0};
 
 uint16_t rx_16bit_spi_id[11] = {
 	0x4000,
@@ -78,7 +78,7 @@ uint16_t rx_16bit_spi[11] = {
 };
 
 uint16_t fault_clear[1] = {
-	0x0CBA};
+	0x0CBE};
 
 /* 2.2 Motor Control Variables */
 unsigned int motor_start = OFF;

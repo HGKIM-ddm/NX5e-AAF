@@ -124,10 +124,6 @@ static void Lin_DiagAction(void)
 		Slave_SwData[6] = (uint8_t)(0x63u);
 		Slave_SwData[7] = (uint8_t)(0xFFu);
 	}
-	else if (SW_Chk == 2U)
-	{
-		MCU_Sleep();
-	}
 	else if (SW_Chk == 3U)
 	{
 		Slave_SwData[0] = (uint8_t)(0x26u);
@@ -481,6 +477,9 @@ void Lin_RxCheck(void)
 	Lin_DiagRx();
 
 	ReqRespAAFID = (unsigned int)((Slave_RxData1[0U] & 0xC0U) >> 6U);
+	EngRunSta = (unsigned int)((Slave_RxData1[4U] & 0x30U) >> 4U);
+	HevRdy = (unsigned int)((Slave_RxData1[4U] & 0x0CU) >> 2U);
+	AAF_LINOut = (unsigned int)(Slave_RxData1[4U] & 0x03U);
 	if (AAF_LIN_ChkSum_CHK == PASS)
 	{
 		// ReqRespAAFID = (unsigned int)((Slave_RxData1[0] & 0xC0U) >> 6U);

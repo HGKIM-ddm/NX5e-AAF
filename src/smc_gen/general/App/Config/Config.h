@@ -379,5 +379,6 @@ extern unsigned int AAFx_Position_Status_Temporary;
 extern unsigned int AAFx_InitStatus_Temporary;
 extern unsigned int AAFx_Last_Command;
 extern unsigned int LIN_Recover;
+
 #endif
 
