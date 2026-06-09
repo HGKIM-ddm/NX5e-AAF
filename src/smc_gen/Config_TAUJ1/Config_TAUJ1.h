@@ -39,8 +39,8 @@ Macro definitions (Register bit)
 /***********************************************************************************************************************
 Macro definitions
 ***********************************************************************************************************************/
-#define _TAUJ1_CHANNEL0_COMPARE_VALUE                            (0x0000056CUL) /* Data register for compare values */
-#define _TAUJ1_CHANNEL1_COMPARE_VALUE                            (0x000002B7UL) /* Data register for compare values */
+#define _TAUJ1_CHANNEL0_COMPARE_VALUE                            (0x000015B3UL) /* Data register for compare values */
+#define _TAUJ1_CHANNEL1_COMPARE_VALUE                            (0x00000ADAUL) /* Data register for compare values */
 
 /***********************************************************************************************************************
 Typedef definitions

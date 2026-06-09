@@ -30,7 +30,7 @@ uint16_t tx_16bit_spi[11] = {
 	0x4400, // [2] (R) DIAG Status 2
 	0x0690, // [3] ?  瑜섏젣?
 	0x080F, // [4] (RW)CTRL 2
-	0x0A07, // [5] (RW)CTRL 3
+	0x0A05, // [5] (RW)CTRL 3
 	0x0C3E, // [6] (RW)CTRL 4	3E (open load on) 0C36 0C3A
 	0x0E00, // [7] (RW)CTRL 5
 	0x1000, // [8] (RW)CTRL 6	stall threshold
@@ -58,7 +58,7 @@ uint16_t tx_16bit_spi_current_limit[16] = {
 
 uint16_t tx_16bit_spi_slew_change[2] = {
 	0x0690,
-	0x06C0};
+	0x0691};
 
 uint16_t rx_16bit_spi_id[11] = {
 	0x4000,
