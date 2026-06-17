@@ -108,6 +108,8 @@ void r_Config_TAUD0_3_interrupt(void)
     TIMER_1MS(AdcRecoveryCheck);
     TIMER_1MS(LinSleepStall);
     TIMER_1MS(IGNOffCheck);
+    TIMER_1MS(Freeze_Hold_ModeChk);
+
 // Extra Timer
 #ifdef UDS
     uds_1ms++;

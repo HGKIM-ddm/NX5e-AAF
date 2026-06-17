@@ -12,12 +12,14 @@
  ***********************************************************************************************************************/
 static void Init_StartMotor(uint8_t next_step, uint8_t dir, uint8_t is_case0)
 {
-    if (dir == OPEN) Motor_Open2();
-    else             Motor_Close2();
+    if (dir == OPEN)
+        Motor_Open2();
+    else
+        Motor_Close2();
 
     Drv8889_On();
     motor_start = ON;
-    
+
     // (Case 0, 6, 9)
     motor_stall_flag = MOTOR_NORMAL;
     G_Timer1ms.StallTime = 0U;
@@ -27,7 +29,7 @@ static void Init_StartMotor(uint8_t next_step, uint8_t dir, uint8_t is_case0)
     AAFx_Position_Status = Unknown_Status;
     antipinch_previous_action = INITIALIZATION;
     G_Timer1ms.InitCheck = 0U;
-    G_Timer1msFlag.InitCheckFlag = 1U; 
+    G_Timer1msFlag.InitCheckFlag = 1U;
 
     // (Case 0)
     if (is_case0 == TRUE)
@@ -39,7 +41,6 @@ static void Init_StartMotor(uint8_t next_step, uint8_t dir, uint8_t is_case0)
 
     init_move_step = next_step;
 }
-
 
 /***********************************************************************************************************************
  * Function Name: Init_StallCheck
@@ -54,8 +55,8 @@ static void Init_StallCheck(uint8_t next_step, uint8_t retry_step, uint8_t dir)
     {
         Drv8889_Off();
         motor_start = OFF;
-        
-        if (dir == CLOSE) 
+
+        if (dir == CLOSE)
         {
             step_position_close = step_position;
 
@@ -91,7 +92,7 @@ static void Init_StallCheck(uint8_t next_step, uint8_t retry_step, uint8_t dir)
     }
     else
     {
-        //invaild
+        // invaild
     }
 }
 
@@ -112,8 +113,8 @@ static void Init_Delay(uint8_t next_step)
         G_Timer1ms.InitMove = 0U;
         init_move_step = next_step;
 
-        G_Timer1msFlag.InitCheckFlag = 0U; 
-        G_Timer1ms.InitCheck = 0U;      
+        G_Timer1msFlag.InitCheckFlag = 0U;
+        G_Timer1ms.InitCheck = 0U;
     }
 }
 
@@ -126,27 +127,27 @@ static void Init_Delay(uint8_t next_step)
  ***********************************************************************************************************************/
 static void Init_MoveLimitPosition(void)
 {
-	if (step_position <= step_position_open + limit_step_position)
-	{
-		Motor_Close2();						 // dir CLOSE
-		Drv8889_On();							 // drv on
-		motor_start = ON;					 // step start
-		//G_Timer1msFlag.External10sCheckFlag = ON; // 10s chk timer on
+    if (step_position <= step_position_open + limit_step_position)
+    {
+        Motor_Close2();   // dir CLOSE
+        Drv8889_On();     // drv on
+        motor_start = ON; // step start
+        // G_Timer1msFlag.External10sCheckFlag = ON; // 10s chk timer on
 
-		motor_stall_flag = MOTOR_NORMAL; // stall reset
-		// G_Timer1msFlag.StallTimeFlag = 0;			 stall reset
-		G_Timer1ms.StallTime = 0U;							  // stall reset
-		motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE; // stall reset
-		G_Timer1ms.Spi = 0U;
+        motor_stall_flag = MOTOR_NORMAL; // stall reset
+        // G_Timer1msFlag.StallTimeFlag = 0;			 stall reset
+        G_Timer1ms.StallTime = 0U;                        // stall reset
+        motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE; // stall reset
+        G_Timer1ms.Spi = 0U;
 
-		init_move_step = 14U;
-	}
-	else
-	{
-		// G_Timer1msFlag.External10sCheckFlag = ON; // 10s chk timer on
+        init_move_step = 14U;
+    }
+    else
+    {
+        // G_Timer1msFlag.External10sCheckFlag = ON; // 10s chk timer on
 
-		init_move_step = 14U;
-	}
+        init_move_step = 14U;
+    }
 }
 
 /***********************************************************************************************************************
@@ -159,12 +160,12 @@ static void Init_MoveLimitPosition(void)
 static void Init_CheckLimitArrival(void)
 {
     // check stall
-    uint8_t is_stall_error = ((motor_stall_flag == MOTOR_STALL) || 
-                              ((step_position_close - step_position_open) <= STEP_POSITION_MINIMUM_RANGE)) && 
+    uint8_t is_stall_error = ((motor_stall_flag == MOTOR_STALL) ||
+                              ((step_position_close - step_position_open) <= STEP_POSITION_MINIMUM_RANGE)) &&
                              (stall_test_mode == 0U);
 
     // check obd
-   // uint8_t is_obd_error = (((OBD1_Open_Check >= 3700U) || (OBD1_Close_Check >= 3700U)) && (SNSR1_Check == USE_SNSR1)) || 
+    // uint8_t is_obd_error = (((OBD1_Open_Check >= 3700U) || (OBD1_Close_Check >= 3700U)) && (SNSR1_Check == USE_SNSR1)) ||
     //                       (((OBD2_Open_Check >= 3700U) || (OBD2_Close_Check >= 3700U)) && (SNSR2_Check == USE_SNSR2));
 
     // stall or obd
@@ -176,17 +177,26 @@ static void Init_CheckLimitArrival(void)
         motor_step_value = STEP_TIME_1000RPM;
         G_Timer1msFlag.InitFailCheckFlag = 0U;
         G_Timer1ms.InitFailCheck = 0U;
-        
-        if (fail_safety_step == 0U) { fail_safety_flag = ON; }
-        if (fail_safety_step == 4U) { fail_safety_step = 5U; }
-        else if (fail_safety_step == 9U) { fail_safety_step = 10U; }
+
+        if (fail_safety_step == 0U)
+        {
+            fail_safety_flag = ON;
+        }
+        if (fail_safety_step == 4U)
+        {
+            fail_safety_step = 5U;
+        }
+        else if (fail_safety_step == 9U)
+        {
+            fail_safety_step = 10U;
+        }
     }
     else if (step_position >= step_position_open + limit_step_position)
     {
         Drv8889_Off();
         motor_start = OFF;
         G_Timer1msFlag.StallTimeFlag = 0U;
-        G_Timer1ms.StallTime = 0U; 
+        G_Timer1ms.StallTime = 0U;
         G_Timer1msFlag.External10sCheckFlag = OFF;
         G_Timer1ms.External10sCheck = 0U;
         softstart_complete = OFF;
@@ -211,7 +221,7 @@ static void Init_CheckLimitArrival(void)
 /***********************************************************************************************************************
  * Function Name: InitMove_Cycle1
  * Description  : case 0 ~ 9
- * Called By    : Init_move 
+ * Called By    : Init_move
  * Arguments    : void
  * Return Value : void
  ***********************************************************************************************************************/
@@ -248,7 +258,7 @@ static void InitMove_Cycle1(void)
 /***********************************************************************************************************************
  * Function Name: InitMove_Cycle2
  * Description  : case 10 ~ 15
- * Called By    : Init_move 
+ * Called By    : Init_move
  * Arguments    : void
  * Return Value : void
  ***********************************************************************************************************************/
@@ -266,8 +276,8 @@ static void InitMove_Cycle2(void)
         limit_step_position = (step_position_close - step_position_open) * AAF_ERROR_ANGLE / AAF_FULL_ANGLE;
         // open_1st_step_position = (step_position_close - step_position_open) * AAF_1ST_OPEN_ANGLE / AAF_FULL_ANGLE;  ICE NOT USED
         // open_2nd_step_position = (step_position_close - step_position_open) * AAF_2ST_OPEN_ANGLE / AAF_FULL_ANGLE;  ICE NOT USED
-        //OBD_Init();
-		init_move_step = 13U;
+        // OBD_Init();
+        init_move_step = 13U;
         break;
     case 13:
         Init_MoveLimitPosition();
@@ -279,13 +289,15 @@ static void InitMove_Cycle2(void)
         G_Timer1msFlag.InitMoveFlag = 1U;
         if (G_Timer1ms.InitMove >= 500U)
         {
-			wake_up_motor_range_init_chk = COMPLETE;
-			G_Timer1msFlag.InitMoveFlag = 0U;
-			G_Timer1ms.InitMove = 0U;
-			evrdy_on_flag = ON;
-			motor_Short_chk_count = 0U;
-			motor_Open_chk_count = 0U;
-			init_move_step = 19U;
+            wake_up_motor_range_init_chk = COMPLETE;
+            G_Timer1msFlag.InitMoveFlag = 0U;
+            G_Timer1ms.InitMove = 0U;
+            evrdy_on_flag = ON;
+            motor_Short_chk_count = 0U;
+            motor_Open_chk_count = 0U;
+            Freeze_Hold_Mode_Count = 0U;
+            Init_Fail_Chk = 0U;
+            init_move_step = 19U;
         }
         break;
     default:

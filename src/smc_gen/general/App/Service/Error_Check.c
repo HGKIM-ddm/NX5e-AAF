@@ -300,7 +300,61 @@ void Error_CheckAfterIGN(void)
         }
     }
 }
+void Error_UnknownStatus(void)
+{
+    Drv8889_Off();
+    motor_start = OFF;
+    G_Timer1msFlag.StallTimeFlag = 0U;
+    G_Timer1ms.StallTime = 0U;
+    softstart_complete = OFF;
+    motor_step_value = STEP_TIME_1000RPM;
+    AAF_Tx_Position = UNKOWN_POSITION;
+    AAFx_Position_Status = Unknown_Status;
+    AAFx_InitStatus = DURING_INITIALIZATION;
+    AAFx_SNSR1_Position = Initial_Value;
+    AAFx_SNSR2_Position = Initial_Value;
+    AAFx_SNSR3_Position = Initial_Value;
+    AAFx_SNSR4_Position = Initial_Value;
+    aaf_step = FINISHED_OPERATE;
+}
+void Freeze_Hold_Mode_Recognition(void)
+{
+    if (AmbTempSta == 0x01U)
+    {
+        if (Freeze_Hold_Mode_Recognition_Chk == OFF)
+        {
+            G_Timer1ms.Freeze_Hold_ModeChk = 0U;
+            G_Timer1msFlag.Freeze_Hold_ModeChkFlag = 1U;
+            Freeze_Hold_Mode_Recognition_Chk = ON;
+        }
+        if (G_Timer1ms.Freeze_Hold_ModeChk >= 10000)
+        {
+            Freeze_Hold_Mode = Freeze_Hold_On;
+            G_Timer1msFlag.Freeze_Hold_ModeChkFlag = 0U;
+            G_Timer1ms.Freeze_Hold_ModeChk = 10000U;
+        }
+    }
+    else
+    {
+        if (Freeze_Hold_Mode_Recognition_Chk == ON)
+        {
+            G_Timer1ms.Freeze_Hold_ModeChk = 0U;
+            G_Timer1msFlag.Freeze_Hold_ModeChkFlag = 1U;
+            Freeze_Hold_Mode_Recognition_Chk = OFF;
+        }
 
+        if (G_Timer1ms.Freeze_Hold_ModeChk >= 10000)
+        {
+            Freeze_Hold_Mode = Freeze_Hold_Off;
+            G_Timer1msFlag.Freeze_Hold_ModeChkFlag = 0U;
+            G_Timer1ms.Freeze_Hold_ModeChk = 10000U;
+        }
+    }
+}
+void Freeze_Hold_Start(void)
+{
+    Error_UnknownStatus(); // open stopper re
+}
 /***********************************************************************************************************************
  * Function Name: Error_Check
  * Description  : 외부 보호 요청, 전압, 드라이버 결함, 쇼트/오픈 상태를 순차적으로 체크함
@@ -351,6 +405,7 @@ void Error_Check(void)
                 }
             }
             Limp_Home();
+            Freeze_Hold_Mode_Recognition();
             error_step = 0U;
             break;
 
@@ -363,22 +418,4 @@ void Error_Check(void)
     {
         // invaild
     }
-}
-
-void Error_UnknownStatus(void)
-{
-    Drv8889_Off();
-    motor_start = OFF;
-    G_Timer1msFlag.StallTimeFlag = 0U;
-    G_Timer1ms.StallTime = 0U;
-    softstart_complete = OFF;
-    motor_step_value = STEP_TIME_1000RPM;
-    AAF_Tx_Position = UNKOWN_POSITION;
-    AAFx_Position_Status = Unknown_Status;
-    AAFx_InitStatus = DURING_INITIALIZATION;
-    AAFx_SNSR1_Position = Initial_Value;
-    AAFx_SNSR2_Position = Initial_Value;
-    AAFx_SNSR3_Position = Initial_Value;
-    AAFx_SNSR4_Position = Initial_Value;
-    aaf_step = FINISHED_OPERATE;
 }

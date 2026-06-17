@@ -101,10 +101,6 @@ static void Lin_DiagRx(void)
 			SW_Chk = 3U;
 		}
 	}
-	else if ((Slave_RxSwData1[0U] == 0x00U) && (Slave_RxSwData1[1U] == 0xFFu) && (Slave_RxSwData1[2U] == 0xFFu) && (Slave_RxSwData1[3U] == 0xFFu) && (Slave_RxSwData1[4U] == 0xFFu) && (Slave_RxSwData1[5U] == 0xFFu) && (Slave_RxSwData1[6U] == 0xFFu) && (Slave_RxSwData1[7U] == 0xFFu))
-	{
-		SW_Chk = 2U; // GO TO SLEEP
-	}
 	else
 	{
 		SW_Chk = 0U;
@@ -414,7 +410,7 @@ static void Protection_OffMode(void)
 			EngRunSta = (unsigned int)((ID_chk_rxdata[4U] & 0x30U) >> 4U);
 			HevRdy = (unsigned int)((ID_chk_rxdata[4U] & 0x0CU) >> 2U);
 			AAF_LINOut = (unsigned int)(ID_chk_rxdata[4U] & 0x03U);
-
+			AmbTempSta = (unsigned int)((ID_chk_rxdata[4U] & 0xC0U) >> 6U);
 #ifdef ENABLE_TORQUE_TEST
 			Lin_ParseTorqueTestMode();
 #endif
@@ -446,6 +442,7 @@ static void Protection_OffMode(void)
 			EngRunSta = (unsigned int)((ID_chk_rxdata[4U] & 0x30U) >> 4U);
 			HevRdy = (unsigned int)((ID_chk_rxdata[4U] & 0x0CU) >> 2U);
 			AAF_LINOut = (unsigned int)(ID_chk_rxdata[4U] & 0x03U);
+			AmbTempSta = (unsigned int)((ID_chk_rxdata[4U] & 0xC0U) >> 6U);
 		}
 	}
 }
@@ -480,6 +477,7 @@ void Lin_RxCheck(void)
 	EngRunSta = (unsigned int)((Slave_RxData1[4U] & 0x30U) >> 4U);
 	HevRdy = (unsigned int)((Slave_RxData1[4U] & 0x0CU) >> 2U);
 	AAF_LINOut = (unsigned int)(Slave_RxData1[4U] & 0x03U);
+	AmbTempSta = (unsigned int)((ID_chk_rxdata[4U] & 0xC0U) >> 6U);
 	if (AAF_LIN_ChkSum_CHK == PASS)
 	{
 		// ReqRespAAFID = (unsigned int)((Slave_RxData1[0] & 0xC0U) >> 6U);

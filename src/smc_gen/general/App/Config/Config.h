@@ -103,6 +103,7 @@ extern unsigned int AAFx_SNSR3_Position;
 extern unsigned int AAFx_SNSR4_Position;
 extern unsigned int Req_ChkSum_Tx;
 extern unsigned int Req_Alive_Tx;
+extern unsigned int AmbTempSta;
 
 /* 2.4 Communication Flags & Status */
 extern volatile uint8_t error_status;
@@ -162,6 +163,10 @@ extern unsigned int Short_fault_check;
 extern unsigned int Open_fault_check;
 extern unsigned int motor_Short_chk_count;
 extern unsigned int motor_Open_chk_count;
+extern unsigned int Freeze_Hold_Mode;
+extern unsigned int Freeze_Hold_Mode_Recognition_Chk;
+extern unsigned int Freeze_Hold_Mode_Count;
+extern unsigned int Init_Fail_Chk;
 
 /* 2.7 Antipinch */
 extern unsigned int antipinch_step;
@@ -238,6 +243,7 @@ typedef struct
     unsigned int IgnErrorCheck;
     unsigned int LinSleepStall;
     unsigned int IGNOffCheck;
+    unsigned int Freeze_Hold_ModeChk;
 } Global_Timer1msType;
 
 typedef struct
@@ -280,6 +286,7 @@ typedef struct
     unsigned int IgnErrorCheckFlag;
     unsigned int LinSleepStallFlag;
     unsigned int IGNOffCheckFlag;
+    unsigned int Freeze_Hold_ModeChkFlag;
 } Global_Timer1msFlagType;
 
 extern Global_Timer1msType G_Timer1ms;
@@ -306,7 +313,6 @@ extern unsigned int IGN_Chk;
 extern unsigned int IGN_Chk_On;
 extern unsigned int SW_Chk;
 extern unsigned int Operating_flag;
-extern unsigned int LIN_Short_Ok;
 
 /* 3   Only SX3k*/
 // extern unsigned int OBD1_Close_Check_memory_write;

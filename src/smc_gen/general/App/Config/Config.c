@@ -222,6 +222,10 @@ unsigned int Short_fault_check = 0U;
 unsigned int Open_fault_check = 0U;
 unsigned int motor_Short_chk_count = 0U;
 unsigned int motor_Open_chk_count = 0U;
+unsigned int Freeze_Hold_Mode = 0U;
+unsigned int Freeze_Hold_Mode_Recognition_Chk = 0U;
+unsigned int Freeze_Hold_Mode_Count = 0U;
+unsigned int Init_Fail_Chk = 0U;
 
 /* 2.7 Antipinch */
 unsigned int antipinch_step = 0;
@@ -269,7 +273,6 @@ unsigned int IGN_Chk = 0U;
 unsigned int IGN_Chk_On = 0U;
 unsigned int SW_Chk = 0U;
 unsigned int Operating_flag = 0U;
-unsigned int LIN_Short_Ok = 0U;
 
 /* 3   Only SX3k*/
 // unsigned int OBD1_Close_Check_memory_write = 0;

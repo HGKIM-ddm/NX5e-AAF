@@ -17,7 +17,7 @@
 #define UDS
 
 // Current CodeName
-#define VEHICLE_CODENAME NX5E_STD_AAF1
+#define VEHICLE_CODENAME NX5E_STD_AAF2
 
 /* ==================================================================== */
 
@@ -465,7 +465,7 @@
 
 // #define POSITION_MAXIMUM_RANGE 55000U
 // #define LIMITSTEP_MAXIMUM_RANGE 1700U
-#define POSITION_MAXIMUM_RANGE 15000U
+#define POSITION_MAXIMUM_RANGE 70000U
 #define LIMITSTEP_MAXIMUM_RANGE 3000U
 
 #define MOTOR_WAIT_TIME 30U // 30default
@@ -640,6 +640,9 @@
 #define No_ErrorStatus 0U
 #define Open_ErrorStatus 1U
 #define Close_ErrorStatus 2U
+
+#define Freeze_Hold_Off 0U
+#define Freeze_Hold_On 1U
 
 // --- Sensors & Types ---
 #define SENSOR_NO 0U
