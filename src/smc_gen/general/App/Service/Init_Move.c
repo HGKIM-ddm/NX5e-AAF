@@ -274,6 +274,7 @@ static void InitMove_Cycle2(void)
         break;
     case 12:
         limit_step_position = (step_position_close - step_position_open) * AAF_ERROR_ANGLE / AAF_FULL_ANGLE;
+        limit_step_position_close = (step_position_close - step_position_open) * AAF_ERROR_ANGLE_CLOSE / AAF_FULL_ANGLE;
         // open_1st_step_position = (step_position_close - step_position_open) * AAF_1ST_OPEN_ANGLE / AAF_FULL_ANGLE;  ICE NOT USED
         // open_2nd_step_position = (step_position_close - step_position_open) * AAF_2ST_OPEN_ANGLE / AAF_FULL_ANGLE;  ICE NOT USED
         // OBD_Init();

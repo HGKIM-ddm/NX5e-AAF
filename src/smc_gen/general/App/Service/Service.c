@@ -108,7 +108,21 @@ void App_HwCheck(void)
 
     ADC_GetStatus();
 }
-
+void Power_Reset(void)
+{
+    if ((adc_avr <= 530U) && (G_Timer1ms.PowerResetCheck >= 4000U) && (Power_Reset_Flag == OFF))
+    if ((adc_avr <= 530U) &&(Power_Reset_Flag == OFF))
+    {
+        Power_Reset_Flag = ON;
+    }
+    else if ((Power_Reset_Flag == ON) && (adc_avr >= 760U))
+    {
+        WDTA0.WDTE = 0x00U;
+        while (1)
+        {
+        }
+    }
+}
 /***********************************************************************************************************************
  * Function Name: App_SwLogic
  * Description  : Monitors software-level states executing logic in the EXACT order of the original loop.
@@ -132,4 +146,6 @@ void App_SwLogic(void)
 
     // [Sequence 5] Step Initialization Check
     Step_InitAndCheck();
+
+    //Power_Reset();
 }

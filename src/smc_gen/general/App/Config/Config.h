@@ -50,6 +50,7 @@ extern unsigned int flap_move;
 extern unsigned int step_position_open;
 extern unsigned int step_position_close;
 extern unsigned int limit_step_position;
+extern unsigned int limit_step_position_close;
 extern unsigned int open_1st_step_position;
 extern unsigned int open_2nd_step_position;
 extern unsigned int protection_function;
@@ -233,7 +234,7 @@ typedef struct
     unsigned int MotorShortCheck;
     unsigned int MotorOpenCheck;
     unsigned int IgnCheck;
-    //unsigned int ObdRecoveryCheck;
+    // unsigned int ObdRecoveryCheck;
     unsigned int AdcRecoveryCheck;
     unsigned int LinBusInactive;
     unsigned int External10sCheck;
@@ -244,6 +245,7 @@ typedef struct
     unsigned int LinSleepStall;
     unsigned int IGNOffCheck;
     unsigned int Freeze_Hold_ModeChk;
+    unsigned int PowerResetCheck;
 } Global_Timer1msType;
 
 typedef struct
@@ -278,7 +280,7 @@ typedef struct
     unsigned int MotorShortCheckFlag;
     unsigned int MotorOpenCheckFlag;
     unsigned int IgnCheckFlag;
-    //unsigned int ObdRecoveryCheckFlag;
+    // unsigned int ObdRecoveryCheckFlag;
     unsigned int AdcRecoveryCheckFlag;
     unsigned int External10sCheckFlag;
     unsigned int Adc1sCheckFlag;
@@ -287,6 +289,7 @@ typedef struct
     unsigned int LinSleepStallFlag;
     unsigned int IGNOffCheckFlag;
     unsigned int Freeze_Hold_ModeChkFlag;
+    unsigned int PowerResetCheckFlag;
 } Global_Timer1msFlagType;
 
 extern Global_Timer1msType G_Timer1ms;
@@ -385,6 +388,9 @@ extern unsigned int AAFx_Position_Status_Temporary;
 extern unsigned int AAFx_InitStatus_Temporary;
 extern unsigned int AAFx_Last_Command;
 extern unsigned int LIN_Recover;
+extern unsigned int Power_Reset_Flag;
+extern unsigned int LIN_Nrst;
+
+
 
 #endif
-

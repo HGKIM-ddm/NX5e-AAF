@@ -200,7 +200,7 @@ static void Operate_NormalProcess(void)
 	}
 	else if (aaf_action == CLOSE)
 	{
-		if (step_position <= (step_position_close - limit_step_position))
+		if (step_position <= (step_position_close - limit_step_position_close))
 		{
 			Operate_NormalAction(CLOSE);
 		}
@@ -354,7 +354,7 @@ static void Operate_CheckRange(void)
 		Operate_SelectTxPostion();
 		aaf_step = FINISHED_OPERATE;
 	}
-	else if ((aaf_action == CLOSE) && (step_position >= (step_position_close - limit_step_position)))
+	else if ((aaf_action == CLOSE) && (step_position >= (step_position_close - limit_step_position_close)))
 	{
 		AAF_Tx_Position = CLOSE;
 		Operate_SelectTxPostion();
@@ -377,7 +377,7 @@ static void Operate_CheckRange(void)
 		AAF_Tx_Position = DIAG_MODE_OPEN;
 		aaf_step = FINISHED_OPERATE;
 	}
-	else if ((aaf_action == DIAG_MODE_CLOSE) && (step_position >= (step_position_close - limit_step_position)))
+	else if ((aaf_action == DIAG_MODE_CLOSE) && (step_position >= (step_position_close - limit_step_position_close)))
 	{
 		AAF_Tx_Position = DIAG_MODE_CLOSE;
 		aaf_step = FINISHED_OPERATE;
@@ -387,7 +387,7 @@ static void Operate_CheckRange(void)
 		AAF_Tx_Position = DIAG_MODE_AUTO;
 		aaf_step = FINISHED_OPERATE;
 	}
-	else if ((aaf_action == DIAG_MODE_AUTO) && (diag_mode_auto_dir == CLOSE) && (step_position >= (step_position_close - limit_step_position)))
+	else if ((aaf_action == DIAG_MODE_AUTO) && (diag_mode_auto_dir == CLOSE) && (step_position >= (step_position_close - limit_step_position_close)))
 	{
 		AAF_Tx_Position = DIAG_MODE_AUTO;
 		aaf_step = FINISHED_OPERATE;

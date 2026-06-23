@@ -26,7 +26,7 @@
 void AAF_SetType(void);
 void App_HwCheck(void);
 void App_SwLogic(void);
-
+void Power_Reset(void);
 #endif
 
 

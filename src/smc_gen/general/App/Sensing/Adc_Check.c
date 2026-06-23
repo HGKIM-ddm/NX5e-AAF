@@ -84,6 +84,15 @@ void ADC_GetStatus(void)
 
 		adc_chk_ready = 0U;
 		G_Timer1ms.AdcCheck = 0U;
+		if (adc_avr <= 530)
+		{
+			G_Timer1msFlag.PowerResetCheckFlag = 1U;
+		}
+		else
+		{
+			G_Timer1msFlag.PowerResetCheckFlag = 0U;
+			G_Timer1ms.PowerResetCheck = 0U;
+		}
 	}
 	else if ((G_Timer1ms.AdcCheck >= 10U) && (voltage_chk_delay_complete == 1U) && (adc_chk_ready == 0U))
 	{

@@ -35,7 +35,7 @@ static void Step_Check(void)
 						  (step_range > STEP_POSITION_MAXIMUM_RANGE) ||
 						  (now_step_memory_read == REFERENCE_POSITION) ||
 						  (now_step_memory_read < open_memory_read + limit_memory_read) ||
-						  (now_step_memory_read > close_memory_read - limit_memory_read) ||
+						  (now_step_memory_read > close_memory_read - limit_step_position_close) ||
 
 						  /* 2. 초기화 실패(Zero) 체크 */
 						  (close_memory_read == 0U) ||
@@ -65,6 +65,7 @@ static void Step_Check(void)
 	else
 	{
 		Step_LoadData();
+		limit_step_position_close = (step_position_close - step_position_open) * AAF_ERROR_ANGLE_CLOSE / AAF_FULL_ANGLE;
 		if (AAFx_Position_Status == Open_Status)
 		{
 			aaf_step = AAF_WAITING;

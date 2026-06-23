@@ -17,7 +17,7 @@
 #define UDS
 
 // Current CodeName
-#define VEHICLE_CODENAME NX5E_STD_AAF2
+#define VEHICLE_CODENAME SX3K_STD_HEV_KR_AAF2
 
 /* ==================================================================== */
 
@@ -601,7 +601,8 @@
 /***********************************************************************************************************************
  * 7. AAF Specifics
  ***********************************************************************************************************************/
-#define AAF_ERROR_ANGLE 5U // V
+#define AAF_ERROR_ANGLE 7U // V
+#define AAF_ERROR_ANGLE_CLOSE 9U // V
 #define AAF_1ST_OPEN_ANGLE 65U
 #define AAF_2ST_OPEN_ANGLE 45U
 

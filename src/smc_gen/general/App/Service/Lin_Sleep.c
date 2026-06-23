@@ -220,7 +220,7 @@ static void LinSleep_CheckCompletion(void)
         lin_sleep_step = 8U;
     }
     // 조건 2: 외장형 CLOSE 방향 Stopper 도착
-    else if ((Last_aaf_action == CLOSE) && (motor_stall_flag == MOTOR_STALL) && (step_position >= (step_position_close - limit_step_position)) && (AAFx_Type == EXTERNAL_TYPE))
+    else if ((Last_aaf_action == CLOSE) && (motor_stall_flag == MOTOR_STALL) && (step_position >= (step_position_close - limit_step_position_close)) && (AAFx_Type == EXTERNAL_TYPE))
     {
         LinSleep_StopMotorAndReset(); // 공통 정지
 
@@ -230,7 +230,7 @@ static void LinSleep_CheckCompletion(void)
         lin_sleep_step = 5U;
     }
     // 조건 2: 내장형 CLOSE 방향 TBD 도착
-    else if ((Last_aaf_action == CLOSE) && (step_position >= (step_position_close - limit_step_position)) && (AAFx_Type == INTERNAL_TYPE))
+    else if ((Last_aaf_action == CLOSE) && (step_position >= (step_position_close - limit_step_position_close)) && (AAFx_Type == INTERNAL_TYPE))
     {
         LinSleep_StopMotorAndReset(); // 공통 정지
         AAF_Tx_Position = CLOSE;
@@ -343,7 +343,7 @@ static void LinSleep_Stall_Stop(void)
         AAFx_SNSR4_Position = Initial_Value;
         lin_sleep_step = 8U;
     }
-    else if ((step_position <= (step_position_close - limit_step_position)) && (Sleep_Stall == OFF))
+    else if ((step_position <= (step_position_close - limit_step_position_close)) && (Sleep_Stall == OFF))
     {
         LinSleep_StopMotorAndReset(); // 공통 정지
         if ((EngRunSta == 0x00U) && (HevRdy == 0x00U) && (AAF_LINOut == 0x00U))
@@ -387,7 +387,7 @@ static void LinSleep_Final(void)
     //     AAFx_InitStatus = DURING_INITIALIZATION;
     // }
 
-    if (G_Timer1ms.LinBusInactive >= LIN_BUS_CHK_TIME_4_SEC)
+    if ((G_Timer1ms.LinBusInactive >= LIN_BUS_CHK_TIME_4_SEC))
     {
         MCU_Sleep();
     }
@@ -455,13 +455,12 @@ static void McuSleep_PortConfig(void)
  ***********************************************************************************************************************/
 static void McuSleep_InternalModuleStop(void)
 {
-    R_Config_INTC_Create(); // 인터럽트 컨트롤러 재설정 (Wake-up 준비)
-    // R_Config_INTC_INTP5_Start(); // (주석 유지)
-
-    R_Config_CSIH0_Stop();    // SPI 모듈 정지
-    R_Config_ADCA0_Halt();    // ADC 모듈 정지
     R_Config_TAUD0_13_Stop(); // 타이머 정지
     R_Config_TAUD0_3_Stop();  // 타이머 정지
+    // R_Config_INTC_Create();      // 인터럽트 컨트롤러 재설정 (Wake-up 준비)
+    R_Config_INTC_INTP5_Start(); // (주석 유지)
+    R_Config_CSIH0_Stop();       // SPI 모듈 정지
+    R_Config_ADCA0_Halt(); // ADC 모듈 정지
 
     G_Timer1msFlag.SpiFlag = 0U; // 관련 플래그 초기화
     G_Timer1ms.Spi = 0U;
@@ -522,22 +521,42 @@ void MCU_Sleep(void)
     // 1. 종료 상태 플래그 설정
     power_chk = Normal_Shutdown;
     First_Powerchk = 1U;
-
+    G_Timer1usFlag.SpiFlag = 0U;
+    G_Timer1us.Spi = 0U;
     // 2. 필요 시 플래시 메모리에 데이터 저장
     if (step_check_flag == 2U)
     {
         FDL_Write();
     }
 
-    // 3. 외부 하드웨어 전원 차단
-    McuSleep_ExternalOff();
+    LIN_Nrst = PORT.PPR0 & (1 << 0); // NRST
+    if ((adc_avr <= 550U) && (LIN_Nrst == OFF))
+    {
+        // 3. 외부 하드웨어 전원 차단 INTP5 위해 LIN IC ON
+        McuSleep_ExternalOff();
+        LinTrcv_On();
 
-    // 4. 슬립 대비 포트 설정 (누설 전류 방지)
-    McuSleep_PortConfig();
+        //   4. 슬립 대비 포트 설정 (누설 전류 방지)
+        McuSleep_PortConfig();
 
-    // 5. 내부 주변장치 클럭 정지
-    McuSleep_InternalModuleStop();
+        //  5. 내부 주변장치 클럭 정지
+        McuSleep_InternalModuleStop();
 
-    // 6. Deep Stop 모드 진입 (Wake-up 이벤트 발생 전까지 정지)
-    McuSleep_DeepStop();
+        // 6. Deep Stop 모드 진입 (Wake-up 이벤트 발생 전까지 정지)
+        McuSleep_DeepStop();
+    }
+    else
+    {
+        // 3. 외부 하드웨어 전원 차단
+        McuSleep_ExternalOff();
+
+        // 4. 슬립 대비 포트 설정 (누설 전류 방지)
+        McuSleep_PortConfig();
+
+        // 5. 내부 주변장치 클럭 정지
+        McuSleep_InternalModuleStop();
+
+        // 6. Deep Stop 모드 진입 (Wake-up 이벤트 발생 전까지 정지)
+        McuSleep_DeepStop();
+    }
 }

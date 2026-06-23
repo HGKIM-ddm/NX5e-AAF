@@ -250,7 +250,7 @@ static void Antipinch_PrevClose(void)
         break;
 
     case 4:
-        if ((aaf_action == CLOSE) && (step_position >= step_position_close - limit_step_position))
+        if ((aaf_action == CLOSE) && (step_position >= step_position_close - limit_step_position_close))
         {
             Drv8889_Off();
             motor_start = OFF;
