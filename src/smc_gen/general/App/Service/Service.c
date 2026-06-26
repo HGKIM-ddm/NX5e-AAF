@@ -110,12 +110,12 @@ void App_HwCheck(void)
 }
 void Power_Reset(void)
 {
-    if ((adc_avr <= 530U) && (G_Timer1ms.PowerResetCheck >= 4000U) && (Power_Reset_Flag == OFF))
-    if ((adc_avr <= 530U) &&(Power_Reset_Flag == OFF))
+    if ((adc_avr <= 530U) && (G_Timer1ms.ProtectionCheck >= 500U) && (G_Timer1ms.PowerResetCheck >= 500U) && (Power_Reset_Flag == OFF))
+    // if ((adc_avr <= 530U) &&(Power_Reset_Flag == OFF))
     {
         Power_Reset_Flag = ON;
     }
-    else if ((Power_Reset_Flag == ON) && (adc_avr >= 760U))
+    else if ((Power_Reset_Flag == ON) && (adc_avr >= 660U))
     {
         WDTA0.WDTE = 0x00U;
         while (1)
@@ -147,5 +147,5 @@ void App_SwLogic(void)
     // [Sequence 5] Step Initialization Check
     Step_InitAndCheck();
 
-    //Power_Reset();
+    Power_Reset();
 }

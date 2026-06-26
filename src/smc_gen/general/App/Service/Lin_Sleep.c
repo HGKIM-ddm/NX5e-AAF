@@ -460,7 +460,7 @@ static void McuSleep_InternalModuleStop(void)
     // R_Config_INTC_Create();      // 인터럽트 컨트롤러 재설정 (Wake-up 준비)
     R_Config_INTC_INTP5_Start(); // (주석 유지)
     R_Config_CSIH0_Stop();       // SPI 모듈 정지
-    R_Config_ADCA0_Halt(); // ADC 모듈 정지
+    R_Config_ADCA0_Halt();       // ADC 모듈 정지
 
     G_Timer1msFlag.SpiFlag = 0U; // 관련 플래그 초기화
     G_Timer1ms.Spi = 0U;
@@ -523,6 +523,7 @@ void MCU_Sleep(void)
     First_Powerchk = 1U;
     G_Timer1usFlag.SpiFlag = 0U;
     G_Timer1us.Spi = 0U;
+
     // 2. 필요 시 플래시 메모리에 데이터 저장
     if (step_check_flag == 2U)
     {

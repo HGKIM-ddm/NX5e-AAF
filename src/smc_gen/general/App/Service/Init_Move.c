@@ -127,25 +127,32 @@ static void Init_Delay(uint8_t next_step)
  ***********************************************************************************************************************/
 static void Init_MoveLimitPosition(void)
 {
-    if (step_position <= step_position_open + limit_step_position)
+    if (CONFIG_AAF_TYPE == EXTERNAL_TYPE)
     {
-        Motor_Close2();   // dir CLOSE
-        Drv8889_On();     // drv on
-        motor_start = ON; // step start
-        // G_Timer1msFlag.External10sCheckFlag = ON; // 10s chk timer on
-
-        motor_stall_flag = MOTOR_NORMAL; // stall reset
-        // G_Timer1msFlag.StallTimeFlag = 0;			 stall reset
-        G_Timer1ms.StallTime = 0U;                        // stall reset
-        motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE; // stall reset
-        G_Timer1ms.Spi = 0U;
-
+        if (step_position <= step_position_open + limit_step_position)
+        {
+            Motor_Close2(); // 외장형: OPEN 끝 → CLOSE 방향으로 안쪽 이동
+            Drv8889_On();
+            motor_start = ON;
+            motor_stall_flag = MOTOR_NORMAL;
+            G_Timer1ms.StallTime = 0U;
+            motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE;
+            G_Timer1ms.Spi = 0U;
+        }
         init_move_step = 14U;
     }
-    else
+    else // INTERNAL_TYPE
     {
-        // G_Timer1msFlag.External10sCheckFlag = ON; // 10s chk timer on
-
+        if (step_position >= (step_position_close - limit_step_position_close))
+        {
+            Motor_Open2(); // 내장형: CLOSE 끝 → OPEN 방향으로 안쪽 이동
+            Drv8889_On();
+            motor_start = ON;
+            motor_stall_flag = MOTOR_NORMAL;
+            G_Timer1ms.StallTime = 0U;
+            motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE;
+            G_Timer1ms.Spi = 0U;
+        }
         init_move_step = 14U;
     }
 }
@@ -169,6 +176,15 @@ static void Init_CheckLimitArrival(void)
     //                       (((OBD2_Open_Check >= 3700U) || (OBD2_Close_Check >= 3700U)) && (SNSR2_Check == USE_SNSR2));
 
     // stall or obd
+    int arrived = 0U;
+    if (CONFIG_AAF_TYPE == EXTERNAL_TYPE)
+    {
+        arrived = (step_position >= step_position_open + limit_step_position);
+    }
+    else
+    {
+        arrived = (step_position <= step_position_close - limit_step_position_close);
+    }
     if (is_stall_error)
     {
         Drv8889_Off();
@@ -191,7 +207,7 @@ static void Init_CheckLimitArrival(void)
             fail_safety_step = 10U;
         }
     }
-    else if (step_position >= step_position_open + limit_step_position)
+    else if (arrived)
     {
         Drv8889_Off();
         motor_start = OFF;
@@ -227,28 +243,40 @@ static void Init_CheckLimitArrival(void)
  ***********************************************************************************************************************/
 static void InitMove_Cycle1(void)
 {
+    uint8_t dir_first, dir_second;
+    if (CONFIG_AAF_TYPE == EXTERNAL_TYPE)
+    {
+        dir_first = OPEN; // 외장형: OPEN 먼저
+        dir_second = CLOSE;
+    }
+    else
+    {
+        dir_first = CLOSE; // 내장형: CLOSE 먼저
+        dir_second = OPEN;
+    }
+
     switch (init_move_step)
     {
     case 0:
-        Init_StartMotor(4U, OPEN, TRUE); // go case 4
+        Init_StartMotor(4U, dir_first, TRUE);
         break;
     case 4:
-        Init_StallCheck(5U, 0U, OPEN); // go case 5 return case 0
+        Init_StallCheck(5U, 0U, dir_first); // dir_first stall → 해당 방향 위치 기록
         break;
     case 5:
         Init_Delay(6U);
         break;
     case 6:
-        Init_StartMotor(7U, CLOSE, FALSE);
+        Init_StartMotor(7U, dir_second, FALSE);
         break;
     case 7:
-        Init_StallCheck(8U, 6U, CLOSE);
+        Init_StallCheck(8U, 6U, dir_second);
         break;
     case 8:
         Init_Delay(9U);
         break;
     case 9:
-        Init_StartMotor(10U, OPEN, FALSE);
+        Init_StartMotor(10U, dir_first, FALSE); // 다시 첫 방향
         break;
     default:
         break;
@@ -267,7 +295,14 @@ static void InitMove_Cycle2(void)
     switch (init_move_step)
     {
     case 10:
-        Init_StallCheck(11U, 9U, OPEN);
+        if (CONFIG_AAF_TYPE == EXTERNAL_TYPE)
+        {
+            Init_StallCheck(11U, 9U, OPEN);
+        }
+        else
+        {
+            Init_StallCheck(11U, 9U, CLOSE);
+        }
         break;
     case 11:
         Init_Delay(12U);

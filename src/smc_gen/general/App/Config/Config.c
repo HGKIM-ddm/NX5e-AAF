@@ -347,3 +347,4 @@ unsigned int AAFx_InitStatus_Temporary = 0U;
 unsigned int AAFx_Last_Command = 0U;
 unsigned int LIN_Recover = 0U;
 unsigned int LIN_Nrst = 0U;
+unsigned int Power_Reset_Flag=0U;

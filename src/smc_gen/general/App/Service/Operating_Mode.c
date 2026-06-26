@@ -572,10 +572,20 @@ static void Operate_Init(void)
 
 	case NORMAL_INITIALIZATION:
 		aaf_step = FINISHED_OPERATE;
-		AAF_Tx_Position = OPEN;
-		AAFx_Position_Status = Open_Status;
 		AAFx_InitStatus = NORMAL_FINISHED_INITIALIZATION;
-
+		if ((step_position <= (step_position_open + limit_step_position)))
+		{
+			AAF_Tx_Position = OPEN;
+			// AAFx_Position_Status = Open_Status;
+		}
+		else
+		{
+			if ((step_position >= (step_position_close - limit_step_position_close)))
+			{
+				AAF_Tx_Position = CLOSE;
+				// AAFx_Position_Status = Close_Status;
+			}
+		}
 		break;
 
 	default:

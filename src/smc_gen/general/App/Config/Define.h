@@ -17,7 +17,7 @@
 #define UDS
 
 // Current CodeName
-#define VEHICLE_CODENAME SX3K_STD_HEV_KR_AAF2
+#define VEHICLE_CODENAME NX5E_STD_AAF3
 
 /* ==================================================================== */
 
