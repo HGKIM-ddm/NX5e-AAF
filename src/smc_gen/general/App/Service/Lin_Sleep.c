@@ -250,7 +250,11 @@ static void LinSleep_CheckCompletion(void)
     }
     else
     {
-        // invalid
+        if ((Open_fault_check == 1U) || (Short_fault_check == 1U))
+        {
+            Error_UnknownStatus();
+            lin_sleep_step = 8U;
+        }
     }
 }
 /***********************************************************************************************************************

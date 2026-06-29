@@ -12,7 +12,7 @@
 #define MINUTE_3 180U
 
 // For Torque Test
-#define ENABLE_TORQUE_TEST
+//#define ENABLE_TORQUE_TEST
 
 #define UDS
 
@@ -591,7 +591,7 @@
 #define MOTOR_CCW_STALL_CHK_VALUE_HIGH_VOLTAGE_1ST 50U // 145   600 PPS 160
 
 #define STALL_CNT_DEFAULT 30000U
-#define STALL_CNT_COMPARISON_VAL 7U // 15default
+#define STALL_CNT_COMPARISON_VAL 5U // 15default
 #define STALL_CHK_WAIT_TIME 250U    // 250
 
 #define MOTOR_NORMAL 0U
@@ -602,7 +602,7 @@
  * 7. AAF Specifics
  ***********************************************************************************************************************/
 #define AAF_ERROR_ANGLE 7U // V
-#define AAF_ERROR_ANGLE_CLOSE 9U // V
+#define AAF_ERROR_ANGLE_CLOSE 7U // V
 #define AAF_1ST_OPEN_ANGLE 65U
 #define AAF_2ST_OPEN_ANGLE 45U
 
