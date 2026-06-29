@@ -108,10 +108,9 @@ void App_HwCheck(void)
 
     ADC_GetStatus();
 }
-void Power_Reset(void)
+void Hw_Reset(void)
 {
-    if ((adc_avr <= 530U) && (G_Timer1ms.ProtectionCheck >= 500U) && (G_Timer1ms.PowerResetCheck >= 500U) && (Power_Reset_Flag == OFF))
-    // if ((adc_avr <= 530U) &&(Power_Reset_Flag == OFF))
+    if ((adc_avr <= 530U) && (G_Timer1ms.ProtectionCheck >= 500U) && (G_Timer1ms.PowerResetCheck >= 4000U) && (Power_Reset_Flag == OFF))
     {
         Power_Reset_Flag = ON;
     }
@@ -121,6 +120,9 @@ void Power_Reset(void)
         while (1)
         {
         }
+    }
+    else
+    {
     }
 }
 /***********************************************************************************************************************
@@ -147,5 +149,5 @@ void App_SwLogic(void)
     // [Sequence 5] Step Initialization Check
     Step_InitAndCheck();
 
-    Power_Reset();
+    Hw_Reset();
 }

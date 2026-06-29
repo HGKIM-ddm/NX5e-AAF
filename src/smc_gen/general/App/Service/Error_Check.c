@@ -27,13 +27,37 @@ static uint8_t Error_CheckVoltage(void)
     {
         if (adc_avr >= ADC_UNDER_VOLTAGE_9V)
         {
-            AAFx_Low_Volt = NO_ERROR;
-            protection_function = OFF;
-            protection_Mode_step = 0U;
-            Under_Voltage_Deceted = 0U;
-            G_Timer1ms.Adc1sCheck = 0U;
-            G_Timer1msFlag.Adc1sCheckFlag = 0U;
-            Re_Init();
+            /* 9V 이상 진입 → 복귀 타이머 시작 */
+            if (Adc_Recovery_Detected == 0U)
+            {
+                Adc_Recovery_Detected = 1U;
+                G_Timer1ms.AdcRecoveryCheck = 0U;
+                G_Timer1msFlag.AdcRecoveryCheckFlag = 1U;
+            }
+            /* 500ms 동안 계속 9V 이상 유지 시 복귀 확정 */
+            if ((Adc_Recovery_Detected == 1U) && (G_Timer1ms.AdcRecoveryCheck >= ADC_Recovery_Time))
+            {
+                AAFx_Low_Volt = NO_ERROR;
+                protection_function = OFF;
+                protection_Mode_step = 0U;
+                Under_Voltage_Deceted = 0U;
+                G_Timer1ms.Adc1sCheck = 0U;
+                G_Timer1msFlag.Adc1sCheckFlag = 0U;
+                Adc_Recovery_Detected = 0U;
+                G_Timer1ms.AdcRecoveryCheck = 0U;
+                G_Timer1msFlag.AdcRecoveryCheckFlag = 0U;
+                Re_Init();
+            }
+        }
+        else
+        {
+            /* 500ms 채우기 전에 다시 9V 미만 → 복귀 타이머 리셋 */
+            if (Adc_Recovery_Detected == 1U)
+            {
+                Adc_Recovery_Detected = 0U;
+                G_Timer1ms.AdcRecoveryCheck = 0U;
+                G_Timer1msFlag.AdcRecoveryCheckFlag = 0U;
+            }
         }
     }
     else if (adc_avr <= ADC_UNDER_VOLTAGE_8_5V)
@@ -77,10 +101,34 @@ static uint8_t Error_CheckVoltage(void)
     {
         if (adc_avr <= ADC_OVER_VOLTAGE_16V)
         {
-            AAFx_Over_Volt = NO_ERROR;
-            protection_function = OFF;
-            protection_Mode_step = 0U;
-            Re_Init();
+            /* 16V 이하 진입 → 복귀 타이머 시작 */
+            if (Adc_Recovery_Detected == 0U)
+            {
+                Adc_Recovery_Detected = 1U;
+                G_Timer1ms.AdcRecoveryCheck = 0U;
+                G_Timer1msFlag.AdcRecoveryCheckFlag = 1U;
+            }
+            /* 500ms 동안 계속 16V 이하 유지 시 복귀 확정 */
+            if ((Adc_Recovery_Detected == 1U) && (G_Timer1ms.AdcRecoveryCheck >= ADC_Recovery_Time))
+            {
+                AAFx_Over_Volt = NO_ERROR;
+                protection_function = OFF;
+                protection_Mode_step = 0U;
+                Adc_Recovery_Detected = 0U;
+                G_Timer1ms.AdcRecoveryCheck = 0U;
+                G_Timer1msFlag.AdcRecoveryCheckFlag = 0U;
+                Re_Init();
+            }
+        }
+        else
+        {
+            /* 500ms 채우기 전에 다시 16V 초과 → 복귀 타이머 리셋 */
+            if (Adc_Recovery_Detected == 1U)
+            {
+                Adc_Recovery_Detected = 0U;
+                G_Timer1ms.AdcRecoveryCheck = 0U;
+                G_Timer1msFlag.AdcRecoveryCheckFlag = 0U;
+            }
         }
     }
     else

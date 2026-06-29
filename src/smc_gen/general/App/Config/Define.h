@@ -17,7 +17,7 @@
 #define UDS
 
 // Current CodeName
-#define VEHICLE_CODENAME NX5E_STD_AAF3
+#define VEHICLE_CODENAME NX5E_STD_AAF1
 
 /* ==================================================================== */
 
@@ -668,7 +668,7 @@
 /***********************************************************************************************************************
  * 9. Only SX3k (OBD Sensor...etc)
  ***********************************************************************************************************************/
-// #define ADC_Recovery_Time 500U
+ #define ADC_Recovery_Time 1500U
 // #define OBD_tolerance 5U // 5%
 // #define OBD_ADC_MAX_LIMIT 3550U
 // #define OBD_ADC_MIN_LIMIT 500U

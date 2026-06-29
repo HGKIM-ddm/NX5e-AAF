@@ -390,7 +390,6 @@ extern unsigned int AAFx_Last_Command;
 extern unsigned int LIN_Recover;
 extern unsigned int Power_Reset_Flag;
 extern unsigned int LIN_Nrst;
-
-
+extern unsigned int Adc_Recovery_Detected;
 
 #endif

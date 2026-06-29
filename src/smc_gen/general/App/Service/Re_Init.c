@@ -35,7 +35,6 @@ static void Step_Check(void)
 						  (step_range > STEP_POSITION_MAXIMUM_RANGE) ||
 						  (now_step_memory_read == REFERENCE_POSITION) ||
 						  (now_step_memory_read < open_memory_read + limit_memory_read) ||
-						  (now_step_memory_read > close_memory_read - limit_step_position_close) ||
 
 						  /* 2. 초기화 실패(Zero) 체크 */
 						  (close_memory_read == 0U) ||
@@ -99,6 +98,7 @@ static void Step_Check(void)
 
 void Re_Init(void)
 {
+	Drv8889_SpiInit();
 	G_Timer1ms.DiagAutoMode = 0U;
 	G_Timer1msFlag.DiagAutoModeFlag = OFF;
 	diag_mode_auto_action = OFF;
