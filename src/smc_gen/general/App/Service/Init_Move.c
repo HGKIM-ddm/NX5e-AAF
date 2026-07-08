@@ -334,6 +334,14 @@ static void InitMove_Cycle2(void)
             Freeze_Hold_Mode_Count = 0U;
             Init_Fail_Chk = 0U;
             init_move_step = 19U;
+            if (AAFx_Type == INTERNAL_TYPE)
+            {
+                AAFx_Last_Command = CLOSE;
+            }
+            else
+            {
+                AAFx_Last_Command = OPEN;
+            }
         }
         break;
     default:

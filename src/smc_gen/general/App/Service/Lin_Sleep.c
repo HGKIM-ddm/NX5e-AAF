@@ -250,7 +250,7 @@ static void LinSleep_CheckCompletion(void)
     }
     else
     {
-        if ((Open_fault_check == 1U) || (Short_fault_check == 1U))
+        if (((Open_fault_check == 1U) || (Short_fault_check == 1U)) || ((AAFx_InitStatus == DURING_INITIALIZATION) && (adc_avr <= ADC_UNDER_VOLTAGE_7V)))
         {
             Error_UnknownStatus();
             lin_sleep_step = 8U;
@@ -527,7 +527,6 @@ void MCU_Sleep(void)
     First_Powerchk = 1U;
     G_Timer1usFlag.SpiFlag = 0U;
     G_Timer1us.Spi = 0U;
-
     // 2. 필요 시 플래시 메모리에 데이터 저장
     if (step_check_flag == 2U)
     {
@@ -535,33 +534,18 @@ void MCU_Sleep(void)
     }
 
     LIN_Nrst = PORT.PPR0 & (1 << 0); // NRST
+    // 3. 외부 하드웨어 전원 차단 INTP5 위해 LIN IC ON
+    McuSleep_ExternalOff();
     if ((adc_avr <= 550U) && (LIN_Nrst == OFF))
     {
-        // 3. 외부 하드웨어 전원 차단 INTP5 위해 LIN IC ON
-        McuSleep_ExternalOff();
         LinTrcv_On();
-
-        //   4. 슬립 대비 포트 설정 (누설 전류 방지)
-        McuSleep_PortConfig();
-
-        //  5. 내부 주변장치 클럭 정지
-        McuSleep_InternalModuleStop();
-
-        // 6. Deep Stop 모드 진입 (Wake-up 이벤트 발생 전까지 정지)
-        McuSleep_DeepStop();
     }
-    else
-    {
-        // 3. 외부 하드웨어 전원 차단
-        McuSleep_ExternalOff();
+    //   4. 슬립 대비 포트 설정 (누설 전류 방지)
+    McuSleep_PortConfig();
 
-        // 4. 슬립 대비 포트 설정 (누설 전류 방지)
-        McuSleep_PortConfig();
+    //  5. 내부 주변장치 클럭 정지
+    McuSleep_InternalModuleStop();
 
-        // 5. 내부 주변장치 클럭 정지
-        McuSleep_InternalModuleStop();
-
-        // 6. Deep Stop 모드 진입 (Wake-up 이벤트 발생 전까지 정지)
-        McuSleep_DeepStop();
-    }
+    // 6. Deep Stop 모드 진입 (Wake-up 이벤트 발생 전까지 정지)
+    McuSleep_DeepStop();
 }
