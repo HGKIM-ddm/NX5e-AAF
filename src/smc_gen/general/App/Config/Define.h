@@ -14,8 +14,6 @@
 // For Torque Test
 //#define ENABLE_TORQUE_TEST
 
-#define UDS
-
 // Current CodeName
 #define VEHICLE_CODENAME NX5E_STD_AAF1
 

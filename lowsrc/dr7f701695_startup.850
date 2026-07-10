@@ -132,19 +132,6 @@ __unused_isr:
 -------------
 -------------	i.e.	.intvect    0x0000:
 -------------------------------------------------------------------------------
-------------- uds bootloader
-.section".intvect_org",.text
-  .global _RESET
-__ex_entry_org:
-    .offset 0x0000
-  #if (RESET_ENABLE > 0x00000000)
-    .extern _RESET
-    jr _RESET
-  #else
-    jr __unused_isr
-  #endif
-------------- uds bootloader
-
 
 .section".intvect",.text
 -------------------------------------------------------------------------------

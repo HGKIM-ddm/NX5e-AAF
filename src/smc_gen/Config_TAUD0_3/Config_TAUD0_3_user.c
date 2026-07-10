@@ -38,9 +38,7 @@ Includes
 #include "Config_TAUD0_3.h"
 /* Start user code for include. Do not edit comment generated here */
 #include "Config.h"
-#ifdef UDS
-extern char uds_1ms;
-#endif
+
 /* End user code. Do not edit comment generated here */
 
 /***********************************************************************************************************************
@@ -110,10 +108,9 @@ void r_Config_TAUD0_3_interrupt(void)
     TIMER_1MS(IGNOffCheck);
     TIMER_1MS(Freeze_Hold_ModeChk);
     TIMER_1MS(PowerResetCheck);
+    TIMER_1MS(LINResetCheck);
 // Extra Timer
-#ifdef UDS
-    uds_1ms++;
-#endif
+
     G_Timer1ms.LinBusInactive++;
 
     if (G_Timer1msFlag.Timer3minuteFlag == 1)

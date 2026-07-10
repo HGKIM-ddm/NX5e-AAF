@@ -246,6 +246,7 @@ typedef struct
     unsigned int IGNOffCheck;
     unsigned int Freeze_Hold_ModeChk;
     unsigned int PowerResetCheck;
+    unsigned int LINResetCheck;
 } Global_Timer1msType;
 
 typedef struct
@@ -290,6 +291,7 @@ typedef struct
     unsigned int IGNOffCheckFlag;
     unsigned int Freeze_Hold_ModeChkFlag;
     unsigned int PowerResetCheckFlag;
+    unsigned int LINResetCheckFlag;
 } Global_Timer1msFlagType;
 
 extern Global_Timer1msType G_Timer1ms;
@@ -390,6 +392,7 @@ extern unsigned int AAFx_Last_Command;
 extern unsigned int LIN_Recover;
 extern unsigned int Power_Reset_Flag;
 extern unsigned int LIN_Nrst;
+extern unsigned int Hw_Error_Check;
 extern unsigned int Adc_Recovery_Detected;
 
 #endif

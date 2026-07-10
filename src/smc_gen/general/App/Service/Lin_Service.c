@@ -1,26 +1,6 @@
 #include "Lin_Service.h"
 #include "Service.h"
 
-#ifdef UDS
-#include "cpu.h"
-#include "..\..\uds\def_lin_uds.h"
-#include "..\..\uds\lin_uds.h"
-#include "..\..\uds\util.h"
-
-void RLIN_Slave_uds_Transmit(uint8_t *databuf, uint8_t Data_length)
-{
-    uint8_t i;
-    uint8_t *Databuf_adr;
-    RLN30.LDFC = 0x18;                     /*b5=0: checksum mode classic; b4=1:transmission*/
-    Databuf_adr = (uint8_t *)&RLN30.LDBR1; /* get the data buffer address*/
-    for (i = 0; i < Data_length; i++)      /* setting tansmission data to date buffer*/
-    {
-        *((uint8_t *)(Databuf_adr + i)) = databuf[i];
-    }
-    RLN30.LTRC = 0x02; /*setting RTS=1;Response transmission start*/
-}
-#endif
-
 /***********************************************************************************************************************
  * Function Name: Lin_Wakeup
  * Description  : Wake up in sleep mode when LIN communication is detected and initialize the associated variables
@@ -32,7 +12,7 @@ static void Lin_Wakeup(void)
 {
     if (lin_bus_inactive_flag == ON)
     {
-        if (lin_sleep_step >= 8U)
+        if ((lin_sleep_step <= 2U) || (lin_sleep_step >= 8U))
         {
             lin_bus_inactive_flag = OFF;
             lin_sleep_step = 0U;
@@ -86,13 +66,6 @@ void Lin_HandleReceivedHeader(void)
     {
         Lin_SlaveReceive(8U); // 0x3C
     }
-#ifdef UDS
-    else if ((GetIDbuffer == 0x7DU) && (uds.state == EST_TX))
-    {
-        RLIN_Slave_uds_Transmit((uint8_t *)&uds.tx_data[1], 8);
-        uds.state = EST_RX;
-    }
-#endif
     else if ((GetIDbuffer == 0x7DU) && ((SW_Chk == 1U) || (SW_Chk == 3U)))
     {
         Lin_SlaveTransmit(Slave_SwData, 8U); // 0x3D
@@ -124,18 +97,6 @@ void Lin_HandleReceivedResponse(void)
         break;
     case 0x3Cu:
         Lin_GetReponseRxData(Slave_RxSwData1);
-#ifdef UDS
-        unsigned int i;
-        if (Slave_RxSwData1[0] == NAD_PHY)
-        {
-            for (i = 0; i < 7; i++)
-            {
-                uds.packet_data[i] = Slave_RxSwData1[i + 2];
-                Slave_RxSwData1[i] = 0;
-            }
-            uds_frame_parser();
-        }
-#endif
         break;
     default:
         break;

@@ -73,10 +73,10 @@ void Limp_Home(void)
 		}
 		break;
 	case 2:
-		if (AAFx_Position_Status == Open_Status)
-		{
-			FDL_Write();
-		}
+		// if (AAFx_Position_Status == Open_Status)
+		// {
+		// 	FDL_Write();
+		// }
 
 		break;
 
