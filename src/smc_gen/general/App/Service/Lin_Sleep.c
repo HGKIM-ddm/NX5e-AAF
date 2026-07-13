@@ -541,7 +541,7 @@ void MCU_Sleep(void)
         FDL_Write();
     }
 
-    if ((adc_avr <= 550U) && (LIN_Nrst == OFF))
+    if ((adc_avr <= 600U) && (LIN_Nrst == OFF))
     {
         lin_sleep_step = 0U;
         return;

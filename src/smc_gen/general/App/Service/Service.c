@@ -121,7 +121,7 @@ void Hw_Reset(void)
         G_Timer1msFlag.LINResetCheckFlag = 0U;
         G_Timer1ms.LINResetCheck = 0U;
     }
-    if (((G_Timer1ms.PowerResetCheck >= 5000U) && (LIN_Nrst == OFF)) || (G_Timer1ms.LinBusInactive >= 10000U) || (G_Timer1ms.LINResetCheck >= 10000U))
+    if (((G_Timer1ms.PowerResetCheck >= 5000U) && (LIN_Nrst == OFF)) || (G_Timer1ms.LinBusInactive >= 30000U) || (G_Timer1ms.LINResetCheck >= 30000U))
     {
         WDTA0.WDTE = 0x00U;
         while (1)
