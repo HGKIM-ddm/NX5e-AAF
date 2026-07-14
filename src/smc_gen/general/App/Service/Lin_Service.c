@@ -32,7 +32,7 @@ static void Lin_Wakeup(void)
 {
     if (lin_bus_inactive_flag == ON)
     {
-        if (lin_sleep_step >= 8U)
+        if ((lin_sleep_step <= 2U) || (lin_sleep_step >= 8U))
         {
             lin_bus_inactive_flag = OFF;
             lin_sleep_step = 0U;

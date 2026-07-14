@@ -430,8 +430,15 @@ static void LinSleep_Cycle3(void)
  ***********************************************************************************************************************/
 static void McuSleep_ExternalOff(void)
 {
-    Drv8889_Sleep();     // 모터 드라이버 슬립 전환
-    LinTrcv_Off();       // LIN 트랜시버 전원 차단
+    Drv8889_Sleep(); // 모터 드라이버 슬립 전환
+    if (LIN_Nrst == OFF)
+    {
+        LinTrcv_On();
+    }
+    else
+    {
+        LinTrcv_Off(); // LIN 트랜시버 전원 차단
+    }
     Drv8889_ScsActive(); // SPI 통신 핀 활성화
 }
 
@@ -527,19 +534,21 @@ void MCU_Sleep(void)
     First_Powerchk = 1U;
     G_Timer1usFlag.SpiFlag = 0U;
     G_Timer1us.Spi = 0U;
+    LIN_Nrst = PORT.PPR0 & (1 << 0); // NRST
+    if (LIN_Nrst == OFF)
+    {
+        lin_sleep_step = 9U;
+        return;
+    }
     // 2. 필요 시 플래시 메모리에 데이터 저장
-    if (step_check_flag == 2U)
+    if ((step_check_flag == 2U) && (LIN_Nrst != OFF))
     {
         FDL_Write();
     }
 
-    LIN_Nrst = PORT.PPR0 & (1 << 0); // NRST
     // 3. 외부 하드웨어 전원 차단 INTP5 위해 LIN IC ON
     McuSleep_ExternalOff();
-    if ((adc_avr <= 550U) && (LIN_Nrst == OFF))
-    {
-        LinTrcv_On();
-    }
+
     //   4. 슬립 대비 포트 설정 (누설 전류 방지)
     McuSleep_PortConfig();
 

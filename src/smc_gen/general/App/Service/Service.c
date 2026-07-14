@@ -110,19 +110,23 @@ void App_HwCheck(void)
 }
 void Hw_Reset(void)
 {
-    if ((adc_avr <= 530U) && (G_Timer1ms.ProtectionCheck >= 500U) && (G_Timer1ms.PowerResetCheck >= 4000U) && (Power_Reset_Flag == OFF))
+    LIN_Nrst = PORT.PPR0 & (1 << 0); // NRST
+
+    if (lin_sleep_step != 0)
     {
-        Power_Reset_Flag = ON;
+        G_Timer1msFlag.LINResetCheckFlag = 1U;
     }
-    else if ((Power_Reset_Flag == ON) && (adc_avr >= 660U))
+    else
+    {
+        G_Timer1msFlag.LINResetCheckFlag = 0U;
+        G_Timer1ms.LINResetCheck = 0U;
+    }
+    if (((G_Timer1ms.PowerResetCheck >= 5000U) && (LIN_Nrst == OFF)) || (G_Timer1ms.LinBusInactive >= 60000U) || (G_Timer1ms.LINResetCheck >= 60000U))
     {
         WDTA0.WDTE = 0x00U;
         while (1)
         {
         }
-    }
-    else
-    {
     }
 }
 /***********************************************************************************************************************
@@ -134,6 +138,9 @@ void Hw_Reset(void)
  ***********************************************************************************************************************/
 void App_SwLogic(void)
 {
+    // [Sequence 0] MCU Error Check
+    Hw_Reset();
+
     // [Sequence 1] Main Operation Mode Check
     Mode_Check();
 
@@ -149,5 +156,4 @@ void App_SwLogic(void)
     // [Sequence 5] Step Initialization Check
     Step_InitAndCheck();
 
-    Hw_Reset();
 }

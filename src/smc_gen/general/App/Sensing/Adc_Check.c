@@ -84,7 +84,7 @@ void ADC_GetStatus(void)
 
 		adc_chk_ready = 0U;
 		G_Timer1ms.AdcCheck = 0U;
-		if (adc_avr <= 530)
+		if (adc_avr <= 550)
 		{
 			G_Timer1msFlag.PowerResetCheckFlag = 1U;
 		}

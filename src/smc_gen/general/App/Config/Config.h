@@ -246,6 +246,7 @@ typedef struct
     unsigned int IGNOffCheck;
     unsigned int Freeze_Hold_ModeChk;
     unsigned int PowerResetCheck;
+    unsigned int LINResetCheck;
 } Global_Timer1msType;
 
 typedef struct
@@ -290,6 +291,7 @@ typedef struct
     unsigned int IGNOffCheckFlag;
     unsigned int Freeze_Hold_ModeChkFlag;
     unsigned int PowerResetCheckFlag;
+    unsigned int LINResetCheckFlag;
 } Global_Timer1msFlagType;
 
 extern Global_Timer1msType G_Timer1ms;
