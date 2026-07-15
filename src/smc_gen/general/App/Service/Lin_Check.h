@@ -7,6 +7,8 @@ void Lin_RxCheck(void);
 void Lin_TxCheck(void);
 void Lin_BusCheck(void);
 void Lin_Error_Status(void);
+void Lin_NrstCheck(void);
+
 #endif
 
 

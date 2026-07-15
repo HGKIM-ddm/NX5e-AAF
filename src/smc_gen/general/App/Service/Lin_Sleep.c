@@ -1,6 +1,5 @@
 #include "Lin_Sleep.h"
 #include "Service.h"
-
 /***********************************************************************************************************************
  * Function Name: LinSleep_StopMotorAndReset
  * Description  : 모터 구동 정지 및 제어 변수 리셋 (Case 0, 4 공통)
@@ -396,7 +395,43 @@ static void LinSleep_Final(void)
         MCU_Sleep();
     }
 }
+/***********************************************************************************************************************
+ * Function Name: LIN_VoltageDetect
+ * Description  : 최종 Sleep 진입 전 상태를 정리하고 MCU Sleep을 호출함 (Case 9)
+ * Called By    :
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void LinSleep_UnderVoltageRecovery(void)
+{
+    /* 1. Interrupt Disable */
+    DI();
 
+    /* 2. LIN Mode를 Reset Mode로 전환 */
+    RLN30.LCUC = 0x00U;
+
+    /* 3. Transmission Stop */
+    RLN30.LTRC = 0x04U;
+    RLN30.LST  = 0x00U;
+    RLN30.LEST = 0x00U;
+
+    /* 4. TxD Port의 Property 변경 */
+    R_PORT_ResetAltFunc(Port10, 10U, Output);
+    R_PORT_ResetAltFunc(Port10, 9U, Input);
+
+    /* 5. EN Port, TxD Port를 Low로 변경 */
+    PORT.P10 &= ~_PORT_Pn10_OUTPUT_HIGH; // TxD Low
+    PORT.P10 &= ~_PORT_Pn3_OUTPUT_HIGH;  // EN Low
+
+    /* 6. Interrupt Enable */
+    EI();
+
+    /* 7. NRST 복귀 확인 (Lin_NrstCheck가 이미 디바운스 완료해둔 값) */
+    if (lin_nrst_low_flag == OFF)
+    {
+        lin_sleep_step = 8U;
+    }
+}
 /***********************************************************************************************************************
  * Function Name: LinSleep_Cycle3
  * Description  : LIN Sleep 후반부(동작) 단계 처리 (구동 시작 -> 완료 확인 -> Sleep)
@@ -417,6 +452,9 @@ static void LinSleep_Cycle3(void)
     case 8:
         LinSleep_Final();
         break;
+    case 9:
+        LinSleep_UnderVoltageRecovery();
+        break;
     default:
         break;
     }
@@ -431,7 +469,7 @@ static void LinSleep_Cycle3(void)
 static void McuSleep_ExternalOff(void)
 {
     Drv8889_Sleep(); // 모터 드라이버 슬립 전환
-    if (LIN_Nrst == OFF)
+    if (lin_nrst_low_flag == ON)
     {
         LinTrcv_On();
     }
@@ -459,38 +497,18 @@ static void McuSleep_PortConfig(void)
 }
 
 /***********************************************************************************************************************
- * Function Name: McuSleep_InternalModuleStop
- * Description  : 전력 소모를 줄이기 위해 MCU 내부 주변장치(ADC, 타이머, 통신 모듈)의 클럭을 정지함
+ * Function Name: Hw_Recovery
+ * Description  : 모터IC, LIN IC 끈것을 다시 복구
  * Arguments    : void
  * Return Value : void
  ***********************************************************************************************************************/
-static void McuSleep_InternalModuleStop(void)
+void Hw_Recovery(void)
 {
-    R_Config_TAUD0_13_Stop(); // 타이머 정지
-    R_Config_TAUD0_3_Stop();  // 타이머 정지
-    // R_Config_INTC_Create();      // 인터럽트 컨트롤러 재설정 (Wake-up 준비)
-    R_Config_INTC_INTP5_Start(); // (주석 유지)
-    R_Config_CSIH0_Stop();       // SPI 모듈 정지
-    R_Config_ADCA0_Halt();       // ADC 모듈 정지
-
-    G_Timer1msFlag.SpiFlag = 0U; // 관련 플래그 초기화
-    G_Timer1ms.Spi = 0U;
+    Drv8889_Init();
+    LinTrcv_On();
+    Drv8889_SpiInit();
+    //Lin_SlaveInit();
 }
-
-/***********************************************************************************************************************
- * Function Name: McuSleep_DeepStop
- * Description  : 클럭 생성기를 슬립 모드용으로 설정하고, 최종적으로 Deep Stop Mode로 진입함
- * Arguments    : void
- * Return Value : void
- ***********************************************************************************************************************/
-static void McuSleep_DeepStop(void)
-{
-    R_CGC_Create_sleepmode(); // 클럭 설정 변경
-
-    R_Config_STBC_Prepare_Deep_Stop_Mode(); // 대기 모드 진입 준비 레지스터 설정
-    R_Config_STBC_Start_Deep_Stop_Mode();   // [진입점] 여기서 MCU 동작 멈춤
-}
-
 /***********************************************************************************************************************
  * Function Name: Lin_Sleep
  * Description  : LIN Sleep 모드 진입 및 Wakeup 동작 시퀀스 전체 제어
@@ -534,14 +552,14 @@ void MCU_Sleep(void)
     First_Powerchk = 1U;
     G_Timer1usFlag.SpiFlag = 0U;
     G_Timer1us.Spi = 0U;
-    LIN_Nrst = PORT.PPR0 & (1 << 0); // NRST
-    if (LIN_Nrst == OFF)
+    // LIN_Nrst = PORT.PPR0 & (1 << 0); // NRST
+    if (lin_nrst_low_flag == ON) //undervoltage
     {
         lin_sleep_step = 9U;
         return;
     }
     // 2. 필요 시 플래시 메모리에 데이터 저장
-    if ((step_check_flag == 2U) && (LIN_Nrst != OFF))
+    if (step_check_flag == 2U)
     {
         FDL_Write();
     }
@@ -553,8 +571,5 @@ void MCU_Sleep(void)
     McuSleep_PortConfig();
 
     //  5. 내부 주변장치 클럭 정지
-    McuSleep_InternalModuleStop();
-
-    // 6. Deep Stop 모드 진입 (Wake-up 이벤트 발생 전까지 정지)
-    McuSleep_DeepStop();
+    Hw_Recovery();
 }

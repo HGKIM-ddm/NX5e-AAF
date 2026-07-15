@@ -55,6 +55,7 @@ static void Communication_Check(void)
     Lin_RxCheck();
     Lin_TxCheck();
     Spi_Check();
+    Lin_NrstCheck();
 }
 
 /***********************************************************************************************************************
@@ -108,11 +109,14 @@ void App_HwCheck(void)
 
     ADC_GetStatus();
 }
+
 void Hw_Reset(void)
 {
-    LIN_Nrst = PORT.PPR0 & (1 << 0); // NRST
-
-    if (lin_sleep_step != 0)
+    if (G_Timer1ms.PowerResetCheck >= 4000U)
+    {
+        Power_Reset_Flag = 1U;
+    }
+    if (lin_sleep_step != 0U)
     {
         G_Timer1msFlag.LINResetCheckFlag = 1U;
     }
@@ -121,7 +125,7 @@ void Hw_Reset(void)
         G_Timer1msFlag.LINResetCheckFlag = 0U;
         G_Timer1ms.LINResetCheck = 0U;
     }
-    if (((G_Timer1ms.PowerResetCheck >= 5000U) && (LIN_Nrst == OFF)) || (G_Timer1ms.LinBusInactive >= 60000U) || (G_Timer1ms.LINResetCheck >= 60000U))
+    if ((G_Timer1ms.LinBusInactive >= 60000U) || (G_Timer1ms.LINResetCheck >= 60000U) || ((Power_Reset_Flag == 1U) && (adc_avr >= ADC_UNDER_VOLTAGE_9V)))
     {
         WDTA0.WDTE = 0x00U;
         while (1)
@@ -129,31 +133,31 @@ void Hw_Reset(void)
         }
     }
 }
-/***********************************************************************************************************************
- * Function Name: App_SwLogic
- * Description  : Monitors software-level states executing logic in the EXACT order of the original loop.
- * Called By    : AAF_App
- * Arguments    : void
- * Return Value : void
- ***********************************************************************************************************************/
-void App_SwLogic(void)
-{
-    // [Sequence 0] MCU Error Check
-    Hw_Reset();
 
-    // [Sequence 1] Main Operation Mode Check
-    Mode_Check();
+    /***********************************************************************************************************************
+     * Function Name: App_SwLogic
+     * Description  : Monitors software-level states executing logic in the EXACT order of the original loop.
+     * Called By    : AAF_App
+     * Arguments    : void
+     * Return Value : void
+     ***********************************************************************************************************************/
+    void App_SwLogic(void)
+    {
+        // [Sequence 0] MCU Error Check
+        Hw_Reset();
 
-    // [Sequence 2] Communication Check
-    Communication_Check();
+        // [Sequence 1] Main Operation Mode Check
+        Mode_Check();
 
-    // [Sequence 3] External Factors Check
-    // CHK_external_factors();
+        // [Sequence 2] Communication Check
+        Communication_Check();
 
-    // [Sequence 4] Safety & Protection Logic (Fail-safe, Antipinch, LIN Bus, Protection)
-    Safety_Check();
+        // [Sequence 3] External Factors Check
+        // CHK_external_factors();
 
-    // [Sequence 5] Step Initialization Check
-    Step_InitAndCheck();
+        // [Sequence 4] Safety & Protection Logic (Fail-safe, Antipinch, LIN Bus, Protection)
+        Safety_Check();
 
-}
+        // [Sequence 5] Step Initialization Check
+        Step_InitAndCheck();
+    }

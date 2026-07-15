@@ -120,6 +120,8 @@ extern unsigned int spi_action_step;
 extern char ret;
 extern unsigned int lin_bus_inactive_flag;
 extern unsigned int lin_sleep_step;
+extern unsigned int lin_nrst_low_flag;
+extern unsigned int lin_nrst_debounce_count;
 
 /* 2.5 ADC & Power Variables */
 extern uint16_t bat_adc;
@@ -247,6 +249,7 @@ typedef struct
     unsigned int Freeze_Hold_ModeChk;
     unsigned int PowerResetCheck;
     unsigned int LINResetCheck;
+    unsigned int NrstCheck;
 } Global_Timer1msType;
 
 typedef struct
@@ -292,6 +295,7 @@ typedef struct
     unsigned int Freeze_Hold_ModeChkFlag;
     unsigned int PowerResetCheckFlag;
     unsigned int LINResetCheckFlag;
+    unsigned int NrstCheckFlag;
 } Global_Timer1msFlagType;
 
 extern Global_Timer1msType G_Timer1ms;
@@ -391,7 +395,6 @@ extern unsigned int AAFx_InitStatus_Temporary;
 extern unsigned int AAFx_Last_Command;
 extern unsigned int LIN_Recover;
 extern unsigned int Power_Reset_Flag;
-extern unsigned int LIN_Nrst;
 extern unsigned int Adc_Recovery_Detected;
 
 #endif

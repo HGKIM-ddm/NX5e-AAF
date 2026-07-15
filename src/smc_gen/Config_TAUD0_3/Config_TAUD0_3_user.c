@@ -111,6 +111,7 @@ void r_Config_TAUD0_3_interrupt(void)
     TIMER_1MS(Freeze_Hold_ModeChk);
     TIMER_1MS(PowerResetCheck);
     TIMER_1MS(LINResetCheck);
+    TIMER_1MS(NrstCheck);
 // Extra Timer
 #ifdef UDS
     uds_1ms++;
