@@ -175,8 +175,11 @@ unsigned int spi_action_step = 0;
 char ret = 0;
 unsigned int lin_bus_inactive_flag = 0;
 unsigned int lin_sleep_step = 0;
-unsigned int lin_nrst_low_flag = 0;
-unsigned int lin_nrst_debounce_count = 0;
+unsigned int LIN_Nrst = 0;
+unsigned int LIN_Nrst_Check = 0;
+unsigned int LIN_NRST_Recognition_Chk = 0;
+unsigned int LIN_En_Check = 0;
+unsigned int LIN_Tx_Check = 0;
 
 /* 2.5 ADC & Power Variables */
 uint16_t bat_adc = 0;
@@ -260,6 +263,7 @@ unsigned int power_chk_memory_write = 0; // power chk
 unsigned int power_chk_memory_read = 0;
 unsigned int First_Powerchk_memory_write = 0U;
 unsigned int First_Powerchk_memory_read = 0U;
+unsigned int LIN_Sleep_FlashWrite = 0U;
 
 /* 2.9 Timers (1us / 1ms Counters) */
 

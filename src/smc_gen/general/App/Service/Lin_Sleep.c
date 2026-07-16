@@ -15,6 +15,7 @@ static void LinSleep_StopMotorAndReset(void)
     motor_step_value = STEP_TIME_1000RPM;
     fail_safety_flag = OFF;
     fail_safety_step = 0U;
+    LIN_Sleep_FlashWrite = OFF;
 }
 
 /***********************************************************************************************************************
@@ -119,16 +120,12 @@ static void LinSleep_ParsingCommand(void)
             lin_sleep_step = 8;
         }
     }
-    else if (AAF_LINOut == 0x01U)
+    else
     {
         Drv8889_Wakeup();
         aaf_action = OPEN;
         Last_aaf_action = aaf_action;
         lin_sleep_step = 3U;
-    }
-    else
-    {
-        // invalid
     }
 }
 
@@ -249,7 +246,7 @@ static void LinSleep_CheckCompletion(void)
     }
     else
     {
-        if (((Open_fault_check == 1U) || (Short_fault_check == 1U)) || ((AAFx_InitStatus == DURING_INITIALIZATION) && (adc_avr <= ADC_UNDER_VOLTAGE_7V)))
+        if ((protection_function == ON) || ((Open_fault_check == 1U) || (Short_fault_check == 1U)) || ((AAFx_InitStatus == DURING_INITIALIZATION) && (adc_avr <= ADC_UNDER_VOLTAGE_7V)))
         {
             Error_UnknownStatus();
             lin_sleep_step = 8U;
@@ -412,7 +409,7 @@ static void LinSleep_UnderVoltageRecovery(void)
 
     /* 3. Transmission Stop */
     RLN30.LTRC = 0x04U;
-    RLN30.LST  = 0x00U;
+    RLN30.LST = 0x00U;
     RLN30.LEST = 0x00U;
 
     /* 4. TxD Port의 Property 변경 */
@@ -420,14 +417,14 @@ static void LinSleep_UnderVoltageRecovery(void)
     R_PORT_ResetAltFunc(Port10, 9U, Input);
 
     /* 5. EN Port, TxD Port를 Low로 변경 */
-    PORT.P10 &= ~_PORT_Pn10_OUTPUT_HIGH; // TxD Low
-    PORT.P10 &= ~_PORT_Pn3_OUTPUT_HIGH;  // EN Low
+    // PORT.P10 &= ~_PORT_Pn10_OUTPUT_HIGH; // TxD Low
+    // PORT.P10 &= ~_PORT_Pn3_OUTPUT_HIGH;  // EN Low
 
     /* 6. Interrupt Enable */
     EI();
 
     /* 7. NRST 복귀 확인 (Lin_NrstCheck가 이미 디바운스 완료해둔 값) */
-    if (lin_nrst_low_flag == OFF)
+    if (LIN_Nrst == LIN_NRST_High)
     {
         lin_sleep_step = 8U;
     }
@@ -469,7 +466,7 @@ static void LinSleep_Cycle3(void)
 static void McuSleep_ExternalOff(void)
 {
     Drv8889_Sleep(); // 모터 드라이버 슬립 전환
-    if (lin_nrst_low_flag == ON)
+    if (LIN_Nrst == LIN_NRST_Low)
     {
         LinTrcv_On();
     }
@@ -498,16 +495,23 @@ static void McuSleep_PortConfig(void)
 
 /***********************************************************************************************************************
  * Function Name: Hw_Recovery
- * Description  : 모터IC, LIN IC 끈것을 다시 복구
+ * Description  :
  * Arguments    : void
  * Return Value : void
  ***********************************************************************************************************************/
 void Hw_Recovery(void)
 {
-    Drv8889_Init();
-    LinTrcv_On();
-    Drv8889_SpiInit();
-    //Lin_SlaveInit();
+    if (LIN_Nrst == LIN_NRST_Low) // undervoltage
+    {
+        lin_sleep_step = 9U;
+        return;
+    }
+    LIN_En_Check = PORT.PPR10 & (1 << 3);  // Enable
+    LIN_Tx_Check = PORT.PPR10 & (1 << 10); // LIN Tx
+    if ((LIN_En_Check == 0U) && (LIN_Tx_Check == 0U))
+    {
+        lin_sleep_step = 8U;
+    }
 }
 /***********************************************************************************************************************
  * Function Name: Lin_Sleep
@@ -552,16 +556,17 @@ void MCU_Sleep(void)
     First_Powerchk = 1U;
     G_Timer1usFlag.SpiFlag = 0U;
     G_Timer1us.Spi = 0U;
-    // LIN_Nrst = PORT.PPR0 & (1 << 0); // NRST
-    if (lin_nrst_low_flag == ON) //undervoltage
+
+    if (LIN_Nrst == LIN_NRST_Low) // undervoltage
     {
         lin_sleep_step = 9U;
         return;
     }
     // 2. 필요 시 플래시 메모리에 데이터 저장
-    if (step_check_flag == 2U)
+    if ((step_check_flag == 2U) && (LIN_Sleep_FlashWrite == OFF))
     {
         FDL_Write();
+        LIN_Sleep_FlashWrite = ON;
     }
 
     // 3. 외부 하드웨어 전원 차단 INTP5 위해 LIN IC ON

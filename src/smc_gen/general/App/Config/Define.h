@@ -645,6 +645,9 @@
 #define Freeze_Hold_Off 0U
 #define Freeze_Hold_On 1U
 
+#define LIN_NRST_High 0U
+#define LIN_NRST_Low 1U
+
 // --- Sensors & Types ---
 #define SENSOR_NO 0U
 #define SENSOR_X1 1U

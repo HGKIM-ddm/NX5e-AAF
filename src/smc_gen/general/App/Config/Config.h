@@ -120,8 +120,11 @@ extern unsigned int spi_action_step;
 extern char ret;
 extern unsigned int lin_bus_inactive_flag;
 extern unsigned int lin_sleep_step;
-extern unsigned int lin_nrst_low_flag;
-extern unsigned int lin_nrst_debounce_count;
+extern unsigned int LIN_Nrst;
+extern unsigned int LIN_Nrst_Check;
+extern unsigned int LIN_NRST_Recognition_Chk;
+extern unsigned int LIN_En_Check;
+extern unsigned int LIN_Tx_Check;
 
 /* 2.5 ADC & Power Variables */
 extern uint16_t bat_adc;
@@ -201,7 +204,7 @@ extern unsigned int power_chk_memory_write;
 extern unsigned int power_chk_memory_read;
 extern unsigned int First_Powerchk_memory_write;
 extern unsigned int First_Powerchk_memory_read;
-
+extern unsigned int LIN_Sleep_FlashWrite;
 /* 2.9 Timers (1us / 1ms Counters) */
 
 /* Global 1ms Timer Group */
@@ -249,7 +252,7 @@ typedef struct
     unsigned int Freeze_Hold_ModeChk;
     unsigned int PowerResetCheck;
     unsigned int LINResetCheck;
-    unsigned int NrstCheck;
+    unsigned int LINNrstCheck;
 } Global_Timer1msType;
 
 typedef struct
@@ -296,6 +299,7 @@ typedef struct
     unsigned int PowerResetCheckFlag;
     unsigned int LINResetCheckFlag;
     unsigned int NrstCheckFlag;
+    unsigned int LINNrstCheckFlag;
 } Global_Timer1msFlagType;
 
 extern Global_Timer1msType G_Timer1ms;

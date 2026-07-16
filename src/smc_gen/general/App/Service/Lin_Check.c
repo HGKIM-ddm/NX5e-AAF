@@ -599,46 +599,35 @@ void Lin_Error_Status(void)
  ***********************************************************************************************************************/
 void Lin_NrstCheck(void)
 {
-    unsigned int nrst_now;
-
-    G_Timer1msFlag.NrstCheckFlag = 1U;
-
-    if (G_Timer1ms.NrstCheck >= 10U)
+    LIN_Nrst_Check = PORT.PPR0 & (1 << 0); // NRST
+    if (LIN_Nrst_Check == 0U)
     {
-        G_Timer1ms.NrstCheck = 0U;
-        nrst_now = PORT.PPR0 & (1U << 0);
-
-        if (nrst_now == OFF) /* NRST Low */
+        if (LIN_NRST_Recognition_Chk == OFF)
         {
-            if (lin_nrst_low_flag == OFF)
-            {
-                lin_nrst_debounce_count++;
-                if (lin_nrst_debounce_count >= 3U)
-                {
-                    lin_nrst_debounce_count = 0U;
-                    lin_nrst_low_flag = ON;
-                }
-            }
-            else
-            {
-                lin_nrst_debounce_count = 0U;
-            }
+            G_Timer1ms.LINNrstCheck = 0U;
+            G_Timer1msFlag.LINNrstCheckFlag = 1U;
+            LIN_NRST_Recognition_Chk = ON;
         }
-        else /* NRST High */
+        if (G_Timer1ms.LINNrstCheck >= 100U)
         {
-            if (lin_nrst_low_flag == ON)
-            {
-                lin_nrst_debounce_count++;
-                if (lin_nrst_debounce_count >= 3U)
-                {
-                    lin_nrst_debounce_count = 0U;
-                    lin_nrst_low_flag = OFF;
-                }
-            }
-            else
-            {
-                lin_nrst_debounce_count = 0U;
-            }
+            LIN_Nrst = LIN_NRST_Low;
+            G_Timer1msFlag.LINNrstCheckFlag = 0U;
+            G_Timer1ms.LINNrstCheck = 100U;
+        }
+    }
+    else
+    {
+        if (LIN_NRST_Recognition_Chk == ON)
+        {
+            G_Timer1ms.LINNrstCheck = 0U;
+            G_Timer1msFlag.LINNrstCheckFlag = 1U;
+            LIN_NRST_Recognition_Chk = OFF;
+        }
+        if (G_Timer1ms.LINNrstCheck >= 100U)
+        {
+            LIN_Nrst = LIN_NRST_High;
+            G_Timer1msFlag.LINNrstCheckFlag = 0U;
+            G_Timer1ms.LINNrstCheck = 100U;
         }
     }
 }

@@ -25,6 +25,7 @@ void FDL_Init(void)
 
 void FDL_Write(void)
 {
+	DI();
 	G_Timer1msFlag.FdlErrorCheckFlag = 0U;
 	G_Timer1ms.FdlErrorCheck = 0U;
 	close_memory_write = step_position_close;
@@ -196,6 +197,7 @@ void FDL_Write(void)
 
 	G_Timer1msFlag.FdlErrorCheckFlag = 0U;
 	G_Timer1ms.FdlErrorCheck = 0U;
+	EI();
 }
 
 void FDL_Read(void)
