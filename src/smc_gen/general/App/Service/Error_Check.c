@@ -359,6 +359,9 @@ void Error_UnknownStatus(void)
     AAF_Tx_Position = UNKOWN_POSITION;
     AAFx_Position_Status = Unknown_Status;
     AAFx_InitStatus = DURING_INITIALIZATION;
+    AAF_Tx_Position_Temporary = UNKOWN_POSITION;
+    AAFx_Position_Status_Temporary = Unknown_Status;
+    AAFx_InitStatus_Temporary = DURING_INITIALIZATION;
     AAFx_SNSR1_Position = Initial_Value;
     AAFx_SNSR2_Position = Initial_Value;
     AAFx_SNSR3_Position = Initial_Value;

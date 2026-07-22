@@ -153,8 +153,6 @@ void Lin_CalculateVerifyChecksum(uint8_t is_response_received)
 {
     unsigned int sum_val = 0U;
 
-    ReqRespAAFID = WAIT;
-
     Req_ChkSum_Rx = (unsigned int)((Slave_RxData1[5] & 0xF0U) >> 4U);
     Req_Alive_Rx = (unsigned int)(Slave_RxData1[5] & 0x0FU);
     Req_Alive_Tx = Req_Alive_Rx;

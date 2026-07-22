@@ -173,7 +173,7 @@ static void AAF_App(void)
 const uint32_t ECU_SIGN[4] = {
 	0, 0, 0, 0};
 const uint8_t ECU_VER[] = {
-	"NX5E V0.1.3 RH850 2026.3.31\n\r" // 012 로 VERSION READ 자리변동 금지.
+	"NX5E V0.1.3 RH850 2026.7.22\n\r" // 012 로 VERSION READ 자리변동 금지.
 };
 #pragma ghs enddata
 #endif
