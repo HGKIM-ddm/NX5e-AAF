@@ -1,5 +1,9 @@
 #include "Lin_Sleep.h"
 #include "Service.h"
+
+static void Hw_Recovery(void);
+static void MCU_Sleep(void);
+
 /***********************************************************************************************************************
  * Function Name: LinSleep_StopMotorAndReset
  * Description  : 모터 구동 정지 및 제어 변수 리셋 (Case 0, 4 공통)
@@ -12,7 +16,6 @@ static void LinSleep_StopMotorAndReset(void)
     G_Timer1msFlag.StallTimeFlag = 0U;
     G_Timer1ms.StallTime = 0U;
     softstart_complete = OFF;
-    motor_step_value = STEP_TIME_1000RPM;
     fail_safety_flag = OFF;
     fail_safety_step = 0U;
     LIN_Sleep_FlashWrite = OFF;
@@ -68,7 +71,7 @@ static void LinSleep_ParsingCommand(void)
     {
         if (lin_aaf_command == OPEN)
         {
-            if (IGN_Chk == 0)
+            if (IGN_Chk == 0U)
             {
                 lin_sleep_step = 8U;
             }
@@ -82,7 +85,7 @@ static void LinSleep_ParsingCommand(void)
         }
         else if (lin_aaf_command == CLOSE)
         {
-            if (IGN_Chk == 0)
+            if (IGN_Chk == 0U)
             {
                 lin_sleep_step = 8U;
             }
@@ -96,28 +99,28 @@ static void LinSleep_ParsingCommand(void)
         }
         else if (lin_aaf_command == UNKOWN_POSITION)
         {
-            if (IGN_Chk == 0)
+            if (IGN_Chk == 0U)
             {
-                lin_sleep_step = 8;
+                lin_sleep_step = 8U;
             }
             else if (AAFx_Last_Command == CLOSE)
             {
                 Drv8889_Wakeup();
                 aaf_action = CLOSE;
                 Last_aaf_action = aaf_action;
-                lin_sleep_step = 3;
+                lin_sleep_step = 3U;
             }
             else
             {
                 Drv8889_Wakeup();
                 aaf_action = OPEN;
                 Last_aaf_action = aaf_action;
-                lin_sleep_step = 3;
+                lin_sleep_step = 3U;
             }
         }
         else
         {
-            lin_sleep_step = 8;
+            lin_sleep_step = 8U;
         }
     }
     else
@@ -363,7 +366,7 @@ static void LinSleep_Stall_Stop(void)
 
         // Operate_SelectTxPostion();
         // aaf_step = FINISHED_OPERATE;
-        G_Timer1ms.Spi = 0;
+        G_Timer1ms.Spi = 0U;
         lin_sleep_step = 8U;
     }
     else
@@ -499,18 +502,20 @@ static void McuSleep_PortConfig(void)
  * Arguments    : void
  * Return Value : void
  ***********************************************************************************************************************/
-void Hw_Recovery(void)
+static void Hw_Recovery(void)
 {
     if (LIN_Nrst == LIN_NRST_Low) // undervoltage
     {
         lin_sleep_step = 9U;
-        return;
     }
-    LIN_En_Check = PORT.PPR10 & (1 << 3);  // Enable
-    LIN_Tx_Check = PORT.PPR10 & (1 << 10); // LIN Tx
-    if ((LIN_En_Check == 0U) && (LIN_Tx_Check == 0U))
+    else
     {
-        lin_sleep_step = 8U;
+        LIN_En_Check = PORT.PPR10 & (1U << 3U);  // Enable
+        LIN_Tx_Check = PORT.PPR10 & (1U << 10U); // LIN Tx
+        if ((LIN_En_Check == 0U) && (LIN_Tx_Check == 0U))
+        {
+            lin_sleep_step = 8U;
+        }
     }
 }
 /***********************************************************************************************************************
@@ -528,7 +533,7 @@ void Lin_Sleep(void)
         LinSleep_Cycle1();
     }
     // Step 3 ~ 5: 마지막 구동 후 스톨에 따른 분기
-    else if ((lin_sleep_step >= 3) && (lin_sleep_step <= 5))
+    else if ((lin_sleep_step >= 3U) && (lin_sleep_step <= 5U))
     {
         LinSleep_Cycle2();
     }
@@ -549,7 +554,7 @@ void Lin_Sleep(void)
  * Arguments    : void
  * Return Value : void
  ***********************************************************************************************************************/
-void MCU_Sleep(void)
+static void MCU_Sleep(void)
 {
     // 1. 종료 상태 플래그 설정
     power_chk = Normal_Shutdown;
@@ -560,21 +565,23 @@ void MCU_Sleep(void)
     if (LIN_Nrst == LIN_NRST_Low) // undervoltage
     {
         lin_sleep_step = 9U;
-        return;
     }
-    // 2. 필요 시 플래시 메모리에 데이터 저장
-    if ((step_check_flag == 2U) && (LIN_Sleep_FlashWrite == OFF))
+    else
     {
-        FDL_Write();
-        LIN_Sleep_FlashWrite = ON;
+        // 2. 필요 시 플래시 메모리에 데이터 저장
+        if ((step_check_flag == 2U) && (LIN_Sleep_FlashWrite == OFF))
+        {
+            FDL_Write();
+            LIN_Sleep_FlashWrite = ON;
+        }
+
+        // 3. 외부 하드웨어 전원 차단 INTP5 위해 LIN IC ON
+        McuSleep_ExternalOff();
+
+        //   4. 슬립 대비 포트 설정 (누설 전류 방지)
+        McuSleep_PortConfig();
+
+        //  5. 내부 주변장치 클럭 정지
+        Hw_Recovery();
     }
-
-    // 3. 외부 하드웨어 전원 차단 INTP5 위해 LIN IC ON
-    McuSleep_ExternalOff();
-
-    //   4. 슬립 대비 포트 설정 (누설 전류 방지)
-    McuSleep_PortConfig();
-
-    //  5. 내부 주변장치 클럭 정지
-    Hw_Recovery();
 }

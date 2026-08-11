@@ -62,6 +62,7 @@
   .weak	___lowinit
   .weak	___ghs_rramstart
   .set   EBV, 0x8000
+
   .text
 _RESET:
   -- Initialization of the global pointer

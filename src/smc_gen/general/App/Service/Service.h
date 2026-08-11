@@ -21,7 +21,6 @@
 #include "Protection_Mode.h"
 #include "Re_Init.h"
 #include "Spi_Check.h"
-//#include "Obd_Check.h"
 
 void AAF_SetType(void);
 void App_HwCheck(void);

@@ -1,92 +1,7 @@
 #include "Lin_CHeck.h"
 #include "Service.h"
 
-#ifdef ENABLE_TORQUE_TEST
-/***********************************************************************************************************************
- * Function Name: Lin_ParseTorqueTestMode
- * Description  : 토크 테스트 및 초기화 관련 플래그 파싱 및 즉각 Re_Init 검사 수행
- ***********************************************************************************************************************/
-static void Lin_ParseTorqueTestMode(void)
-{
-	AAF_Init_Flag = (unsigned int)((ID_chk_rxdata[1U] & 0x80U) >> 7U);
-	AAF_Flap_Fixation_Test_Mode = (unsigned int)((ID_chk_rxdata[2U] & 0x80U) >> 7U);
-	AAF_Maximum_Torque_Test_Mode = (unsigned int)((ID_chk_rxdata[3U] & 0x80U) >> 7U);
-	Re_Init_check = (unsigned int)((ID_chk_rxdata[4U] & 0x80U) >> 7U);
-
-	if (Re_Init_check == 0x01U)
-	{
-		Re_Init_check_flag = 1U;
-	}
-	else
-	{
-		Re_Init_check_flag = 0U;
-	}
-
-	if ((Re_Init_check_flag == 1U) && (aaf_step == AAF_WAITING) && (Re_Init_check_prev == 0U))
-	{
-		Re_Init();
-	}
-	Re_Init_check_prev = Re_Init_check;
-}
-
-/***********************************************************************************************************************
- * Function Name: Lin_ExecuteTorqueTestMode
- * Description  : 파싱된 플래그를 기반으로 토크, 고정 테스트 모드 토글 동작 및 초기화 수행
- ***********************************************************************************************************************/
-static void Lin_ExecuteTorqueTestMode(void)
-{
-	if ((AAF_Init_Flag_tog == OFF) && (AAF_Init_Flag == ON))
-	{
-		if ((AAF1_TargetPosition == 0x7FU) || (AAF2_TargetPosition == 0x7FU) || (AAF3_TargetPosition == 0x7FU))
-		{
-			wake_up_motor_range_init_chk = 0U;
-			evrdy_on_flag = OFF;
-			Re_Init();
-		}
-		AAF_Init_Flag_tog = ON;
-	}
-	else if ((AAF_Init_Flag_tog == ON) && (AAF_Init_Flag == OFF))
-	{
-		AAF_Init_Flag_tog = OFF;
-	}
-	else
-	{
-		// Waiting
-	}
-
-	if ((AAF_Flap_Fixation_Test_Mode_tog == OFF) && (AAF_Flap_Fixation_Test_Mode == ON))
-	{
-		AAF_Flap_Fixation_Test_Mode_tog = ON;
-	}
-	else if ((AAF_Flap_Fixation_Test_Mode_tog == ON) && (AAF_Flap_Fixation_Test_Mode == OFF))
-	{
-		wake_up_motor_range_init_chk = 0U;
-		evrdy_on_flag = OFF;
-		Re_Init();
-		AAF_Flap_Fixation_Test_Mode_tog = OFF;
-	}
-	else
-	{
-		// Waiting
-	}
-
-	if ((AAF_Maximum_Torque_Test_Mode_tog == OFF) && (AAF_Maximum_Torque_Test_Mode == ON))
-	{
-		AAF_Maximum_Torque_Test_Mode_tog = ON;
-	}
-	else if ((AAF_Maximum_Torque_Test_Mode_tog == ON) && (AAF_Maximum_Torque_Test_Mode == OFF))
-	{
-		wake_up_motor_range_init_chk = 0U;
-		evrdy_on_flag = OFF;
-		Re_Init();
-		AAF_Maximum_Torque_Test_Mode_tog = OFF;
-	}
-	else
-	{
-		// Waiting
-	}
-}
-#endif
+static void Lin_Error_Status(void);
 
 static void Lin_DiagRx(void)
 {
@@ -401,19 +316,16 @@ static void Protection_OffMode(void)
 	{
 		if (AAFx_InitStatus != DURING_INITIALIZATION)
 		{
-			ReqAAF3DiagMode = (unsigned int)((ID_chk_rxdata[0U] & 0x30U) >> 4U);
-			ReqAAF2DiagMode = (unsigned int)((ID_chk_rxdata[0U] & 0x0CU) >> 2U);
-			ReqAAF1DiagMode = (unsigned int)(ID_chk_rxdata[0U] & 0x03U);
-			AAF1_TargetPosition = (unsigned int)(ID_chk_rxdata[1U] & 0x7FU);
-			AAF2_TargetPosition = (unsigned int)(ID_chk_rxdata[2U] & 0x7FU);
-			AAF3_TargetPosition = (unsigned int)(ID_chk_rxdata[3U] & 0x7FU);
-			EngRunSta = (unsigned int)((ID_chk_rxdata[4U] & 0x30U) >> 4U);
-			HevRdy = (unsigned int)((ID_chk_rxdata[4U] & 0x0CU) >> 2U);
-			AAF_LINOut = (unsigned int)(ID_chk_rxdata[4U] & 0x03U);
-			AmbTempSta = (unsigned int)((ID_chk_rxdata[4U] & 0xC0U) >> 6U);
-#ifdef ENABLE_TORQUE_TEST
-			Lin_ParseTorqueTestMode();
-#endif
+			ReqAAF3DiagMode = (((unsigned int)ID_chk_rxdata[0U] & 0x30U) >> 4U);
+			ReqAAF2DiagMode = (((unsigned int)ID_chk_rxdata[0U] & 0x0CU) >> 2U);
+			ReqAAF1DiagMode = ((unsigned int)ID_chk_rxdata[0U] & 0x03U);
+			AAF1_TargetPosition = ((unsigned int)ID_chk_rxdata[1U] & 0x7FU);
+			AAF2_TargetPosition = ((unsigned int)ID_chk_rxdata[2U] & 0x7FU);
+			AAF3_TargetPosition = ((unsigned int)ID_chk_rxdata[3U] & 0x7FU);
+			EngRunSta = (((unsigned int)ID_chk_rxdata[4U] & 0x30U) >> 4U);
+			HevRdy = (((unsigned int)ID_chk_rxdata[4U] & 0x0CU) >> 2U);
+			AAF_LINOut = ((unsigned int)ID_chk_rxdata[4U] & 0x03U);
+			AmbTempSta = (((unsigned int)ID_chk_rxdata[4U] & 0xC0U) >> 6U);
 
 			if (AAFx_Index == AAF_1)
 			{
@@ -431,18 +343,14 @@ static void Protection_OffMode(void)
 			{
 				// invalid
 			}
-
-#ifdef ENABLE_TORQUE_TEST
-			Lin_ExecuteTorqueTestMode();
-#endif
 		}
 		else
 		{
-			ReqRespAAFID = (unsigned int)((ID_chk_rxdata[0U] & 0xC0U) >> 6U);
-			EngRunSta = (unsigned int)((ID_chk_rxdata[4U] & 0x30U) >> 4U);
-			HevRdy = (unsigned int)((ID_chk_rxdata[4U] & 0x0CU) >> 2U);
-			AAF_LINOut = (unsigned int)(ID_chk_rxdata[4U] & 0x03U);
-			AmbTempSta = (unsigned int)((ID_chk_rxdata[4U] & 0xC0U) >> 6U);
+			ReqRespAAFID = (((unsigned int)ID_chk_rxdata[0U] & 0xC0U) >> 6U);
+			EngRunSta = (((unsigned int)ID_chk_rxdata[4U] & 0x30U) >> 4U);
+			HevRdy = (((unsigned int)ID_chk_rxdata[4U] & 0x0CU) >> 2U);
+			AAF_LINOut = ((unsigned int)ID_chk_rxdata[4U] & 0x03U);
+			AmbTempSta = (((unsigned int)ID_chk_rxdata[4U] & 0xC0U) >> 6U);
 		}
 	}
 }
@@ -459,7 +367,7 @@ static void Protection_OnMode(void)
 
 	if (lin_rx_pass_flag == PASS)
 	{
-		AAF_ProtectionMode_Rx = (unsigned int)((ID_chk_rxdata[7U] & 0x40U) >> 6U);
+		AAF_ProtectionMode_Rx = (((unsigned int)ID_chk_rxdata[7U] & 0x40U) >> 6U);
 	}
 }
 
@@ -473,14 +381,14 @@ void Lin_RxCheck(void)
 {
 	Lin_DiagRx();
 
-	ReqRespAAFID = (unsigned int)((Slave_RxData1[0U] & 0xC0U) >> 6U);
-	EngRunSta = (unsigned int)((Slave_RxData1[4U] & 0x30U) >> 4U);
-	HevRdy = (unsigned int)((Slave_RxData1[4U] & 0x0CU) >> 2U);
-	AAF_LINOut = (unsigned int)(Slave_RxData1[4U] & 0x03U);
-	AmbTempSta = (unsigned int)((ID_chk_rxdata[4U] & 0xC0U) >> 6U);
+	ReqRespAAFID = (((unsigned int)Slave_RxData1[0U] & 0xC0U) >> 6U);
+	EngRunSta = (((unsigned int)Slave_RxData1[4U] & 0x30U) >> 4U);
+	HevRdy = (((unsigned int)Slave_RxData1[4U] & 0x0CU) >> 2U);
+	AAF_LINOut = ((unsigned int)Slave_RxData1[4U] & 0x03U);
+	AmbTempSta = (((unsigned int)ID_chk_rxdata[4U] & 0xC0U) >> 6U);
 	if (AAF_LIN_ChkSum_CHK == PASS)
 	{
-		// ReqRespAAFID = (unsigned int)((Slave_RxData1[0] & 0xC0U) >> 6U);
+		// ReqRespAAFID = (((unsigned int)Slave_RxData1[0] & 0xC0U) >> 6U);
 
 		if (protection_function == OFF) //
 		{
@@ -535,7 +443,22 @@ void Lin_TxCheck(void)
 	Slave_TxData[4U] = (uint8_t)((0x1Fu << 3U) | (TotalNumOfAAFSensor));
 	Slave_TxData[5U] = (uint8_t)((AAFx_SNSR4_Position << 6U) | (AAFx_SNSR3_Position << 4U) | (AAFx_SNSR2_Position << 2U) | AAFx_SNSR1_Position);
 
-	Req_ChkSum_Tx = (unsigned int)((16U - ((((Slave_TxData[0U] / 16U) + (Slave_TxData[1U] / 16U) + (Slave_TxData[2U] / 16U) + (Slave_TxData[3U] / 16U) + (Slave_TxData[4U] / 16U) + (Slave_TxData[5U] / 16U) + Req_Alive_Tx) + ((Slave_TxData[0U] % 16U) + (Slave_TxData[1U] % 16U) + (Slave_TxData[2U] % 16U) + (Slave_TxData[3U] % 16U) + (Slave_TxData[4U] % 16U) + (Slave_TxData[5U] % 16U))) & 0x0Fu) & 0x0Fu));
+	Req_ChkSum_Tx = ((16U - ((
+								 (
+									 ((unsigned int)Slave_TxData[0U] / 16U) +
+									 ((unsigned int)Slave_TxData[1U] / 16U) +
+									 ((unsigned int)Slave_TxData[2U] / 16U) +
+									 ((unsigned int)Slave_TxData[3U] / 16U) +
+									 ((unsigned int)Slave_TxData[4U] / 16U) +
+									 ((unsigned int)Slave_TxData[5U] / 16U) + Req_Alive_Tx) +
+								 (((unsigned int)Slave_TxData[0U] % 16U) +
+								  ((unsigned int)Slave_TxData[1U] % 16U) +
+								  ((unsigned int)Slave_TxData[2U] % 16U) +
+								  ((unsigned int)Slave_TxData[3U] % 16U) +
+								  ((unsigned int)Slave_TxData[4U] % 16U) +
+								  ((unsigned int)Slave_TxData[5U] % 16U))) &
+							 0x0FU)) &
+					  0x0FU);
 
 	Slave_TxData[6U] = (uint8_t)((Req_ChkSum_Tx << 4U) | Req_Alive_Tx);
 	Lin_DiagAction();
@@ -557,7 +480,7 @@ void Lin_BusCheck(void)
 		// aaf_action = FLAP_STOP;
 		// aaf_action_complete_chk = FLAP_STOP;
 		// softstart_complete = OFF;
-		// motor_step_value = STEP_TIME_1000RPM;
+
 
 		// G_Timer1ms.StallCheck = 0U;		 // test
 		// G_Timer1msFlag.StallCheckFlag = 0U; // test
@@ -570,7 +493,7 @@ void Lin_BusCheck(void)
 	}
 }
 
-void Lin_Error_Status(void)
+static void Lin_Error_Status(void)
 {
 	if ((antipinch_previous_action == OPEN) && (antipinch_action_on == ON))
 	{
@@ -599,35 +522,35 @@ void Lin_Error_Status(void)
  ***********************************************************************************************************************/
 void Lin_NrstCheck(void)
 {
-    LIN_Nrst_Check = PORT.PPR0 & (1 << 0); // NRST
-    if (LIN_Nrst_Check == 0U)
-    {
-        if (LIN_NRST_Recognition_Chk == OFF)
-        {
-            G_Timer1ms.LINNrstCheck = 0U;
-            G_Timer1msFlag.LINNrstCheckFlag = 1U;
-            LIN_NRST_Recognition_Chk = ON;
-        }
-        if (G_Timer1ms.LINNrstCheck >= 100U)
-        {
-            LIN_Nrst = LIN_NRST_Low;
-            G_Timer1msFlag.LINNrstCheckFlag = 0U;
-            G_Timer1ms.LINNrstCheck = 100U;
-        }
-    }
-    else
-    {
-        if (LIN_NRST_Recognition_Chk == ON)
-        {
-            G_Timer1ms.LINNrstCheck = 0U;
-            G_Timer1msFlag.LINNrstCheckFlag = 1U;
-            LIN_NRST_Recognition_Chk = OFF;
-        }
-        if (G_Timer1ms.LINNrstCheck >= 100U)
-        {
-            LIN_Nrst = LIN_NRST_High;
-            G_Timer1msFlag.LINNrstCheckFlag = 0U;
-            G_Timer1ms.LINNrstCheck = 100U;
-        }
-    }
+	LIN_Nrst_Check = PORT.PPR0 & (1U << 0U); // NRST
+	if (LIN_Nrst_Check == 0U)
+	{
+		if (LIN_NRST_Recognition_Chk == OFF)
+		{
+			G_Timer1ms.LINNrstCheck = 0U;
+			G_Timer1msFlag.LINNrstCheckFlag = 1U;
+			LIN_NRST_Recognition_Chk = ON;
+		}
+		if (G_Timer1ms.LINNrstCheck >= 100U)
+		{
+			LIN_Nrst = LIN_NRST_Low;
+			G_Timer1msFlag.LINNrstCheckFlag = 0U;
+			G_Timer1ms.LINNrstCheck = 100U;
+		}
+	}
+	else
+	{
+		if (LIN_NRST_Recognition_Chk == ON)
+		{
+			G_Timer1ms.LINNrstCheck = 0U;
+			G_Timer1msFlag.LINNrstCheckFlag = 1U;
+			LIN_NRST_Recognition_Chk = OFF;
+		}
+		if (G_Timer1ms.LINNrstCheck >= 100U)
+		{
+			LIN_Nrst = LIN_NRST_High;
+			G_Timer1msFlag.LINNrstCheckFlag = 0U;
+			G_Timer1ms.LINNrstCheck = 100U;
+		}
+	}
 }

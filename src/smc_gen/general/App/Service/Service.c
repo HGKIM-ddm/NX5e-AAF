@@ -7,33 +7,9 @@
  ***********************************************************************************************************************/
 static void Mode_Check(void)
 {
-    if ((protection_function == OFF) && (lin_bus_inactive_flag == OFF) && (AAF_Maximum_Torque_Test_Mode == OFF) && (G_Timer1ms.ProtectionCheck == 550))
+    if ((protection_function == OFF) && (lin_bus_inactive_flag == OFF) && (G_Timer1ms.ProtectionCheck == 550U))
     {
         Operating_Mode();
-
-        // if (Obd_Position_Turn == 0U)
-        // {
-        //     Obd_PositionStat1();
-        // }
-        // else if (Obd_Position_Turn == 1000U)
-        // {
-        //     Obd_PositionStat2();
-        // }
-        // else if (Obd_Position_Turn == 2000U)
-        // {
-        //     Obd_PositionStat3();
-        // }
-
-        // Obd_Position_Turn++;
-
-        // if (Obd_Position_Turn >= 3000U)
-        // {
-        //     Obd_Position_Turn = 0U;
-        // }
-    }
-    else if (AAF_Maximum_Torque_Test_Mode == ON)
-    {
-        Torque_TestMode();
     }
     else if ((lin_bus_inactive_flag == ON) && (antipinch_action_on == OFF))
     {
@@ -66,7 +42,7 @@ static void Communication_Check(void)
 static void Safety_Check(void)
 {
     // 1. Fail Safety Mode
-    if ((protection_function == OFF) && (lin_bus_inactive_flag == OFF) && (AAF_Maximum_Torque_Test_Mode == OFF))
+    if ((protection_function == OFF) && (lin_bus_inactive_flag == OFF))
     {
         FailSafety_Mode();
     }
@@ -81,7 +57,7 @@ static void Safety_Check(void)
     Lin_BusCheck();
 
     // 4. Protection Mode
-    if ((protection_function == ON) && (lin_bus_inactive_flag == OFF) && (AAF_Maximum_Torque_Test_Mode == OFF))
+    if ((protection_function == ON) && (lin_bus_inactive_flag == OFF))
     {
         Protection_Mode();
     }
@@ -110,7 +86,7 @@ void App_HwCheck(void)
     ADC_GetStatus();
 }
 
-void Hw_Reset(void)
+static void Hw_Reset(void)
 {
     if (G_Timer1ms.PowerResetCheck >= 4000U)
     {

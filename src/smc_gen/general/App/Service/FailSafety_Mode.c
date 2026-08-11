@@ -41,7 +41,7 @@ static void FS_CheckStallStop(unsigned int next_step)
 {
     if ((motor_stall_flag == MOTOR_STALL) || (G_Timer1ms.InitCheck >= 4500U))
     {
-        Drv8889_Off2();
+        Drv8889_Off3();
         motor_start = OFF;
         G_Timer1msFlag.StallTimeFlag = 0U;
         G_Timer1ms.StallTime = 0U; /* stall reset */
@@ -49,7 +49,6 @@ static void FS_CheckStallStop(unsigned int next_step)
         G_Timer1msFlag.InitCheckFlag = 0U;
         G_Timer1ms.InitCheck = 0U;
         softstart_complete = OFF;
-        motor_step_value = STEP_TIME_1000RPM;
         fail_safety_step = next_step;
     }
 }
@@ -176,7 +175,7 @@ static void FS_CheckStallStopFreezeHold(void)
     if ((motor_stall_flag == MOTOR_STALL) || (G_Timer1ms.InitCheck >= 4500U))
     {
         /* 공통 정지 처리 */
-        Drv8889_Off2();
+        Drv8889_Off3();
         motor_start = OFF;
         G_Timer1msFlag.StallTimeFlag = 0U;
         G_Timer1ms.StallTime = 0U;
@@ -184,7 +183,6 @@ static void FS_CheckStallStopFreezeHold(void)
         G_Timer1msFlag.InitCheckFlag = 0U;
         G_Timer1ms.InitCheck = 0U;
         softstart_complete = OFF;
-        motor_step_value = STEP_TIME_1000RPM;
 
         /* ── 분기 1 : count >= 10 ─────────────────────────────────────────── */
         /* Freeze Hold 반복 상한 초과. 더 이상 시도하지 않고 최종 에러 확정    */

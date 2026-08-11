@@ -176,6 +176,10 @@ static void Operate_Process(void)
 	{
 		AAFx_Last_Command = CLOSE;
 	}
+	else
+	{
+		// invalid
+	}
 	aaf_action_complete_chk = FLAP_MOVING;
 }
 
@@ -252,9 +256,13 @@ static void Operate_NormalProcess(void)
 static void Operate_NormalAction(unsigned int direction)
 {
 	if (direction == OPEN)
+	{
 		Motor_Open2();
+	}
 	else
+	{
 		Motor_Close2();
+	}
 
 	Drv8889_On();
 	motor_start = ON;
@@ -264,9 +272,13 @@ static void Operate_NormalAction(unsigned int direction)
 	motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE;
 
 	if (direction == OPEN)
+	{
 		flap_move = OPEN;
+	}
 	else
+	{
 		flap_move = CLOSE;
+	}
 
 	Diag_Mode = 0U;
 	aaf_step = TRAVEL_RANGE_COMPLETE_CHECK;
@@ -312,21 +324,29 @@ static void Operate_DiagProcess(void)
 static void Operate_DiagAction(unsigned int direction, unsigned int is_auto)
 {
 	if (direction == OPEN)
+	{
 		Motor_Open2();
+	}
 	else
+	{
 		Motor_Close2();
+	}
 
 	Drv8889_On();
 	motor_start = ON;
 	G_Timer1msFlag.StallCheckFlag = ON;
-	G_Timer1ms.StallTime = 0;
+	G_Timer1ms.StallTime = 0U;
 	motor_stall_value = MOTOR_STALL_CHK_NORMAL_VALUE;
-	Diag_Mode = 1;
+	Diag_Mode = 1U;
 
 	if (direction == OPEN)
+	{
 		flap_move = OPEN;
+	}
 	else
+	{
 		flap_move = CLOSE;
+	}
 
 	// G_Timer1msFlag.InitCheckFlag = 1;
 
@@ -346,7 +366,10 @@ static void Operate_DiagAction(unsigned int direction, unsigned int is_auto)
  ***********************************************************************************************************************/
 static void Operate_CheckRange(void)
 {
-	Operate_SelectAAFxMode();
+	if ((AAFx_Index >= 1U) && (AAFx_Index <= 3U))
+	{
+		Operate_SelectAAFxMode();
+	}
 
 	if ((aaf_action == OPEN) && (step_position <= (step_position_open + limit_step_position))) //
 	{
@@ -402,11 +425,6 @@ static void Operate_SelectAAFxMode(void)
 {
 	const uint8_t ReqAAFDiagMode[] = {0U, ReqAAF1DiagMode, ReqAAF2DiagMode, ReqAAF3DiagMode};
 
-	if (AAFx_Index < 1U || AAFx_Index > 3U)
-	{
-		return;
-	}
-
 	if (ReqAAFDiagMode[AAFx_Index] != 0U)
 	{
 		if (aaf_action == DIAG_MODE_AUTO)
@@ -420,6 +438,10 @@ static void Operate_SelectAAFxMode(void)
 		else if (aaf_action == DIAG_MODE_CLOSE)
 		{
 			AAFx_Mode = 3U;
+		}
+		else
+		{
+			// invaild
 		}
 	}
 	else
@@ -462,7 +484,6 @@ static void Operate_HandleStall(void)
 		Drv8889_Off2();
 		motor_start = OFF;
 		softstart_complete = OFF;
-		motor_step_value = STEP_TIME_1000RPM;
 
 		if (aaf_action == DIAG_MODE_OPEN)
 		{
@@ -566,10 +587,6 @@ static void Operate_Init(void)
 
 		break;
 
-	case TRAVEL_RANGE_ERROR:
-
-		break;
-
 	case NORMAL_INITIALIZATION:
 		aaf_step = FINISHED_OPERATE;
 		AAFx_InitStatus = NORMAL_FINISHED_INITIALIZATION;
@@ -631,7 +648,6 @@ static void Operate_Finish(void)
 	G_Timer1ms.StallCheck = 0U;			// test
 	G_Timer1msFlag.StallCheckFlag = 0U; // test
 	softstart_complete = OFF;
-	motor_step_value = STEP_TIME_1000RPM;
 	G_Timer1msFlag.InitCheckFlag = 0U;				  // test
 	G_Timer1ms.InitCheck = 0U;						  // test
 	G_Timer1msFlag.StallTimeFlag = 0U;				  // stall reset
@@ -709,46 +725,6 @@ void Operating_Mode(void)
 
 		break;
 
-	default:
-		break;
-	}
-}
-
-void Torque_TestMode(void)
-{
-	if ((AAFx_Index == AAF_1) && (ReqRespAAFID == AAF_1))
-	{
-		torque_test_position = AAF1_TargetPosition;
-	}
-	else if ((AAFx_Index == AAF_2) && (ReqRespAAFID == AAF_2))
-	{
-		torque_test_position = AAF2_TargetPosition;
-	}
-	else if ((AAFx_Index == AAF_3) && (ReqRespAAFID == AAF_3))
-	{
-		torque_test_position = AAF3_TargetPosition;
-	}
-	else
-	{
-		torque_test_position = WAITING;
-	}
-
-	switch (torque_test_position)
-	{
-	case 0x7F: // STOP
-		Drv8889_Off2();
-		motor_start = OFF;
-		break;
-	case 0x00: // CLOSE
-		Motor_Close();
-		Drv8889_On();
-		motor_start = ON;
-		break;
-	case 0x64: // OPEN
-		Motor_Open();
-		Drv8889_On();
-		motor_start = ON;
-		break;
 	default:
 		break;
 	}

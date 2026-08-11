@@ -9,15 +9,10 @@
  * Tuning
  * ==================================================================== */
 // For TC TEST DEFAULT 180 3minute
-#define MINUTE_3 180U
-
-// For Torque Test
-//#define ENABLE_TORQUE_TEST
-
-#define UDS
+#define MINUTE_3 18U
 
 // Current CodeName
-#define VEHICLE_CODENAME NX5E_STD_AAF1
+#define VEHICLE_CODENAME NX5E_STD_AAF2
 
 /* ==================================================================== */
 
@@ -378,7 +373,7 @@
         (reg) = (value);                           \
         (reg) = ~(value);                          \
         (reg) = (value);                           \
-    } while ((pstatus) == 1u)
+    } while ((pstatus) == 1U)
 #endif
 /***********************************************************************************************************************
  * 2. General Defines
@@ -388,11 +383,11 @@
 #define FAIL 0U
 #define PASS 1U
 #ifndef TRUE
-#define TRUE 1
+#define TRUE 1U
 #endif
 
 #ifndef FALSE
-#define FALSE 0
+#define FALSE 0U
 #endif
 #define WAITING 2U
 #define UNKNOWN 0U
@@ -427,7 +422,6 @@
 
 #define START_INITIALIZATION 0U
 #define CHECK_TRAVELRANGE 1U
-#define TRAVEL_RANGE_ERROR 2U
 #define NORMAL_INITIALIZATION 3U
 #define WAIT_INITIALIZATION 4U
 
@@ -450,8 +444,6 @@
 // PPS = RPM * (360 / step angle) / 60
 // PPS = RPM * (360 / step angle) / 60 >> RPM = PPS * (ANGLE / 360) * 60
 // #define STEP_TIME_1125RPM 28U // 450PPS
-#define STEP_TIME_1250RPM 7U // 500PPS(4000) = 25, 450PPS(3600) = 27~28
-#define STEP_TIME_1000RPM 7U
 
 #define REFERENCE_POSITION 30000U // 30000
 #define LIMIT_POSITION 1800U
@@ -668,36 +660,6 @@
 
 #define ADC_Detect_Time 3000U
 
-/***********************************************************************************************************************
- * 9. Only SX3k (OBD Sensor...etc)
- ***********************************************************************************************************************/
- #define ADC_Recovery_Time 1500U
-// #define OBD_tolerance 5U // 5%
-// #define OBD_ADC_MAX_LIMIT 3550U
-// #define OBD_ADC_MIN_LIMIT 500U
-
-// #define OBD_BAT_SHORT_LIMIT 3900U
-// #define OBD_GND_SHORT_LIMIT 10U
-// #define OBD_Open_MIN_LIMIT 1U
-// #define OBD_Open_LIMIT 400U
-
-// #define POSITION_CLOSE_THRESHOLD 45U
-// #define POSITION_OPEN_THRESHOLD 55U
-// #define POSITION_OFFSET 5U
-
-// #define NO_SNSR1 0U
-// #define USE_SNSR1 1U
-// #define SNSR1_Open 1U
-// #define SNSR1_Close 2U
-
-// #define NO_SNSR2 0U
-// #define USE_SNSR2 1U
-// #define SNSR2_Open 1U
-// #define SNSR2_Close 2U
-
-// #define NO_SNSR3 0U
-// #define USE_SNSR3 1U
-// #define SNSR3_Open 1U
-// #define SNSR3_Close 2U
+#define ADC_Recovery_Time 1500U
 
 #endif

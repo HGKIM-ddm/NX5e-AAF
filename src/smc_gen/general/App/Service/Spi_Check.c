@@ -138,20 +138,13 @@ static void SpiCheck_Delay2(void)
  ***********************************************************************************************************************/
 static void SpiCheck_HandleData(void)
 {
-    motor_stall_value = (unsigned int)(rx_16bit_spi[9] & 0xFFU);
-    motor_open_load = (unsigned int)(rx_16bit_spi[9] & 0x100U);
-    AAF_OverCurrent = (unsigned int)(rx_16bit_spi[9] & 0x800U);
+    motor_stall_value = ((unsigned int)rx_16bit_spi[9U] & 0xFFU);
+    motor_open_load = ((unsigned int)rx_16bit_spi[9U] & 0x100U);
+    AAF_OverCurrent = ((unsigned int)rx_16bit_spi[9U] & 0x800U);
 
     G_Timer1ms.Spi = 0U;
 
-    if (AAF_Maximum_Torque_Test_Mode == OFF)
-    {
-        Stall_Check();
-    }
-    else
-    {
-        motor_stall_flag = MOTOR_NORMAL;
-    }
+    Stall_Check();
 
     spi_action_step = 0U;
 }

@@ -13,7 +13,7 @@ static void StallCheck_UpdateCounter(unsigned int low_limit, unsigned int high_l
     // Check if the value is out of the normal range (Stall condition)
     if ((motor_stall_value <= low_limit) || (motor_stall_value > high_limit))
     {
-        if ((G_Timer1ms.StallTime >= STALL_CHK_WAIT_TIME) || (stall_test_mode == 1U))
+        if (G_Timer1ms.StallTime >= STALL_CHK_WAIT_TIME)
         {
             stall_cnt++;
         }

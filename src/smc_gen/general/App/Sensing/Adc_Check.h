@@ -4,7 +4,6 @@
 #include "Config.h"
 
 void ADC_GetStatus(void);
-void ADC_UpdateVoltStat(void);
 
 
 #endif

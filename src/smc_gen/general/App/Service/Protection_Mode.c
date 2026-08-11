@@ -47,14 +47,14 @@ static void Protection_Delay(void)
 static void Protection_StartMotor(void)
 {
     // if(((adc_avr >= ADC_UNDER_VOLTAGE_7V) && (adc_avr <= ADC_UNDER_VOLTAGE_9V)) || ((adc_avr >= ADC_OVER_VOLTAGE_16V) && (adc_avr <= ADC_OVER_VOLTAGE_18V)) || (AAF_ProtectionMode_Rx == ON))
-    // if(((adc_avr >= ADC_OVER_VOLTAGE_16V) && (adc_avr <= ADC_OVER_VOLTAGE_18V)) || (AAF_ProtectionMode_Rx == ON) && (AAF_Tx_Position != OPEN))   
+    // if(((adc_avr >= ADC_OVER_VOLTAGE_16V) && (adc_avr <= ADC_OVER_VOLTAGE_18V)) || (AAF_ProtectionMode_Rx == ON) && (AAF_Tx_Position != OPEN))  
     if ((AAF_Tx_Position != OPEN))
-	{
-        Motor_Open2();                    // dir OPEN
-       	Drv8889_On();                        // drv on
-        motor_start = ON;                // step start
-        G_Timer1msFlag.StallCheckFlag = ON;    // test
-        motor_stall_flag = MOTOR_NORMAL; // stall reset
+    {
+        Motor_Open2();                      // dir OPEN
+        Drv8889_On();                       // drv on
+        motor_start = ON;                   // step start
+        G_Timer1msFlag.StallCheckFlag = ON; // test
+        motor_stall_flag = MOTOR_NORMAL;    // stall reset
         G_Timer1ms.StallTime = 0U;          // stall reset
         protection_Mode_step = 3U;
         G_Timer1msFlag.InitCheckFlag = 1U; // test
@@ -88,7 +88,6 @@ static void Protection_StallCheck(void)
         AAFx_InitStatus = DURING_INITIALIZATION;
         AAFx_Position_Status = Unknown_Status;
         softstart_complete = OFF;
-        motor_step_value = STEP_TIME_1000RPM;
         protection_Mode_step = 4U;
     }
 }
@@ -151,18 +150,15 @@ static void Protection_Cycle2(void)
  ***********************************************************************************************************************/
 void Protection_Mode(void)
 {
-    if (stall_test_mode == 0U)
+
+    // Step 0 ~ 1: 준비 및 대기
+    if (protection_Mode_step <= 1U)
     {
-        // Step 0 ~ 1: 준비 및 대기
-        if (protection_Mode_step <= 1U)
-        {
-            Protection_Cycle1();
-        }
-        // Step 2 ~ 4: 동작 및 완료
-        else
-        {
-            Protection_Cycle2();
-        }
+        Protection_Cycle1();
+    }
+    // Step 2 ~ 4: 동작 및 완료
+    else
+    {
+        Protection_Cycle2();
     }
 }
-

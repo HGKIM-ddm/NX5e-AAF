@@ -123,7 +123,7 @@ void Re_Init(void)
  ***********************************************************************************************************************/
 void Step_InitAndCheck(void)
 {
-	if ((step_check_flag == 0U) && ((EngRunSta == 0x01u) || (HevRdy == 0x01u)))
+	if ((step_check_flag == 0U) && ((EngRunSta == 0x01U) || (HevRdy == 0x01U)))
 	{
 		FDL_Read();
 		// Step_LoadData();

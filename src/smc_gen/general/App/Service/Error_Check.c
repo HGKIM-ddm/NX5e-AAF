@@ -1,174 +1,210 @@
 #include "Error_Check.h"
 #include "Service.h"
 
-/***********************************************************************************************************************
- * Function Name: Error_CheckVoltage
- * Description  : 전압 상태(저전압/과전압)를 체크하고 임계값 이탈 시 모터를 정지하거나 보호 모드로 진입함
- * Arguments    : void
- * Return Value : 1 (즉시 정지 상황), 0 (정상 또는 대기 상황)
- ***********************************************************************************************************************/
-static uint8_t Error_CheckVoltage(void)
-{
-    if (adc_chk_ok_flag != 10U)
-        return 0U;
-    if (adc_avr == 0U)
-        return 0U;
+static void Error_Check(void);
+static void Error_CheckVoltage(void);
+static void Error_CheckMotorFault(void);
+static void Error_CheckShort(void);
+static void Error_CheckOpen(void);
+static void Freeze_Hold_Mode_Recognition(void);
+static void Check_UnderVoltage(void);
+static void Check_OverVoltage(void);
+static void Error_Check_cycle1(void);
+static void Error_Check_cycle2(void);
 
+static uint8_t error_step = 0U;
+
+/***********************************************************************************************************************
+ * Function Name: Check_UnderVoltage
+ * Description  : 저전압을 체크하고 임계값 이탈 시 모터를 정지하거나 보호 모드로 진입함
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Check_UnderVoltage(void)
+{
     /* 1. 저전압 (Under Voltage) */
     if (adc_avr <= ADC_UNDER_VOLTAGE_7V)
     {
         protection_function = ON;
         Error_UnknownStatus();
         AAFx_Low_Volt = UNDER_VOLTAGE;
-        return 1U;
+        vol_ret = 1U;
     }
-
-    if ((AAFx_Low_Volt == UNDER_VOLTAGE) && (protection_function == ON))
+    else
     {
-        if (adc_avr >= ADC_UNDER_VOLTAGE_9V)
+        if ((AAFx_Low_Volt == UNDER_VOLTAGE) && (protection_function == ON))
         {
-            /* 9V 이상 진입 → 복귀 타이머 시작 */
-            if (Adc_Recovery_Detected == 0U)
+            if (adc_avr >= ADC_UNDER_VOLTAGE_9V)
             {
-                Adc_Recovery_Detected = 1U;
-                G_Timer1ms.AdcRecoveryCheck = 0U;
-                G_Timer1msFlag.AdcRecoveryCheckFlag = 1U;
+                /* 9V 이상 진입 → 복귀 타이머 시작 */
+                if (Adc_Recovery_Detected == 0U)
+                {
+                    Adc_Recovery_Detected = 1U;
+                    G_Timer1ms.AdcRecoveryCheck = 0U;
+                    G_Timer1msFlag.AdcRecoveryCheckFlag = 1U;
+                }
+                /* 500ms 동안 계속 9V 이상 유지 시 복귀 확정 */
+                if ((Adc_Recovery_Detected == 1U) && (G_Timer1ms.AdcRecoveryCheck >= ADC_Recovery_Time))
+                {
+                    AAFx_Low_Volt = NO_ERROR;
+                    protection_function = OFF;
+                    protection_Mode_step = 0U;
+                    Under_Voltage_Deceted = 0U;
+                    G_Timer1ms.Adc1sCheck = 0U;
+                    G_Timer1msFlag.Adc1sCheckFlag = 0U;
+                    Adc_Recovery_Detected = 0U;
+                    G_Timer1ms.AdcRecoveryCheck = 0U;
+                    G_Timer1msFlag.AdcRecoveryCheckFlag = 0U;
+                    Re_Init();
+                }
             }
-            /* 500ms 동안 계속 9V 이상 유지 시 복귀 확정 */
-            if ((Adc_Recovery_Detected == 1U) && (G_Timer1ms.AdcRecoveryCheck >= ADC_Recovery_Time))
+            else
             {
-                AAFx_Low_Volt = NO_ERROR;
-                protection_function = OFF;
-                protection_Mode_step = 0U;
-                Under_Voltage_Deceted = 0U;
+                /* 500ms 채우기 전에 다시 9V 미만 → 복귀 타이머 리셋 */
+                if (Adc_Recovery_Detected == 1U)
+                {
+                    Adc_Recovery_Detected = 0U;
+                    G_Timer1ms.AdcRecoveryCheck = 0U;
+                    G_Timer1msFlag.AdcRecoveryCheckFlag = 0U;
+                }
+            }
+        }
+        else if (adc_avr <= ADC_UNDER_VOLTAGE_8_5V)
+        {
+            if (Under_Voltage_Deceted == 0U)
+            {
+                Under_Voltage_Deceted = 1U;
                 G_Timer1ms.Adc1sCheck = 0U;
+                G_Timer1msFlag.Adc1sCheckFlag = 1U;
+            }
+            if ((Under_Voltage_Deceted == 1U) && (G_Timer1ms.Adc1sCheck >= ADC_Detect_Time))
+            {
+                AAFx_Low_Volt = UNDER_VOLTAGE;
+                protection_function = ON;
+                DTC_Status = 0x20u;
+                Error_UnknownStatus();
+                G_Timer1ms.Adc1sCheck = ADC_Detect_Time;
                 G_Timer1msFlag.Adc1sCheckFlag = 0U;
-                Adc_Recovery_Detected = 0U;
-                G_Timer1ms.AdcRecoveryCheck = 0U;
-                G_Timer1msFlag.AdcRecoveryCheckFlag = 0U;
-                Re_Init();
             }
         }
         else
         {
-            /* 500ms 채우기 전에 다시 9V 미만 → 복귀 타이머 리셋 */
-            if (Adc_Recovery_Detected == 1U)
+            if (Under_Voltage_Deceted == 1U)
             {
-                Adc_Recovery_Detected = 0U;
-                G_Timer1ms.AdcRecoveryCheck = 0U;
-                G_Timer1msFlag.AdcRecoveryCheckFlag = 0U;
+                Under_Voltage_Deceted = 0U;
+                G_Timer1ms.Adc1sCheck = 0U;
+                G_Timer1msFlag.Adc1sCheckFlag = 0U;
             }
         }
     }
-    else if (adc_avr <= ADC_UNDER_VOLTAGE_8_5V)
-    {
-        if (Under_Voltage_Deceted == 0U)
-        {
-            Under_Voltage_Deceted = 1U;
-            G_Timer1ms.Adc1sCheck = 0U;
-            G_Timer1msFlag.Adc1sCheckFlag = 1U;
-        }
-        if ((Under_Voltage_Deceted == 1U) && (G_Timer1ms.Adc1sCheck >= ADC_Detect_Time))
-        {
-            AAFx_Low_Volt = UNDER_VOLTAGE;
-            protection_function = ON;
-            DTC_Status = 0x20u;
-            Error_UnknownStatus();
-            G_Timer1ms.Adc1sCheck = ADC_Detect_Time;
-            G_Timer1msFlag.Adc1sCheckFlag = 0U;
-        }
-    }
-    else
-    {
-        if (Under_Voltage_Deceted == 1U)
-        {
-            Under_Voltage_Deceted = 0U;
-            G_Timer1ms.Adc1sCheck = 0U;
-            G_Timer1msFlag.Adc1sCheckFlag = 0U;
-        }
-    }
-
+}
+/***********************************************************************************************************************
+ * Function Name: Check_OverVoltage
+ * Description  : 과전압을 체크하고 임계값 이탈 시 모터를 정지하거나 보호 모드로 진입함
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Check_OverVoltage(void)
+{
     /* 2. 과전압 (Over Voltage) */
     if (adc_avr >= ADC_OVER_VOLTAGE_18V)
     {
         protection_function = ON;
         Error_UnknownStatus();
         AAFx_Over_Volt = OVER_VOLTAGE;
-        return 1U;
-    }
-
-    if ((AAFx_Over_Volt == OVER_VOLTAGE) && (protection_function == ON))
-    {
-        if (adc_avr <= ADC_OVER_VOLTAGE_16V)
-        {
-            /* 16V 이하 진입 → 복귀 타이머 시작 */
-            if (Adc_Recovery_Detected == 0U)
-            {
-                Adc_Recovery_Detected = 1U;
-                G_Timer1ms.AdcRecoveryCheck = 0U;
-                G_Timer1msFlag.AdcRecoveryCheckFlag = 1U;
-            }
-            /* 500ms 동안 계속 16V 이하 유지 시 복귀 확정 */
-            if ((Adc_Recovery_Detected == 1U) && (G_Timer1ms.AdcRecoveryCheck >= ADC_Recovery_Time))
-            {
-                AAFx_Over_Volt = NO_ERROR;
-                protection_function = OFF;
-                protection_Mode_step = 0U;
-                Adc_Recovery_Detected = 0U;
-                G_Timer1ms.AdcRecoveryCheck = 0U;
-                G_Timer1msFlag.AdcRecoveryCheckFlag = 0U;
-                Re_Init();
-            }
-        }
-        else
-        {
-            /* 500ms 채우기 전에 다시 16V 초과 → 복귀 타이머 리셋 */
-            if (Adc_Recovery_Detected == 1U)
-            {
-                Adc_Recovery_Detected = 0U;
-                G_Timer1ms.AdcRecoveryCheck = 0U;
-                G_Timer1msFlag.AdcRecoveryCheckFlag = 0U;
-            }
-        }
+        vol_ret = 1U;
     }
     else
     {
-        if (adc_avr >= ADC_OVER_VOLTAGE_16_5V)
+        if ((AAFx_Over_Volt == OVER_VOLTAGE) && (protection_function == ON))
         {
-            if (Over_Voltage_Deceted == 0U)
+            if (adc_avr <= ADC_OVER_VOLTAGE_16V)
             {
-                Over_Voltage_Deceted = 1U;
-                G_Timer1ms.Adc1sCheck = 0U;
-                G_Timer1msFlag.Adc1sCheckFlag = 1U;
-            }
-            if ((Over_Voltage_Deceted == 1U) && (G_Timer1ms.Adc1sCheck >= ADC_Detect_Time))
-            {
-                AAFx_Over_Volt = OVER_VOLTAGE;
-                protection_function = ON;
-                DTC_Status = 0x40u;
-                Error_UnknownStatus();
-                G_Timer1ms.Adc1sCheck = ADC_Detect_Time;
-                G_Timer1msFlag.Adc1sCheckFlag = 0U;
+                /* 16V 이하 진입 → 복귀 타이머 시작 */
+                if (Adc_Recovery_Detected == 0U)
+                {
+                    Adc_Recovery_Detected = 1U;
+                    G_Timer1ms.AdcRecoveryCheck = 0U;
+                    G_Timer1msFlag.AdcRecoveryCheckFlag = 1U;
+                }
+                /* 500ms 동안 계속 16V 이하 유지 시 복귀 확정 */
+                if ((Adc_Recovery_Detected == 1U) && (G_Timer1ms.AdcRecoveryCheck >= ADC_Recovery_Time))
+                {
+                    AAFx_Over_Volt = NO_ERROR;
+                    protection_function = OFF;
+                    protection_Mode_step = 0U;
+                    Adc_Recovery_Detected = 0U;
+                    G_Timer1ms.AdcRecoveryCheck = 0U;
+                    G_Timer1msFlag.AdcRecoveryCheckFlag = 0U;
+                    Re_Init();
+                }
             }
             else
             {
-                // invaild
+                /* 500ms 채우기 전에 다시 16V 초과 → 복귀 타이머 리셋 */
+                if (Adc_Recovery_Detected == 1U)
+                {
+                    Adc_Recovery_Detected = 0U;
+                    G_Timer1ms.AdcRecoveryCheck = 0U;
+                    G_Timer1msFlag.AdcRecoveryCheckFlag = 0U;
+                }
             }
         }
         else
         {
-            if (Over_Voltage_Deceted == 1U)
+            if (adc_avr >= ADC_OVER_VOLTAGE_16_5V)
             {
-                Over_Voltage_Deceted = 0U;
-                G_Timer1ms.Adc1sCheck = 0U;
-                G_Timer1msFlag.Adc1sCheckFlag = 0U;
+                if (Over_Voltage_Deceted == 0U)
+                {
+                    Over_Voltage_Deceted = 1U;
+                    G_Timer1ms.Adc1sCheck = 0U;
+                    G_Timer1msFlag.Adc1sCheckFlag = 1U;
+                }
+                if ((Over_Voltage_Deceted == 1U) && (G_Timer1ms.Adc1sCheck >= ADC_Detect_Time))
+                {
+                    AAFx_Over_Volt = OVER_VOLTAGE;
+                    protection_function = ON;
+                    DTC_Status = 0x40u;
+                    Error_UnknownStatus();
+                    G_Timer1ms.Adc1sCheck = ADC_Detect_Time;
+                    G_Timer1msFlag.Adc1sCheckFlag = 0U;
+                }
+                else
+                {
+                    // invaild
+                }
+            }
+            else
+            {
+                if (Over_Voltage_Deceted == 1U)
+                {
+                    Over_Voltage_Deceted = 0U;
+                    G_Timer1ms.Adc1sCheck = 0U;
+                    G_Timer1msFlag.Adc1sCheckFlag = 0U;
+                }
             }
         }
     }
-
-    return 0U;
 }
-
+/***********************************************************************************************************************
+ * Function Name: Error_CheckVoltage
+ * Description  : 전압 상태(저전압/과전압)를 체크하고 임계값 이탈 시 모터를 정지하거나 보호 모드로 진입함
+ * Arguments    : void
+ * Return Value : void
+ ***********************************************************************************************************************/
+static void Error_CheckVoltage(void)
+{
+    if ((adc_chk_ok_flag != 10U) || (adc_avr == 0U))
+    {
+        vol_ret = 0U;
+    }
+    else
+    {
+        vol_ret = 0U;
+        Check_UnderVoltage();
+        Check_OverVoltage();
+    }
+}
 /***********************************************************************************************************************
  * Function Name: Error_CheckMotorFault
  * Description  : 모터 드라이버의 Fault 상태 및 초기화 실패 여부를 확인하여 보호 모드(Sleep) 진입
@@ -176,7 +212,7 @@ static uint8_t Error_CheckVoltage(void)
 static void Error_CheckMotorFault(void)
 {
     // 초기화가 비정상적으로 종료되었거나 모터 하드웨어 Fault가 감지된 경우
-    if ((AAFx_InitStatus == ABNORMAL_FINISHED_INITIALIZATION) && (motor_fault_chk == 1))
+    if ((AAFx_InitStatus == ABNORMAL_FINISHED_INITIALIZATION) && (motor_fault_chk == 1U))
     {
         Drv8889_Sleep();       // 모터 드라이버 보호를 위해 슬립 모드 진입
         AAFx_Motor_Fault = 1U; // 모터 고장 상태 플래그 세팅
@@ -190,9 +226,6 @@ static void Error_CheckMotorFault(void)
  ***********************************************************************************************************************/
 static void Error_CheckShort(void)
 {
-    if (AAFx_Circuit_Short == AAF_CIRCUIT_SHORT)
-        return;
-
     if ((AAF_OverCurrent == OVER_CURRENT) && (Short_Detected == 0U))
     {
         G_Timer1ms.MotorShortCheck = 0U;
@@ -200,12 +233,11 @@ static void Error_CheckShort(void)
         Short_Detected = 1U;
         Short_fault_check = 0U;
         motor_Short_chk_count++;
-        Drv8889_Off2();
+        Drv8889_Off3();
         motor_start = OFF;
         G_Timer1msFlag.StallTimeFlag = 0U;
         G_Timer1ms.StallTime = 0U;
         softstart_complete = OFF;
-        motor_step_value = STEP_TIME_1000RPM;
         AAFx_InitStatus = DURING_INITIALIZATION;
         AAF_Tx_Position = UNKOWN_POSITION;
         AAFx_Position_Status = Unknown_Status;
@@ -217,7 +249,7 @@ static void Error_CheckShort(void)
             Drv8889_FaultClear();
             Short_fault_check = 1U;
         }
-        AAF_OverCurrent = (unsigned int)(rx_16bit_spi[9] & 0x800U);
+        AAF_OverCurrent = ((unsigned int)rx_16bit_spi[9] & 0x800U);
         if (G_Timer1ms.MotorShortCheck >= 1000U)
         {
             if ((AAF_OverCurrent == NO_ERROR) && (Short_fault_check == 1U))
@@ -238,7 +270,7 @@ static void Error_CheckShort(void)
         }
         if (motor_Short_chk_count >= 10U)
         {
-            Drv8889_Off2();
+            Drv8889_Off3();
             motor_start = OFF;
             AAFx_Circuit_Short = AAF_CIRCUIT_SHORT;
             Drv8889_Sleep();
@@ -260,9 +292,6 @@ static void Error_CheckShort(void)
  ***********************************************************************************************************************/
 static void Error_CheckOpen(void)
 {
-    if (AAFx_Motor_Fault == 1)
-        return;
-
     if ((motor_open_load == MOTOR_FAULT) && (Open_Detected == 0U))
     {
         G_Timer1ms.MotorOpenCheck = 0U;
@@ -270,12 +299,11 @@ static void Error_CheckOpen(void)
         Open_Detected = 1U;
         Open_fault_check = 0U;
         motor_Open_chk_count++;
-        Drv8889_Off2();
+        Drv8889_Off3();
         motor_start = OFF;
         G_Timer1msFlag.StallTimeFlag = 0U;
         G_Timer1ms.StallTime = 0U;
         softstart_complete = OFF;
-        motor_step_value = STEP_TIME_1000RPM;
         AAFx_InitStatus = DURING_INITIALIZATION;
         AAF_Tx_Position = UNKOWN_POSITION;
         AAFx_Position_Status = Unknown_Status;
@@ -288,7 +316,7 @@ static void Error_CheckOpen(void)
             Open_fault_check = 1U;
         }
 
-        motor_open_load = (unsigned int)(rx_16bit_spi[9] & 0x100U);
+        motor_open_load = ((unsigned int)rx_16bit_spi[9] & 0x100U);
 
         if (G_Timer1ms.MotorOpenCheck >= 1000U)
         {
@@ -315,7 +343,7 @@ static void Error_CheckOpen(void)
 
         if (motor_Open_chk_count >= 10U)
         {
-            Drv8889_Off2();
+            Drv8889_Off3();
             motor_start = OFF;
             AAFx_Motor_Fault = 1U;
             Drv8889_Sleep();
@@ -355,7 +383,6 @@ void Error_UnknownStatus(void)
     G_Timer1msFlag.StallTimeFlag = 0U;
     G_Timer1ms.StallTime = 0U;
     softstart_complete = OFF;
-    motor_step_value = STEP_TIME_1000RPM;
     AAF_Tx_Position = UNKOWN_POSITION;
     AAFx_Position_Status = Unknown_Status;
     AAFx_InitStatus = DURING_INITIALIZATION;
@@ -368,7 +395,7 @@ void Error_UnknownStatus(void)
     AAFx_SNSR4_Position = Initial_Value;
     aaf_step = FINISHED_OPERATE;
 }
-void Freeze_Hold_Mode_Recognition(void)
+static void Freeze_Hold_Mode_Recognition(void)
 {
     if (AmbTempSta == 0x01U)
     {
@@ -378,7 +405,7 @@ void Freeze_Hold_Mode_Recognition(void)
             G_Timer1msFlag.Freeze_Hold_ModeChkFlag = 1U;
             Freeze_Hold_Mode_Recognition_Chk = ON;
         }
-        if (G_Timer1ms.Freeze_Hold_ModeChk >= 10000)
+        if (G_Timer1ms.Freeze_Hold_ModeChk >= 10000U)
         {
             Freeze_Hold_Mode = Freeze_Hold_On;
             G_Timer1msFlag.Freeze_Hold_ModeChkFlag = 0U;
@@ -394,7 +421,7 @@ void Freeze_Hold_Mode_Recognition(void)
             Freeze_Hold_Mode_Recognition_Chk = OFF;
         }
 
-        if (G_Timer1ms.Freeze_Hold_ModeChk >= 10000)
+        if (G_Timer1ms.Freeze_Hold_ModeChk >= 10000U)
         {
             Freeze_Hold_Mode = Freeze_Hold_Off;
             G_Timer1msFlag.Freeze_Hold_ModeChkFlag = 0U;
@@ -406,67 +433,114 @@ void Freeze_Hold_Start(void)
 {
     Error_UnknownStatus(); // open stopper re
 }
+
+/***********************************************************************************************************************
+ * Function Name: Error_Check_Case
+ * Description  : case4 에러 체크 루틴을 수행함(이름 변경 필요)
+ ***********************************************************************************************************************/
+static void Error_Check_Case(void)
+{
+    if (First_Powerchk == 1U)
+    {
+        if (fdl_fail >= 10U)
+        {
+            AAFx_Circuit_Open = AAF_CIRCUIT_OPEN;
+            protection_function = ON;
+        }
+        else
+        {
+            AAFx_Circuit_Open = NO_ERROR;
+        }
+    }
+    Limp_Home();
+    Freeze_Hold_Mode_Recognition();
+}
+
 /***********************************************************************************************************************
  * Function Name: Error_Check
  * Description  : 외부 보호 요청, 전압, 드라이버 결함, 쇼트/오픈 상태를 순차적으로 체크함
  ***********************************************************************************************************************/
-void Error_Check(void)
+static void Error_Check(void)
 {
-    static uint8_t error_step = 0U;
-
     if (AAF_ProtectionMode_Rx == ON)
     {
         protection_function = ON;
         AAF_ProtectionMode_Tx = ON;
     }
-    else if ((AAF_ProtectionMode_Rx == OFF) && (stall_test_mode == 0U))
+    else if (AAF_ProtectionMode_Rx == OFF)
     {
-        switch (error_step)
+        if (error_step <= 1U)
         {
-        case 0U:
-            if (Error_CheckVoltage() == 1U)
-                return;
-            error_step++;
-            break;
-        case 1U:
-            Error_CheckMotorFault();
-            error_step++;
-            break;
-        case 2U:
-            Error_CheckShort();
-            error_step++;
-            break;
-
-        case 3U:
-            Error_CheckOpen();
-            error_step++;
-            break;
-
-        case 4U:
-            if (First_Powerchk == 1U)
-            {
-                if (fdl_fail >= 10U)
-                {
-                    AAFx_Circuit_Open = AAF_CIRCUIT_OPEN;
-                    protection_function = ON;
-                }
-                else
-                {
-                    AAFx_Circuit_Open = NO_ERROR;
-                }
-            }
-            Limp_Home();
-            Freeze_Hold_Mode_Recognition();
-            error_step = 0U;
-            break;
-
-        default:
-            error_step = 0U;
-            break;
+            Error_Check_cycle1();
+        }
+        else
+        {
+            Error_Check_cycle2();
         }
     }
     else
     {
         // invaild
+    }
+}
+
+/***********************************************************************************************************************
+ * Function Name: Error_Check_cycle1
+ * Description  : 외부 보호 요청, 전압, 드라이버 결함, 쇼트/오픈 상태를 순차적으로 체크함
+ ***********************************************************************************************************************/
+static void Error_Check_cycle1(void)
+{
+
+    switch (error_step)
+    {
+    case 0U:
+        Error_CheckVoltage();
+        if (vol_ret != 1U)
+        {
+            error_step++;
+        }
+        break;
+    case 1U:
+        Error_CheckMotorFault();
+        error_step++;
+        break;
+    default:
+        error_step = 0U;
+        break;
+    }
+}
+
+/***********************************************************************************************************************
+ * Function Name: Error_Check_cycle2
+ * Description  : 외부 보호 요청, 전압, 드라이버 결함, 쇼트/오픈 상태를 순차적으로 체크함
+ ***********************************************************************************************************************/
+static void Error_Check_cycle2(void)
+{
+    switch (error_step)
+    {
+    case 2U:
+        if (AAFx_Circuit_Short != AAF_CIRCUIT_SHORT)
+        {
+            Error_CheckShort();
+        }
+        error_step++;
+        break;
+
+    case 3U:
+        if (AAFx_Motor_Fault != 1U)
+        {
+            Error_CheckOpen();
+        }
+        error_step++;
+        break;
+
+    case 4U:
+        Error_Check_Case();
+        error_step = 0U;
+        break;
+
+    default:
+        error_step = 0U;
+        break;
     }
 }

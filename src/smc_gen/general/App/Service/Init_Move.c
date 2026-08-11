@@ -13,10 +13,13 @@
 static void Init_StartMotor(uint8_t next_step, uint8_t dir, uint8_t is_case0)
 {
     if (dir == OPEN)
+    {
         Motor_Open2();
+    }
     else
+    {
         Motor_Close2();
-
+    }
     Drv8889_On();
     motor_start = ON;
 
@@ -49,7 +52,7 @@ static void Init_StartMotor(uint8_t next_step, uint8_t dir, uint8_t is_case0)
  * retry_step: Steps to move in case of failure (timeout)
  * dir: OPEN, CLOSE DIRECTION
  ***********************************************************************************************************************/
-static void Init_StallCheck(uint8_t next_step, uint8_t retry_step, uint8_t dir)
+static void Init_StallCheck(uint8_t next_step, uint8_t dir)
 {
     if ((motor_stall_flag == MOTOR_STALL) || (G_Timer1ms.InitCheck >= 4500U))
     {
@@ -58,33 +61,16 @@ static void Init_StallCheck(uint8_t next_step, uint8_t retry_step, uint8_t dir)
 
         if (dir == CLOSE)
         {
-            step_position_close = step_position;
-
-            // Only case 7
-            if (next_step == 8U)
-            {
-                // OBD1_Close_Check = OBD1_adc;
-                // OBD2_Close_Check = OBD2_adc;
-                // OBD3_Close_Check = OBD3_adc;
-            }
+            step_position_close = (unsigned int)step_position;
         }
         else // dir == OPEN
         {
-            step_position_open = step_position;
-
-            // Only case 10
-            if (next_step == 11U)
-            {
-                // OBD1_Open_Check = OBD1_adc;
-                // OBD2_Open_Check = OBD2_adc;
-                // OBD3_Open_Check = OBD3_adc;
-            }
+            step_position_open = (unsigned int)step_position;
         }
 
         G_Timer1msFlag.StallTimeFlag = 0U;
         G_Timer1ms.StallTime = 0U;
         softstart_complete = OFF;
-        motor_step_value = STEP_TIME_1000RPM;
         G_Timer1msFlag.InitFailCheckFlag = 0U;
         G_Timer1ms.InitFailCheck = 0U;
 
@@ -129,7 +115,7 @@ static void Init_MoveLimitPosition(void)
 {
     if (CONFIG_AAF_TYPE == EXTERNAL_TYPE)
     {
-        if (step_position <= step_position_open + limit_step_position)
+        if (step_position <= (step_position_open + limit_step_position))
         {
             Motor_Close2(); // 외장형: OPEN 끝 → CLOSE 방향으로 안쪽 이동
             Drv8889_On();
@@ -166,31 +152,26 @@ static void Init_MoveLimitPosition(void)
  ***********************************************************************************************************************/
 static void Init_CheckLimitArrival(void)
 {
-    // check stall
-    uint8_t is_stall_error = ((motor_stall_flag == MOTOR_STALL) ||
-                              ((step_position_close - step_position_open) <= STEP_POSITION_MINIMUM_RANGE)) &&
-                             (stall_test_mode == 0U);
-
-    // check obd
-    // uint8_t is_obd_error = (((OBD1_Open_Check >= 3700U) || (OBD1_Close_Check >= 3700U)) && (SNSR1_Check == USE_SNSR1)) ||
-    //                       (((OBD2_Open_Check >= 3700U) || (OBD2_Close_Check >= 3700U)) && (SNSR2_Check == USE_SNSR2));
-
-    // stall or obd
-    int arrived = 0U;
+    unsigned int arrived = 0U;
     if (CONFIG_AAF_TYPE == EXTERNAL_TYPE)
     {
-        arrived = (step_position >= step_position_open + limit_step_position);
+        if (step_position >= (step_position_open + limit_step_position))
+        {
+            arrived = 1U;
+        }
     }
     else
     {
-        arrived = (step_position <= step_position_close - limit_step_position_close);
+        if (step_position <= (step_position_close - limit_step_position_close))
+        {
+            arrived = 1U;
+        }
     }
-    if (is_stall_error)
+    if ((motor_stall_flag == MOTOR_STALL) || ((step_position_close - step_position_open) <= STEP_POSITION_MINIMUM_RANGE))
     {
         Drv8889_Off();
         motor_start = OFF;
         softstart_complete = OFF;
-        motor_step_value = STEP_TIME_1000RPM;
         G_Timer1msFlag.InitFailCheckFlag = 0U;
         G_Timer1ms.InitFailCheck = 0U;
 
@@ -206,8 +187,12 @@ static void Init_CheckLimitArrival(void)
         {
             fail_safety_step = 10U;
         }
+        else
+        {
+            // invaild
+        }
     }
-    else if (arrived)
+    else if (arrived == 1U)
     {
         Drv8889_Off();
         motor_start = OFF;
@@ -216,7 +201,6 @@ static void Init_CheckLimitArrival(void)
         G_Timer1msFlag.External10sCheckFlag = OFF;
         G_Timer1ms.External10sCheck = 0U;
         softstart_complete = OFF;
-        motor_step_value = STEP_TIME_1000RPM;
         G_Timer1msFlag.InitFailCheckFlag = 0U;
         G_Timer1ms.InitFailCheck = 0U;
 
@@ -261,7 +245,7 @@ static void InitMove_Cycle1(void)
         Init_StartMotor(4U, dir_first, TRUE);
         break;
     case 4:
-        Init_StallCheck(5U, 0U, dir_first); // dir_first stall → 해당 방향 위치 기록
+        Init_StallCheck(5U, dir_first); // dir_first stall → 해당 방향 위치 기록
         break;
     case 5:
         Init_Delay(6U);
@@ -270,7 +254,7 @@ static void InitMove_Cycle1(void)
         Init_StartMotor(7U, dir_second, FALSE);
         break;
     case 7:
-        Init_StallCheck(8U, 6U, dir_second);
+        Init_StallCheck(8U, dir_second);
         break;
     case 8:
         Init_Delay(9U);
@@ -297,11 +281,11 @@ static void InitMove_Cycle2(void)
     case 10:
         if (CONFIG_AAF_TYPE == EXTERNAL_TYPE)
         {
-            Init_StallCheck(11U, 9U, OPEN);
+            Init_StallCheck(11U, OPEN);
         }
         else
         {
-            Init_StallCheck(11U, 9U, CLOSE);
+            Init_StallCheck(11U, CLOSE);
         }
         break;
     case 11:
@@ -312,7 +296,6 @@ static void InitMove_Cycle2(void)
         limit_step_position_close = (step_position_close - step_position_open) * AAF_ERROR_ANGLE_CLOSE / AAF_FULL_ANGLE;
         // open_1st_step_position = (step_position_close - step_position_open) * AAF_1ST_OPEN_ANGLE / AAF_FULL_ANGLE;  ICE NOT USED
         // open_2nd_step_position = (step_position_close - step_position_open) * AAF_2ST_OPEN_ANGLE / AAF_FULL_ANGLE;  ICE NOT USED
-        // OBD_Init();
         init_move_step = 13U;
         break;
     case 13:
@@ -361,23 +344,3 @@ void Init_move(void)
     }
 }
 
-// void OBD_Init(void)
-// {
-// 	// OBD1
-// 	OBD1_adc_threshold_close = OBD1_Close_Check +
-// 							   ((OBD1_Open_Check - OBD1_Close_Check) * POSITION_CLOSE_THRESHOLD / 100U);
-// 	OBD1_adc_threshold_open = OBD1_Close_Check +
-// 							  ((OBD1_Open_Check - OBD1_Close_Check) * POSITION_OPEN_THRESHOLD / 100U);
-
-// 	// OBD2
-// 	OBD2_adc_threshold_close = OBD2_Close_Check +
-// 							   ((OBD2_Open_Check - OBD2_Close_Check) * POSITION_CLOSE_THRESHOLD / 100U);
-// 	OBD2_adc_threshold_open = OBD2_Close_Check +
-// 							  ((OBD2_Open_Check - OBD2_Close_Check) * POSITION_OPEN_THRESHOLD / 100U);
-
-// 	// OBD3
-// 	OBD3_adc_threshold_close = OBD3_Close_Check +
-// 							   ((OBD3_Open_Check - OBD3_Close_Check) * POSITION_CLOSE_THRESHOLD / 100U);
-// 	OBD3_adc_threshold_open = OBD3_Close_Check +
-// 							  ((OBD3_Open_Check - OBD3_Close_Check) * POSITION_OPEN_THRESHOLD / 100U);
-// }

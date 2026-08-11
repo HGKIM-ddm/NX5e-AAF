@@ -4,7 +4,6 @@
 #include "Config.h"
 
 void Operating_Mode(void);
-void Torque_TestMode(void);
 void Operate_SelectTxPostion(void);
 
 #endif

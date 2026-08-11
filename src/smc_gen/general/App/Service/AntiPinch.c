@@ -34,7 +34,6 @@ static void Antipinch_PrevOpen(void)
             G_Timer1msFlag.StallTimeFlag = 0U;
             G_Timer1ms.StallTime = 0U;
             softstart_complete = OFF;
-            motor_step_value = STEP_TIME_1000RPM;
             aaf_action = FLAP_STOP;
             G_Timer1msFlag.InitCheckFlag = 0U;
             G_Timer1ms.InitCheck = 0U;
@@ -76,7 +75,7 @@ static void Antipinch_PrevOpen(void)
         break;
 
     case 4:
-        if ((aaf_action == OPEN) && (step_position <= step_position_open + limit_step_position))
+        if ((aaf_action == OPEN) && (step_position <= (step_position_open + limit_step_position)))
         {
             Drv8889_Off();
             motor_start = OFF;
@@ -88,7 +87,7 @@ static void Antipinch_PrevOpen(void)
                 {
                     aaf_action = DIAG_MODE_OPEN;
                     aaf_step = AAF_WAITING;
-                    //AAFx_ErrorStatus = No_ErrorStatus;
+                    // AAFx_ErrorStatus = No_ErrorStatus;
                     AAFx_InitStatus = NORMAL_FINISHED_INITIALIZATION;
                     Operate_SelectTxPostion();
                 }
@@ -96,7 +95,7 @@ static void Antipinch_PrevOpen(void)
                 {
                     aaf_action = DIAG_MODE_AUTO;
                     aaf_step = AAF_WAITING;
-                   // AAFx_ErrorStatus = No_ErrorStatus;
+                    // AAFx_ErrorStatus = No_ErrorStatus;
                     AAFx_InitStatus = NORMAL_FINISHED_INITIALIZATION;
                     Operate_SelectTxPostion();
                 }
@@ -110,7 +109,7 @@ static void Antipinch_PrevOpen(void)
                 AAF_Tx_Position = OPEN;
                 AAFx_Position_Status = Open_Status;
                 AAFx_InitStatus = NORMAL_FINISHED_INITIALIZATION;
-                //AAFx_ErrorStatus = No_ErrorStatus;
+                // AAFx_ErrorStatus = No_ErrorStatus;
                 Operate_SelectTxPostion();
             }
 
@@ -120,7 +119,6 @@ static void Antipinch_PrevOpen(void)
             G_Timer1msFlag.StallTimeFlag = 0U;
             G_Timer1ms.StallTime = 0U;
             softstart_complete = OFF;
-            motor_step_value = STEP_TIME_1000RPM;
 
             antipinch_previous_action = ANTIWAIT;
             antipinch_step = 0U;
@@ -134,7 +132,6 @@ static void Antipinch_PrevOpen(void)
             G_Timer1msFlag.StallTimeFlag = 0U;
             G_Timer1ms.StallTime = 0U;
             softstart_complete = OFF;
-            motor_step_value = STEP_TIME_1000RPM;
 
             G_Timer1msFlag.InitCheckFlag = 0U;
             G_Timer1ms.InitCheck = 0U;
@@ -162,8 +159,14 @@ static void Antipinch_PrevOpen(void)
             }
             else
             {
+                // invaild
             }
         }
+        else
+        {
+            // invaild
+        }
+
         break;
 
     default:
@@ -206,7 +209,6 @@ static void Antipinch_PrevClose(void)
             G_Timer1msFlag.StallTimeFlag = 0U;
             G_Timer1ms.StallTime = 0U;
             softstart_complete = OFF;
-            motor_step_value = STEP_TIME_1000RPM;
 
             G_Timer1msFlag.InitCheckFlag = 0U;
             G_Timer1ms.InitCheck = 0U;
@@ -250,7 +252,7 @@ static void Antipinch_PrevClose(void)
         break;
 
     case 4:
-        if ((aaf_action == CLOSE) && (step_position >= step_position_close - limit_step_position_close))
+        if ((aaf_action == CLOSE) && (step_position >= (step_position_close - limit_step_position_close)))
         {
             Drv8889_Off();
             motor_start = OFF;
@@ -261,7 +263,7 @@ static void Antipinch_PrevClose(void)
                 {
                     aaf_action = DIAG_MODE_CLOSE;
                     aaf_step = AAF_WAITING;
-                    //AAFx_ErrorStatus = No_ErrorStatus;
+                    // AAFx_ErrorStatus = No_ErrorStatus;
                     AAFx_InitStatus = NORMAL_FINISHED_INITIALIZATION;
                     Operate_SelectTxPostion();
                 }
@@ -269,7 +271,7 @@ static void Antipinch_PrevClose(void)
                 {
                     aaf_action = DIAG_MODE_AUTO;
                     aaf_step = AAF_WAITING;
-                    //AAFx_ErrorStatus = No_ErrorStatus;
+                    // AAFx_ErrorStatus = No_ErrorStatus;
                     AAFx_InitStatus = NORMAL_FINISHED_INITIALIZATION;
                     Operate_SelectTxPostion();
                 }
@@ -283,7 +285,7 @@ static void Antipinch_PrevClose(void)
                 AAF_Tx_Position = CLOSE;
                 AAFx_Position_Status = Close_Status;
                 AAFx_InitStatus = NORMAL_FINISHED_INITIALIZATION;
-                //AAFx_ErrorStatus = No_ErrorStatus;
+                // AAFx_ErrorStatus = No_ErrorStatus;
                 Operate_SelectTxPostion();
             }
 
@@ -293,7 +295,6 @@ static void Antipinch_PrevClose(void)
             G_Timer1msFlag.StallTimeFlag = 0U;
             G_Timer1ms.StallTime = 0U;
             softstart_complete = OFF;
-            motor_step_value = STEP_TIME_1000RPM;
 
             antipinch_previous_action = ANTIWAIT;
             antipinch_step = 0U;
@@ -307,13 +308,16 @@ static void Antipinch_PrevClose(void)
             G_Timer1msFlag.StallTimeFlag = 0U;
             G_Timer1ms.StallTime = 0U;
             softstart_complete = OFF;
-            motor_step_value = STEP_TIME_1000RPM;
 
             G_Timer1msFlag.InitCheckFlag = 0U;
             G_Timer1ms.InitCheck = 0U;
 
             aaf_action = FLAP_STOP;
             antipinch_step = 5U;
+        }
+        else
+        {
+            // invaild
         }
         break;
 
@@ -340,7 +344,6 @@ static void Antipinch_PrevClose(void)
             G_Timer1msFlag.StallTimeFlag = 0U;
             G_Timer1ms.StallTime = 0U;
             softstart_complete = OFF;
-            motor_step_value = STEP_TIME_1000RPM;
 
             aaf_action = FLAP_STOP;
             G_Timer1msFlag.InitCheckFlag = 0U;
@@ -350,12 +353,10 @@ static void Antipinch_PrevClose(void)
 
             // fail_safety_flag = ON;
             antipinch_action_on = OFF;
-
             antipinch_previous_action = INITIALIZATION;
 
             G_Timer1msFlag.External10sCheckFlag = OFF;
             G_Timer1ms.External10sCheck = 0U;
-            aaf_action = FLAP_STOP;
             aaf_action_complete_chk = FLAP_STOP;
 
             G_Timer1ms.StallCheck = 0U;
@@ -381,7 +382,16 @@ static void Antipinch_PrevClose(void)
                 fail_safety_step = 0U;
                 LIN_Recover = 1U;
             }
+            else
+            {
+                // invaild
+            }
         }
+        else
+        {
+            // invaild
+        }
+
         break;
 
     default:

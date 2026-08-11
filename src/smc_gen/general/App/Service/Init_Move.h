@@ -3,7 +3,6 @@
 
 #include "Config.h"
 
-//void OBD_Init(void);
 void Init_move(void);
 
 #endif

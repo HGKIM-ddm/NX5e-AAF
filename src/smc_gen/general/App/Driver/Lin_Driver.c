@@ -110,7 +110,7 @@ void Lin_SlaveInit(void)
 void Lin_SlaveReceive(uint8_t Data_length)
 {
 	Lin_ClearDataBuffer();
-	// RLN30.LDFC = 0x20;		   /*b5=1:enhanced checksum mode; b4=0:Reception*/
+	// RLN30.LDFC = 0x20;		   b5=1:enhanced checksum mode; b4=0:Reception
 	if (GetIDbuffer == 0x3CU) // 0x3C / 0x3D
 	{
 		RLN30.LDFC = 0x00U; // b5=0 → Classic checksum
@@ -136,7 +136,7 @@ void Lin_SlaveTransmit(uint8_t *databuf, uint8_t Data_length)
 	// uint32_t  Databuf_adr;
 	uint8_t *Databuf_adr;
 
-	// RLN30.LDFC = 0x30;		   /*b5=1:enhanced checksum mode; b4=1:transmission*/
+	// RLN30.LDFC = 0x30;		   b5=1:enhanced checksum mode; b4=1:transmission
 	if ((GetIDbuffer == 0x7DU)) // 0x3C / 0x3D
 	{
 		RLN30.LDFC = 0x10U; // b5=0 → Classic checksum
@@ -146,10 +146,10 @@ void Lin_SlaveTransmit(uint8_t *databuf, uint8_t Data_length)
 		RLN30.LDFC = 0x30U; // b5=1 → Enhanced checksum
 	}
 	RLN30.LDFC |= Data_length; /* b4-b0=Data_length: response data lengh select byte*/
-	// Databuf_adr = &RLN30.LDBR1;    /* get the data buffer address*/
+	// Databuf_adr = &RLN30.LDBR1;     get the data buffer address
 	Databuf_adr = (uint8_t *)&RLN30.LDBR1; /* get the data buffer address*/
 
-	for (i = 0; i < Data_length; i++) /* setting tansmission data to date buffer*/
+	for (i = 0U; i < Data_length; i++) /* setting tansmission data to date buffer*/
 	{
 		*((uint8_t *)(Databuf_adr + i)) = databuf[i];
 	}
@@ -185,7 +185,7 @@ void Lin_GetReponseRxData(uint8_t *RxData)
 	k = RLN30.LDFC & 0x0FU;
 	// Databuf_adr = &RLN30.LDBR1;
 	Databuf_adr = (uint8_t *)&RLN30.LDBR1;
-	for (i = 0; i < k; i++)
+	for (i = 0U; i < k; i++)
 	{
 		RxData[i] = (*((uint8_t *)(Databuf_adr + i)));
 	}

@@ -11,6 +11,7 @@ void Drv8889_On(void);
 void Drv8889_On2(void);
 void Drv8889_Off(void);
 void Drv8889_Off2(void);
+void Drv8889_Off3(void);
 
 void Drv8889_ScsActive(void);
 void Drv8889_ScsInactive(void);

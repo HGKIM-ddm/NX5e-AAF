@@ -116,6 +116,13 @@ void Drv8889_Off2(void)
 	G_Timer1ms.StallTime = 0U;
 }
 
+void Drv8889_Off3(void)
+{
+	PORT.P10 |= _PORT_Pn0_OUTPUT_HIGH; // MCU_DRVOFF
+	G_Timer1msFlag.StallTimeFlag = 0U;
+	G_Timer1ms.StallTime = 0U;
+}
+
 void Drv8889_ScsActive(void)
 {
 	PORT.P8 &= ~_PORT_Pn0_OUTPUT_HIGH;
